@@ -1,0 +1,1177 @@
+/* Component styles. Mobile first: the base rules are for small screens,
+   and the min-width media queries add to them for tablets and desktops. */
+
+/* ---------- Skip link ---------- */
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 100;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  font-weight: var(--font-weight-bold);
+  /* Parked off screen until it receives keyboard focus. */
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ---------- Icons ---------- */
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon--filled {
+  fill: currentColor;
+}
+
+.icon--large {
+  width: 2rem;
+  height: 2rem;
+  stroke-width: 1.5;
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-button-bg);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+
+.button:hover {
+  background-color: var(--color-button-hover);
+  text-decoration: none;
+}
+
+.button--primary {
+  background-color: var(--color-success);
+  /* A transparent border keeps the size equal to other buttons and
+     becomes a visible outline in Windows High Contrast mode. */
+  border-color: transparent;
+  color: var(--color-on-emphasis);
+}
+
+.button--primary:hover {
+  background-color: var(--color-success-hover);
+}
+
+.button--danger {
+  background-color: var(--color-danger-emphasis);
+  border-color: transparent;
+  color: var(--color-on-emphasis);
+}
+
+.button--danger:hover {
+  background-color: var(--color-danger-hover);
+}
+
+/* Red text needs the plain page background behind it to stay readable (4.5:1)
+   in both themes. On hover it turns into a solid danger button. */
+.button--danger-outline {
+  background-color: var(--color-canvas);
+  color: var(--color-danger);
+}
+
+.button--danger-outline:hover {
+  background-color: var(--color-danger-emphasis);
+  border-color: transparent;
+  color: var(--color-on-emphasis);
+}
+
+.button--quiet {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.button--quiet:hover {
+  background-color: var(--color-button-hover);
+}
+
+.button--block {
+  width: 100%;
+}
+
+/* Busy buttons stay focusable (so keyboard focus is not lost) but look inactive. */
+.button[aria-disabled="true"],
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  /* Sticky: the header scrolls with the page until it reaches the top, then
+     stays there, so the menu is always one step away on a long list. */
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* If the open phone menu is taller than the screen, it scrolls on its own. */
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  background-color: var(--color-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* On very short screens (a phone on its side, or a page zoomed to 400%) a stuck
+   header would cover too much of the content, so there it scrolls away as usual. */
+@media (max-height: 30rem) {
+  .site-header {
+    position: static;
+  }
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  /* Pushes everything after the logo to the right-hand side. */
+  margin-right: auto;
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+/* "Sign up" in the header bar: phones only. On the narrowest screens there is
+   no room beside the logo and the Menu button, so there it stays in the menu. */
+.site-header__cta {
+  display: none;
+}
+
+@media (min-width: 22.5rem) and (max-width: 47.99rem) {
+  .site-header__cta {
+    display: inline-flex;
+  }
+
+  .site-nav__signup {
+    display: none;
+  }
+}
+
+.site-logo .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* The menu is one <nav>. On small screens it is a panel that the Menu button
+   opens and closes; on wide screens it is always shown as a row. */
+.site-nav {
+  display: none;
+  flex-basis: 100%;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.site-nav--open {
+  display: flex;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius);
+  /* The current page is marked with a bar and bold text, not only with color. */
+  border-left: 3px solid transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.site-nav__link:hover {
+  background-color: var(--color-button-hover);
+}
+
+.site-nav__link[aria-current="page"] {
+  border-left-color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.site-nav__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.site-nav__user {
+  flex-basis: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.theme-toggle__state {
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 48rem) {
+  .menu-button {
+    display: none;
+  }
+
+  .site-nav,
+  .site-nav--open {
+    display: flex;
+    flex: 1;
+    flex-basis: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: 0;
+    border-top: 0;
+  }
+
+  .site-nav__list {
+    flex-direction: row;
+    gap: var(--space-1);
+    margin-left: var(--space-4);
+  }
+
+  .site-nav__link {
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    border-top: 3px solid transparent;
+    border-radius: 0;
+  }
+
+  .site-nav__link[aria-current="page"] {
+    border-bottom-color: var(--color-text);
+  }
+
+  .site-nav__actions {
+    flex-wrap: nowrap;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .site-nav__user {
+    flex-basis: auto;
+    max-width: 12rem;
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  background-color: var(--color-inset);
+  border-top: var(--border-width) solid var(--color-border);
+  padding-block: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- Page heading ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  font-size: var(--font-size-sm);
+}
+
+.page-heading {
+  margin-bottom: var(--space-2);
+}
+
+.page-intro {
+  margin-bottom: var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.section-heading {
+  margin-bottom: var(--space-3);
+}
+
+/* ---------- Cards ---------- */
+
+.card {
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.card--padded {
+  padding: var(--space-4);
+}
+
+.card--narrow {
+  max-width: 32rem;
+}
+
+.reviewer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.reviewer-grid > li {
+  display: flex;
+}
+
+.reviewer-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reviewer-card {
+  transition: border-color var(--motion-fast) var(--motion-ease);
+}
+
+/* Shows that the card can be opened while the pointer is over its upper part. */
+.reviewer-card:has(.reviewer-card__title a:hover) {
+  border-color: var(--color-border-control);
+}
+
+.reviewer-card__body {
+  /* The stretched title link below is positioned against this box. */
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* The subject and tag rows are 44px tall for easy tapping and already carry
+     their own breathing room, so the padding and gaps here are kept small. */
+  padding: var(--space-1) var(--space-4) var(--space-4);
+}
+
+.reviewer-card__title {
+  /* Tucks the title up under the subject row's built-in space. */
+  margin-top: calc(var(--space-2) * -1);
+  font-size: var(--font-size-md);
+}
+
+.reviewer-card__title a {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target);
+}
+
+/* Makes the whole upper part of the card open the reviewer. It is still one
+   link: this invisible layer belongs to the title link and covers the card body. */
+.reviewer-card__title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.reviewer-card__body .meta {
+  margin-top: var(--space-1);
+}
+
+/* A small pill (subject or tag) inside a taller, easier-to-tap link.
+   It sits above the stretched title link so it can be chosen on its own. */
+.chip-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  text-decoration: none;
+}
+
+.chip-link:hover .label,
+.chip-link:hover .tag {
+  text-decoration: underline;
+}
+
+.chip-link:hover .label {
+  background-color: var(--color-button-hover);
+}
+
+.reviewer-card__description {
+  /* Shows up to three lines. The full text is on the reviewer's own page. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reviewer-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-subtle);
+  border-top: var(--border-width) solid var(--color-border);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.meta__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.label {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* Each tag link is already 44px tall, so rows need no extra space between them. */
+  gap: 0 var(--space-1);
+}
+
+.tag {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  background-color: var(--color-accent-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.8;
+}
+
+@media (min-width: 40rem) {
+  .reviewer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .reviewer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Upvote button ---------- */
+
+.upvote-button {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The upvoted state changes the icon (outline to solid), the word, and the
+   border weight, so it never depends on color alone. */
+.upvote-button[aria-pressed="true"] {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.upvote-button__count {
+  font-weight: var(--font-weight-bold);
+}
+
+.upvote-error {
+  flex-basis: 100%;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- Tabs ---------- */
+
+.tab-bar {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: -1px;
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-ease);
+}
+
+.tab:hover {
+  background-color: var(--color-button-hover);
+  color: var(--color-text);
+}
+
+/* The selected tab gets a thick bar and bold text, not only a color change. */
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--color-text);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---------- Feed toolbar ---------- */
+
+/* On phones the top of the feed is kept short, so the first study reviewer
+   is visible without scrolling. */
+.feed-page .page-intro {
+  margin-bottom: var(--space-3);
+}
+
+.feed-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Phones: the "Subject" label sits beside its menu instead of above it. */
+.feed-toolbar__filter .field {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.feed-toolbar__filter .field__label {
+  white-space: nowrap;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.search-form__row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.search-form__row .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-2);
+  margin-block: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media (min-width: 40rem) {
+  .feed-page .page-intro {
+    margin-bottom: var(--space-5);
+  }
+
+  .feed-toolbar {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .feed-toolbar__filter .field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+  }
+
+  .search-form {
+    flex: 1;
+  }
+
+  .feed-toolbar__filter {
+    width: 14rem;
+  }
+}
+
+/* ---------- Forms ---------- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.field__required {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.field__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.field__success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-success-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.field__success .icon,
+.field__error .icon {
+  margin-top: 0.2em;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  /* 1rem (16px) stops iPhones from zooming in when an input is tapped. */
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+}
+
+textarea.input {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+/* Drop-down menus: the browser's own arrow sits hard against the right edge
+   and cannot be moved, so it is replaced with one that has room around it. */
+select.input {
+  appearance: none;
+  padding-right: calc(var(--space-3) * 2 + 1rem);
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+
+input[type="file"].input {
+  padding: var(--space-2);
+}
+
+/* Invalid inputs get a thicker border as well as the red color and the message. */
+.input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+
+.field__control-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.field__control-row .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.form__footer {
+  font-size: var(--font-size-sm);
+}
+
+.upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 0.75rem;
+  accent-color: var(--color-success);
+}
+
+/* The "Selected: notes.pdf" line under the file picker. */
+.file-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+}
+
+.file-summary > .icon {
+  color: var(--color-success-text);
+}
+
+.file-summary__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 10rem;
+}
+
+.file-summary__name {
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---------- Alerts ---------- */
+
+/* The close button is a full 44px target, pulled into the box's padding so
+   the message box does not grow much taller because of it. */
+.alert__dismiss {
+  margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1) calc(var(--space-2) * -1) 0;
+  padding: 0;
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-control);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+}
+
+.alert .icon {
+  margin-top: 0.2em;
+}
+
+.alert__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert--error {
+  background-color: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+}
+
+.alert--error .icon,
+.alert--error .alert__title {
+  color: var(--color-danger);
+}
+
+.alert--success {
+  background-color: var(--color-success-subtle);
+  border-color: var(--color-success-text);
+}
+
+.alert--success .icon,
+.alert--success .alert__title {
+  color: var(--color-success-text);
+}
+
+.alert--info {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+
+.alert--info .icon,
+.alert--info .alert__title {
+  color: var(--color-accent);
+}
+
+.alert__title {
+  font-weight: var(--font-weight-bold);
+}
+
+.error-summary__heading {
+  font-size: var(--font-size-md);
+  color: var(--color-danger);
+}
+
+.error-summary__list {
+  margin-top: var(--space-1);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.error-summary__list a {
+  display: inline-block;
+  padding-block: var(--space-1);
+  color: var(--color-text);
+}
+
+/* Holds a one-time message on the feed. Takes up no room when there is none. */
+.flash-slot {
+  margin-bottom: var(--space-4);
+}
+
+.flash-slot:empty {
+  display: none;
+}
+
+/* ---------- Spinner ---------- */
+
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* A spinner is the one animation that would normally keep running, so for
+   reduced-motion users it becomes a still ring. The "Loading" text is always there. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* ---------- Loading placeholders ---------- */
+
+.skeleton-card__body {
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+.skeleton {
+  display: block;
+  height: 0.875rem;
+  background-color: var(--color-button-hover);
+  border-radius: var(--radius);
+  animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.skeleton--chip {
+  width: 6rem;
+  height: 1.25rem;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton--title {
+  width: 80%;
+  height: 1.375rem;
+}
+
+.skeleton--short {
+  width: 50%;
+}
+
+.skeleton--button {
+  width: 6.5rem;
+  height: var(--touch-target);
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* For reduced-motion users the placeholders are simply still. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* ---------- Empty state ---------- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  border: var(--border-width) dashed var(--color-border-control);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.empty-state__title {
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---------- Dialog ---------- */
+
+.dialog {
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  max-height: calc(100dvh - 2rem);
+  padding: var(--space-5);
+  overflow: auto;
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-dialog);
+  color: var(--color-text);
+}
+
+.dialog::backdrop {
+  background-color: var(--color-backdrop);
+}
+
+.dialog__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+/* ---------- Reviewer detail page ---------- */
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.detail-description {
+  /* Keeps the line breaks the author typed. */
+  white-space: pre-wrap;
+}
+
+.file-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-subtle);
+}
+
+.file-box__name {
+  font-weight: var(--font-weight-bold);
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .file-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* ---------- Profile ---------- */
+
+.profile-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.profile-details dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.profile-details dd {
+  margin: 0 0 var(--space-3);
+}
+
+.compact-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.compact-list > li:last-child {
+  border-bottom: 0;
+}
+
+.compact-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ---------- Windows High Contrast (forced colors) ---------- */
+
+@media (forced-colors: active) {
+  /* Colored backgrounds are removed in this mode, so states use borders instead. */
+  .upvote-button[aria-pressed="true"],
+  .tab[aria-selected="true"],
+  .site-nav__link[aria-current="page"] {
+    border-color: Highlight;
+  }
+
+  .tag {
+    border: var(--border-width) solid CanvasText;
+  }
+
+  .skeleton {
+    border: var(--border-width) solid GrayText;
+  }
+
+  /* The drawn arrow uses a fixed color that may vanish here, so the
+     browser's own arrow is used instead. */
+  select.input {
+    appearance: auto;
+    padding-right: var(--space-3);
+    background-image: none;
+  }
+
+  .spinner {
+    border-color: GrayText;
+    border-top-color: Highlight;
+  }
+}

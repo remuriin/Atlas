@@ -1,0 +1,190 @@
+/* Base styles: page defaults, typography, layout shell, and focus handling. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* The header stays stuck to the top of the screen. This keeps whatever the
+     browser scrolls to (a focused control, the main area) from hiding under it. */
+  scroll-padding-top: var(--header-clearance);
+  /* Stops phones from inflating text on rotation, without blocking user zoom. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+  /* Long words, links, and file names wrap instead of forcing sideways scrolling. */
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--font-size-xl);
+}
+
+h2 {
+  font-size: var(--font-size-lg);
+}
+
+h3 {
+  font-size: var(--font-size-md);
+}
+
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  /* Removes the 300ms tap delay on touch screens. */
+  touch-action: manipulation;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+/*
+  One focus style for everything. It is drawn as an outline, so it also shows in
+  Windows High Contrast mode, and the offset keeps it clear of the control's own border.
+*/
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Headings and <main> receive focus from code after a page change. They are not
+   controls, so they do not need a ring that looks like something clickable. */
+h1[tabindex="-1"]:focus,
+h2[tabindex="-1"]:focus,
+main:focus {
+  outline: none;
+}
+
+/* Hidden visually but still read by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Layout shell ---------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.main {
+  flex: 1;
+  padding-block: var(--space-5) var(--space-7);
+}
+
+/* Narrow column for forms and reading pages, so lines stay a comfortable length. */
+.page-narrow {
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+
+.page-form {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--loose {
+  gap: var(--space-6);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+}
+
+@media (min-width: 40rem) {
+  .container {
+    padding-inline: var(--space-5);
+  }
+
+  h1 {
+    font-size: var(--font-size-xxl);
+  }
+}
+
+@media (min-width: 64rem) {
+  .container {
+    padding-inline: var(--space-6);
+  }
+}

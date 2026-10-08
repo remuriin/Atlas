@@ -1,0 +1,24 @@
+{
+  "name": "learnhub-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "firebase": "^13.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^6.30.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "vite": "^8.3.3"
+  }
+}
