@@ -4,6 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { logout } from '../services/authService';
 import Avatar from './Avatar';
+import ConfirmDialog from './ConfirmDialog';
 import Icon from './Icon';
 import ThemeToggle from './ThemeToggle';
 
@@ -13,6 +14,10 @@ function Header() {
   const navigate = useNavigate();
   // Only matters on small screens, where the menu is tucked behind a button.
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // "Log out" asks first, so a stray tap does not end the session.
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
 
   // Close the menu after moving to another page, so it does not cover the new one.
   useEffect(() => {
@@ -26,6 +31,10 @@ function Header() {
     }
 
     const handleKeyDown = (event) => {
+      // While a pop-up (such as "Log out?") is open, Esc belongs to the pop-up only.
+      if (document.querySelector('dialog[open]')) {
+        return;
+      }
       if (event.key === 'Escape') {
         setIsMenuOpen(false);
         const menuButton = document.getElementById('menu-button');
@@ -41,9 +50,24 @@ function Header() {
     };
   }, [isMenuOpen]);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/', { state: { flash: 'You are now logged out.' } });
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    setLogoutError('');
+    try {
+      await logout();
+      setIsLogoutOpen(false);
+      // On the home page the address does not change, so close the phone menu here.
+      setIsMenuOpen(false);
+      navigate('/', { state: { flash: 'You are now logged out.' } });
+    } catch (err) {
+      setLogoutError('Could not log out. Check your internet connection and try again.');
+    }
+    setIsLoggingOut(false);
+  };
+
+  const handleLogoutCancel = () => {
+    setIsLogoutOpen(false);
+    setLogoutError('');
   };
 
   let navClassName = 'site-nav';
@@ -128,7 +152,12 @@ function Header() {
             )}
             <ThemeToggle />
             {auth.firebaseUser && (
-              <button type="button" className="button" onClick={handleLogout}>
+              <button
+                type="button"
+                id="logout-button"
+                className="button"
+                onClick={() => setIsLogoutOpen(true)}
+              >
                 Log out
               </button>
             )}
@@ -145,6 +174,18 @@ function Header() {
           </div>
         </nav>
       </div>
+
+      <ConfirmDialog
+        id="logout-dialog"
+        isOpen={isLogoutOpen}
+        title="Log out of LearnHub?"
+        message="You'll need to log in again to see your saved study reviewers, notes, and flashcards."
+        confirmLabel="Log out"
+        isBusy={isLoggingOut}
+        error={logoutError}
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+      />
     </header>
   );
 }
