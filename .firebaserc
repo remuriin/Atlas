@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "learnhub-ea4291"
+  },
+  "targets": {
+    "learnhub-ea4291": {
+      "hosting": {
+        "app": ["atlas-f2757"],
+        "old": ["learnhub-ea4291"]
+      }
+    }
   }
 }

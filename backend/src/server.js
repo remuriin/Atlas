@@ -5,7 +5,7 @@ const app = require('./app');
 const pool = require('./config/db');
 
 const server = app.listen(env.port, () => {
-  console.log(`LearnHub API is running on http://localhost:${env.port}`);
+  console.log(`Atlas API is running on http://localhost:${env.port}`);
   console.log(`Accepting browser requests from ${env.frontendOrigin}`);
   if (env.isUsingAuthEmulator) {
     console.log('Using the Firebase Auth EMULATOR (development only).');

@@ -14,7 +14,7 @@ const PLACEHOLDER_DATABASE_URL = 'postgres://USER:PASSWORD@HOST:5432/DBNAME';
 // with a confusing database stack trace.
 const stopWithMessage = (lines) => {
   console.error('');
-  console.error('LearnHub backend cannot start yet.');
+  console.error('Atlas backend cannot start yet.');
   console.error('----------------------------------');
   lines.forEach((line) => {
     console.error(line);
@@ -32,7 +32,7 @@ if (databaseUrl === '' || databaseUrl === PLACEHOLDER_DATABASE_URL) {
     'What to do:',
     '  1. Open backend/.env',
     '  2. Replace the DATABASE_URL line with your own Postgres URL, for example:',
-    '       DATABASE_URL=postgres://learnhub:your-password@localhost:5432/learnhub',
+    '       DATABASE_URL=postgres://atlas:your-password@localhost:5432/atlas',
     '  3. Run "npm run db:migrate" once to create the tables',
     '  4. Start the server again',
   ]);

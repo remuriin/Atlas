@@ -1,8 +1,8 @@
 {
-  "name": "learnhub-backend",
+  "name": "atlas-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "LearnHub API: Express + Postgres (plain SQL) + Firebase token verification",
+  "description": "Atlas API: Express + Postgres (plain SQL) + Firebase token verification",
   "main": "src/server.js",
   "engines": {
     "node": ">=20"

@@ -1,7 +1,7 @@
 // Shares the current color theme ("light" or "dark") with the whole app.
 import { createContext, useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'learnhub-theme';
+const STORAGE_KEY = 'atlas-theme';
 
 export const ThemeContext = createContext(null);
 

@@ -1,6 +1,6 @@
 // Shares "who is logged in" with the whole app.
 //   firebaseUser: the Firebase account (null when logged out)
-//   profile:      the matching LearnHub profile from our API (display name, email)
+//   profile:      the matching Atlas profile from our API (display name, email)
 //   isLoading:    true until Firebase has told us whether someone is logged in
 import { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';

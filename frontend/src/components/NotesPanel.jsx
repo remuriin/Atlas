@@ -131,7 +131,7 @@ function NotesPanel(props) {
   // Saves the notes as a plain text file on the device, for reading offline.
   // Headings keep a "#", bullets a "-", so the layout still reads well as text.
   const handleDownload = () => {
-    const header = `Notes: ${props.title}\nDownloaded from LearnHub on ${new Date().toLocaleString()}\n\n`;
+    const header = `Notes: ${props.title}\nDownloaded from Atlas on ${new Date().toLocaleString()}\n\n`;
     const blob = new Blob([header + toPlainText(notes)], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

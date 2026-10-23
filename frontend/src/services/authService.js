@@ -14,10 +14,10 @@ import { auth } from '../firebase';
 import { updateMyProfile } from './profileService';
 
 // Where to go after a Google sign-in that had to leave the page (see below).
-const RETURN_PATH_KEY = 'learnhub-return-path';
+const RETURN_PATH_KEY = 'atlas-return-path';
 
 // Creates the Firebase account, then saves the chosen display name in our API.
-// Returns the saved LearnHub profile.
+// Returns the saved Atlas profile.
 export const register = async (displayName, email, password) => {
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(credential.user, { displayName: displayName });
@@ -30,7 +30,7 @@ export const login = async (email, password) => {
 };
 
 // Signs in with a Google account in a small pop-up window. The Google account's
-// name and profile picture come along with it. A new Google user gets a LearnHub
+// name and profile picture come along with it. A new Google user gets an Atlas
 // profile the same way as anyone else (on their first request to /api/me).
 // returnPath: the page to come back to if the pop-up is blocked and the whole
 // page has to go to Google instead.
