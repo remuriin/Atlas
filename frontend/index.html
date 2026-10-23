@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="LearnHub is a hub for study reviewers made and shared by learners. Browse notes and study guides, and upvote the ones that help." />
+    <meta name="description" content="Atlas is a hub for study reviewers made and shared by learners. Browse notes and study guides, and upvote the ones that help." />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>LearnHub</title>
+    <title>Atlas</title>
     <script>
       // Runs before the page is drawn, so the right theme shows from the very
       // first frame (no flash of the wrong colors). A saved choice wins;
@@ -14,7 +14,11 @@
       (function () {
         var theme = null;
         try {
-          theme = window.localStorage.getItem('learnhub-theme');
+          theme = window.localStorage.getItem('atlas-theme');
+          // Choices saved before the site was renamed from LearnHub used this key.
+          if (!theme) {
+            theme = window.localStorage.getItem('learnhub-theme');
+          }
         } catch (err) {
           theme = null;
         }
@@ -26,7 +30,7 @@
     </script>
   </head>
   <body>
-    <noscript>LearnHub needs JavaScript to run. Please turn it on in your browser settings.</noscript>
+    <noscript>Atlas needs JavaScript to run. Please turn it on in your browser settings.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -146,7 +146,7 @@ const runSeed = async () => {
     // Add the demo author.
     const userResult = await pool.query(
       'INSERT INTO users (firebase_uid, display_name, email) VALUES ($1, $2, $3) RETURNING id',
-      [SEED_FIREBASE_UID, 'LearnHub Demo', 'demo@learnhub.example']
+      [SEED_FIREBASE_UID, 'Atlas Demo', 'demo@atlas.example']
     );
     const authorId = userResult.rows[0].id;
 

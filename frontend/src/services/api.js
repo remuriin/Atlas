@@ -1,4 +1,4 @@
-// A small wrapper around fetch for talking to the LearnHub API.
+// A small wrapper around fetch for talking to the Atlas API.
 // It adds the login token, reads the JSON reply, and turns API errors
 // into Error objects with a message that is safe to show to people.
 import { auth } from '../firebase';
@@ -11,7 +11,7 @@ if (apiUrl.endsWith('/')) {
 
 export const API_URL = apiUrl;
 
-const NETWORK_MESSAGE = 'Could not reach LearnHub. Check your internet connection and try again.';
+const NETWORK_MESSAGE = 'Could not reach Atlas. Check your internet connection and try again.';
 const FALLBACK_MESSAGE = 'Something went wrong. Please try again.';
 
 // Firebase renews the token by itself when it is close to expiring.

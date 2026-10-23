@@ -268,7 +268,7 @@ function LoginPage() {
         </div>
 
         <p className="form__footer">
-          New to LearnHub?{' '}
+          New to Atlas?{' '}
           <Link to="/register" state={location.state}>
             Create an account
           </Link>

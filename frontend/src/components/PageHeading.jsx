@@ -10,7 +10,7 @@ function PageHeading(props) {
   const location = useLocation();
 
   useEffect(() => {
-    document.title = `${props.title} · LearnHub`;
+    document.title = `${props.title} · Atlas`;
   }, [props.title]);
 
   useEffect(() => {

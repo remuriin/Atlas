@@ -24,14 +24,14 @@ export const getExtension = (fileName) => {
 };
 
 // Word and PowerPoint files are accepted, but they can only be downloaded, not
-// opened inside LearnHub. Returns a friendly note for those, or '' for other files.
+// opened inside Atlas. Returns a friendly note for those, or '' for other files.
 export const describeOfficeLimits = (fileName) => {
   const extension = getExtension(fileName);
   if (extension === 'doc' || extension === 'ppt') {
-    return 'Old Word and PowerPoint files (.doc, .ppt) can only be downloaded: they cannot be opened inside LearnHub or turned into flashcards. Saving it as a PDF first works best.';
+    return 'Old Word and PowerPoint files (.doc, .ppt) can only be downloaded: they cannot be opened inside Atlas or turned into flashcards. Saving it as a PDF first works best.';
   }
   if (extension === 'docx' || extension === 'pptx') {
-    return 'Word and PowerPoint files can only be downloaded, not opened inside LearnHub. Saving it as a PDF first lets people read it right here.';
+    return 'Word and PowerPoint files can only be downloaded, not opened inside Atlas. Saving it as a PDF first lets people read it right here.';
   }
   return '';
 };

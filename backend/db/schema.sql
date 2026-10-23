@@ -1,4 +1,4 @@
--- LearnHub database schema.
+-- Atlas database schema.
 -- Every statement uses IF NOT EXISTS, so this file is safe to run again and again.
 
 -- One row per person. Passwords are NOT stored here: Firebase Authentication owns them.

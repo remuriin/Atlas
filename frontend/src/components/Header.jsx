@@ -87,7 +87,7 @@ function Header() {
       <div className="container site-header__inner">
         <Link className="site-logo" to="/">
           <Icon name="book" />
-          LearnHub
+          Atlas
         </Link>
 
         {/* On phones the menu is closed by default, so "Sign up" also sits
@@ -178,7 +178,7 @@ function Header() {
       <ConfirmDialog
         id="logout-dialog"
         isOpen={isLogoutOpen}
-        title="Log out of LearnHub?"
+        title="Log out of Atlas?"
         message="You'll need to log in again to see your saved study reviewers, notes, and flashcards."
         confirmLabel="Log out"
         isBusy={isLoggingOut}

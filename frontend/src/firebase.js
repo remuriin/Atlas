@@ -1,4 +1,4 @@
-// Sets up Firebase. LearnHub uses Firebase for ONE thing only: Authentication
+// Sets up Firebase. Atlas uses Firebase for ONE thing only: Authentication
 // (sign up, log in, log out, password reset). All other data lives in our own API.
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';

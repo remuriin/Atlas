@@ -1,4 +1,4 @@
-// The upvote control: the only social feature in LearnHub.
+// The upvote control: the only social feature in Atlas.
 // props: reviewerId, title, count, hasUpvoted
 import { useContext, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';

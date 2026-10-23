@@ -1,4 +1,4 @@
-# LearnHub
+# Atlas
 
 A hub where anyone can share and discover **study reviewers**: notes, study guides, and review
 files that people made themselves. The community curates quality with upvotes. That is the only
@@ -69,11 +69,12 @@ Logged-in users also get private study tools:
   drift out of sync.
 
 ```
-learnhub/
-  frontend/      React app
-  backend/       Express + Postgres API
-  firebase.json  Auth emulator settings only
-  .firebaserc    default project id for the emulator
+atlas/
+  frontend/          React app
+  backend/           Express + Postgres API
+  hosting-redirect/  page for the old address (it only redirects)
+  firebase.json      Hosting sites and Auth emulator settings
+  .firebaserc        project id, and which Hosting site each target uses
   README.md
 ```
 
@@ -110,8 +111,8 @@ npm run db:seed         # optional: adds 20 sample study reviewers
 Need a throwaway local database? With Docker:
 
 ```bash
-docker run --name learnhub-db -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=learnhub -p 5432:5432 -d postgres:16
-# then: DATABASE_URL=postgres://postgres:devpass@localhost:5432/learnhub
+docker run --name atlas-db -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=atlas -p 5432:5432 -d postgres:16
+# then: DATABASE_URL=postgres://postgres:devpass@localhost:5432/atlas
 ```
 
 **3. Start everything**
@@ -131,7 +132,7 @@ Open http://localhost:5173 and create an account. Emulator accounts live only in
 when the emulator stops. The matching rows in your `users` table stay, which is harmless: sign up
 again with the same email and a new row is made.
 
-If the backend prints **"LearnHub backend cannot start yet"**, it is telling you exactly which
+If the backend prints **"Atlas backend cannot start yet"**, it is telling you exactly which
 setting in `backend/.env` still needs a value. That is on purpose: it never starts with a
 placeholder database URL.
 
@@ -144,9 +145,9 @@ placeholder database URL.
 | `PORT` | Port the API listens on. Default `4000`. |
 | `DATABASE_URL` | **Replace with your VPS Postgres URL.** `postgres://USER:PASSWORD@HOST:5432/DBNAME` |
 | `DATABASE_SSL` | `true` only when Postgres is on another machine and requires SSL. Default `false`. |
-| `FIREBASE_PROJECT_ID` | Your Firebase project id. Tokens from any other project are rejected. `demo-learnhub` works only with the emulator. |
+| `FIREBASE_PROJECT_ID` | Your Firebase project id. Tokens from any other project are rejected. `demo-atlas` works only with the emulator. |
 | `FIREBASE_AUTH_EMULATOR_HOST` | `127.0.0.1:9099` in development. **Delete this line in production.** The server refuses to start if it is set while `NODE_ENV=production`. |
-| `FRONTEND_ORIGIN` | Exact address of the website, for example `https://learnhub.example.com`. Only this origin may call the API from a browser. |
+| `FRONTEND_ORIGIN` | Exact address of the website, for example `https://atlas.example.com`. Only this origin may call the API from a browser. |
 | `UPLOAD_DIR` | Folder for uploaded files. Default `./uploads`. |
 | `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. |
 | `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
@@ -169,17 +170,17 @@ After changing `frontend/.env`, restart `npm run dev` (or rebuild) so Vite picks
 
 ## Putting your Postgres URL into `backend/.env`
 
-1. On the VPS, create a database and a user for LearnHub (run as the `postgres` superuser):
+1. On the VPS, create a database and a user for Atlas (run as the `postgres` superuser):
 
    ```sql
-   CREATE USER learnhub WITH PASSWORD 'choose-a-long-random-password';
-   CREATE DATABASE learnhub OWNER learnhub;
+   CREATE USER atlas WITH PASSWORD 'choose-a-long-random-password';
+   CREATE DATABASE atlas OWNER atlas;
    ```
 
 2. Open `backend/.env` and replace the placeholder line:
 
    ```
-   DATABASE_URL=postgres://learnhub:choose-a-long-random-password@localhost:5432/learnhub
+   DATABASE_URL=postgres://atlas:choose-a-long-random-password@localhost:5432/atlas
    ```
 
    If the password contains characters such as `@ : / # ?`, percent-encode them
@@ -209,8 +210,8 @@ console.
 
 ```bash
 firebase login
-firebase projects:create learnhub-<short-unique-suffix> --display-name "LearnHub"
-firebase apps:create WEB "LearnHub Web" --project <project-id>
+firebase projects:create atlas-<short-unique-suffix> --display-name "Atlas"
+firebase apps:create WEB "Atlas Web" --project <project-id>
 firebase apps:sdkconfig WEB <app-id> --project <project-id>
 ```
 
@@ -226,25 +227,35 @@ Then, in the [Firebase console](https://console.firebase.google.com):
    email → **Save**. (Until this is done, "Continue with Google" says Google sign-in is not
    turned on yet.)
 3. **Settings** tab → **Authorized domains** → **Add domain** → enter the domain the website will be
-   served from (for example `learnhub.example.com`) → **Add**. `localhost` is already allowed.
+   served from (for example `atlas.example.com`) → **Add**. `localhost` is already allowed.
 
 The free **Spark** plan is enough.
 
 ## Current live deployment
 
-- **Website:** https://learnhub-ea4291.web.app (Firebase Hosting, serves `frontend/dist`).
+- **Website:** https://atlas-f2757.web.app (Firebase Hosting site `atlas-f2757`, target `app`,
+  serves `frontend/dist`).
+- **Old address:** https://learnhub-ea4291.web.app (the project's default site, target `old`)
+  sends every page to the same page on the new address. Firebase cannot delete a default site.
 - **API:** https://api.140-245-60-8.sslip.io (the backend on the VPS under pm2 as `learnhub-api`,
   behind nginx with a Let's Encrypt certificate). `sslip.io` is a free service that turns the
   name into the server's IP address; swap it for a real domain when you have one.
-- `frontend/.env.production` holds the live API address and is used only by `npm run build`.
-  `frontend/.env` keeps pointing at your local backend for development.
+- `frontend/.env.production` holds the live API address and the sign-in domain, and is used only
+  by `npm run build`. `frontend/.env` keeps pointing at your local backend for development.
+- The project was called LearnHub before. Some names cannot or need not change, and keep the old
+  name on purpose: the Firebase project id `learnhub-ea4291`, and on the VPS the folder
+  `/var/www/learnhub`, the pm2 process `learnhub-api`, and the Postgres database and user
+  `learnhub`. Visitors never see them.
 
 To publish frontend changes:
 
 ```bash
 cd frontend && npm run build
-cd .. && firebase deploy --only hosting
+cd .. && firebase deploy --only hosting:app
 ```
+
+The old address only needs deploying again if `hosting-redirect/` or its part of `firebase.json`
+changes: `firebase deploy --only hosting:old`.
 
 To publish backend changes, copy the changed files to `/var/www/learnhub/backend` on the VPS and
 run `pm2 restart learnhub-api`. When `package.json` changed, run `npm ci --omit=dev` first; when
@@ -258,10 +269,10 @@ database port then never needs to be open to the internet.
 
 1. **Copy the project** to the server and install: `cd backend && npm ci --omit=dev`.
 2. **Backend settings** in `backend/.env`:
-   - `DATABASE_URL=postgres://learnhub:...@localhost:5432/learnhub`
+   - `DATABASE_URL=postgres://atlas:...@localhost:5432/atlas`
    - `FIREBASE_PROJECT_ID=<your real project id>`
    - delete the `FIREBASE_AUTH_EMULATOR_HOST` line
-   - `FRONTEND_ORIGIN=https://learnhub.example.com` (your real domain, no trailing slash)
+   - `FRONTEND_ORIGIN=https://atlas.example.com` (your real domain, no trailing slash)
    - `TRUST_PROXY=true`
    - `GEMINI_API_KEY=<your key>` (only needed for flashcards)
 3. **Create the tables:** `npm run db:migrate`.
@@ -270,19 +281,19 @@ database port then never needs to be open to the internet.
    ```bash
    npm install -g pm2
    cd backend
-   NODE_ENV=production pm2 start src/server.js --name learnhub-api
+   NODE_ENV=production pm2 start src/server.js --name atlas-api
    pm2 save && pm2 startup
    ```
 
-   or with systemd (`/etc/systemd/system/learnhub-api.service`):
+   or with systemd (`/etc/systemd/system/atlas-api.service`):
 
    ```ini
    [Unit]
-   Description=LearnHub API
+   Description=Atlas API
    After=network.target postgresql.service
 
    [Service]
-   WorkingDirectory=/var/www/learnhub/backend
+   WorkingDirectory=/var/www/atlas/backend
    ExecStart=/usr/bin/node src/server.js
    Environment=NODE_ENV=production
    Restart=always
@@ -297,7 +308,7 @@ database port then never needs to be open to the internet.
    with the database: a reviewer is a database row **plus** a file.
 
 5. **Build the frontend** with production values in `frontend/.env`
-   (`VITE_API_URL=https://learnhub.example.com`, `VITE_USE_AUTH_EMULATOR=false`, the four real
+   (`VITE_API_URL=https://atlas.example.com`, `VITE_USE_AUTH_EMULATOR=false`, the four real
    `VITE_FIREBASE_*` values), then `cd frontend && npm ci && npm run build`. The result is the
    static folder `frontend/dist`.
 
@@ -307,13 +318,13 @@ database port then never needs to be open to the internet.
    ```nginx
    server {
      listen 443 ssl;
-     server_name learnhub.example.com;
+     server_name atlas.example.com;
      # ssl_certificate lines are added by certbot
 
      # Must be larger than MAX_FILE_SIZE_MB, or nginx rejects uploads before the API sees them.
      client_max_body_size 12m;
 
-     root /var/www/learnhub/frontend/dist;
+     root /var/www/atlas/frontend/dist;
      index index.html;
 
      # Every page address is handled by the React app.
@@ -339,7 +350,7 @@ Avoid this if you can. If you cannot:
 
 - `postgresql.conf`: set `listen_addresses` to the server's private address (not `'*'`).
 - `pg_hba.conf`: allow only the backend server's IP, with SSL and password hashing:
-  `hostssl learnhub learnhub 203.0.113.10/32 scram-sha-256`
+  `hostssl atlas atlas 203.0.113.10/32 scram-sha-256`
 - Firewall: open port 5432 only to that one IP (`ufw allow from 203.0.113.10 to any port 5432`).
 - Turn on SSL in Postgres (`ssl = on`) and set `DATABASE_SSL=true` in `backend/.env`. That setting
   encrypts the connection but does not verify the server's certificate, which suits a self-signed
