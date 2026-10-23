@@ -3,6 +3,13 @@
 const multer = require('multer');
 const env = require('../config/env');
 
+// Statuses whose message we wrote ourselves: every 4xx, plus 502 and 503, which are
+// used when the flashcard service (Gemini) fails or is not set up.
+const SAFE_STATUSES = [502, 503];
+for (let status = 400; status < 500; status += 1) {
+  SAFE_STATUSES.push(status);
+}
+
 // Runs when no route matched the address.
 const notFoundHandler = (req, res) => {
   res.status(404).json({ error: { message: 'That address does not exist on this API.' } });
@@ -38,7 +45,7 @@ const errorHandler = (err, req, res, next) => {
   } else if (err.type === 'entity.parse.failed') {
     status = 400;
     message = 'The request could not be read. Check that it is valid.';
-  } else if (err.status && err.status >= 400 && err.status < 500) {
+  } else if (err.status && SAFE_STATUSES.indexOf(err.status) !== -1) {
     // An error we created on purpose with createHttpError, so its message is safe to show.
     status = err.status;
     message = err.message;

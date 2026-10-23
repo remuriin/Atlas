@@ -45,9 +45,39 @@ CREATE TABLE IF NOT EXISTS recently_viewed (
   PRIMARY KEY (user_id, reviewer_id)
 );
 
+-- One row per study reviewer a user saved. The user's notes for it live here too.
+-- If the uploader deletes the original, reviewer_id becomes NULL but the row stays,
+-- so the saved title, subject, notes, and flashcards are not lost.
+CREATE TABLE IF NOT EXISTS saved_items (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reviewer_id INTEGER REFERENCES reviewers(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  notes TEXT NOT NULL DEFAULT '',
+  notes_updated_at TIMESTAMP,
+  saved_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (user_id, reviewer_id),
+  CHECK (char_length(notes) <= 20000)
+);
+
+-- Flashcards made from a saved item. Deleting the saved item deletes its cards.
+CREATE TABLE IF NOT EXISTS flashcards (
+  id SERIAL PRIMARY KEY,
+  saved_item_id INTEGER NOT NULL REFERENCES saved_items(id) ON DELETE CASCADE,
+  position INTEGER NOT NULL,
+  front TEXT NOT NULL,
+  back TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT NOW(),
+  CHECK (status IN ('new', 'learning', 'learned'))
+);
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);
 CREATE INDEX IF NOT EXISTS idx_reviewers_author_id ON reviewers (author_id);
 CREATE INDEX IF NOT EXISTS idx_upvotes_reviewer_id ON upvotes (reviewer_id);
 CREATE INDEX IF NOT EXISTS idx_recently_viewed_user_id ON recently_viewed (user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_items_user_id ON saved_items (user_id);
+CREATE INDEX IF NOT EXISTS idx_flashcards_saved_item_id ON flashcards (saved_item_id);

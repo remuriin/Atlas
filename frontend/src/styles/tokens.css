@@ -74,6 +74,8 @@
   --color-success-text: #1a7f37;
   --color-success-subtle: #dafbe1;
 
+  --color-attention: #9a6700; /* "still learning" marks: 4.8:1 on canvas */
+
   --color-danger: #d1242f;
   --color-danger-emphasis: #d1242f; /* danger button background */
   --color-danger-hover: #a40e26;
@@ -85,6 +87,48 @@
   --shadow-dialog: 0 8px 24px rgba(31, 35, 40, 0.2);
   /* The small arrow on drop-down menus, drawn in the muted text color (#59636e). */
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2359636e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+
+  /* Subject colors. Each subject has three:
+       --subject-X        the stripe on cards and the legend swatch (4.6:1 or more on canvas)
+       --subject-X-bg     the subject pill's background
+       --subject-X-text   the subject pill's text (6.1:1 or more on its background)
+     The subject's name is always written out too, so color is never the only clue. */
+  --subject-math: #0969da;
+  --subject-math-bg: #ddf4ff;
+  --subject-math-text: #0550ae;
+  --subject-science: #1a7f37;
+  --subject-science-bg: #dafbe1;
+  --subject-science-text: #116329;
+  --subject-english: #8250df;
+  --subject-english-bg: #fbefff;
+  --subject-english-text: #6639ba;
+  --subject-history: #8a5a2b;
+  --subject-history-bg: #f6ece2;
+  --subject-history-text: #6b4423;
+  --subject-social: #1b7c83;
+  --subject-social-bg: #d6f7f4;
+  --subject-social-text: #155e63;
+  --subject-cs: #4f5fd1;
+  --subject-cs-bg: #e8ebff;
+  --subject-cs-text: #3a46a8;
+  --subject-engineering: #bc4c00;
+  --subject-engineering-bg: #fff1e5;
+  --subject-engineering-text: #953800;
+  --subject-business: #7d6d00;
+  --subject-business-bg: #fbf6d4;
+  --subject-business-text: #5f5300;
+  --subject-health: #cf222e;
+  --subject-health-bg: #ffebe9;
+  --subject-health-text: #a40e26;
+  --subject-languages: #0a7ea4;
+  --subject-languages-bg: #dbf5fd;
+  --subject-languages-text: #076080;
+  --subject-arts: #bf3989;
+  --subject-arts-bg: #ffeff7;
+  --subject-arts-text: #99286e;
+  --subject-other: #59636e;
+  --subject-other-bg: #eff2f5;
+  --subject-other-text: #424a53;
 }
 
 /* Dark theme */
@@ -110,6 +154,8 @@
   --color-success-text: #3fb950;
   --color-success-subtle: #12261e;
 
+  --color-attention: #d29922;
+
   --color-danger: #f85149;
   --color-danger-emphasis: #da3633;
   --color-danger-hover: #b62324;
@@ -121,6 +167,45 @@
   --shadow-dialog: 0 8px 24px rgba(1, 4, 9, 0.6);
   /* Same arrow in the dark theme's muted text color (#9198a1). */
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%239198a1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+
+  /* Subject colors (see the light theme for what each one is for).
+     Stripes are 5.6:1 or more on canvas; pill text is 9.4:1 or more on its background. */
+  --subject-math: #4493f8;
+  --subject-math-bg: #0f2a4a;
+  --subject-math-text: #a5d6ff;
+  --subject-science: #3fb950;
+  --subject-science-bg: #12301b;
+  --subject-science-text: #aff5b4;
+  --subject-english: #ab7df8;
+  --subject-english-bg: #2a1d47;
+  --subject-english-text: #e2c5ff;
+  --subject-history: #c9915f;
+  --subject-history-bg: #33241a;
+  --subject-history-text: #f0d1b3;
+  --subject-social: #39c5bb;
+  --subject-social-bg: #0f3331;
+  --subject-social-text: #a6f2ea;
+  --subject-cs: #8899ff;
+  --subject-cs-bg: #1c2350;
+  --subject-cs-text: #c9d1ff;
+  --subject-engineering: #f0883e;
+  --subject-engineering-bg: #3d2210;
+  --subject-engineering-text: #ffc799;
+  --subject-business: #c8b336;
+  --subject-business-bg: #2f2a0d;
+  --subject-business-text: #f0e199;
+  --subject-health: #f85149;
+  --subject-health-bg: #3d1418;
+  --subject-health-text: #ffc1ba;
+  --subject-languages: #39b7e0;
+  --subject-languages-bg: #0d2f3d;
+  --subject-languages-text: #a8e6fa;
+  --subject-arts: #f778ba;
+  --subject-arts-bg: #3d1530;
+  --subject-arts-text: #ffc0e0;
+  --subject-other: #9198a1;
+  --subject-other-bg: #212830;
+  --subject-other-text: #d1d7e0;
 }
 
 /* Visitors who ask for more contrast get stronger borders and darker secondary text. */

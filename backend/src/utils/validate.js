@@ -28,7 +28,12 @@ const LIMITS = {
   displayNameMin: 2,
   displayNameMax: 50,
   searchMax: 100,
+  notesMax: 20000,
 };
+
+// How many flashcards someone may ask for, and how well a card can be known.
+const FLASHCARD_COUNTS = [10, 20, 30];
+const FLASHCARD_STATUSES = ['new', 'learning', 'learned'];
 
 // The largest number a Postgres INTEGER column can hold.
 const MAX_INTEGER = 2147483647;
@@ -119,6 +124,38 @@ const validateDisplayName = (value) => {
   return displayName;
 };
 
+// Checks the notes for a saved item. Notes may be empty, and keep their spacing
+// and line breaks exactly as typed. Returns the notes or throws a 400 error.
+const validateNotes = (value) => {
+  if (typeof value !== 'string') {
+    throw createHttpError(400, 'Notes must be text.', { notes: 'Notes must be text.' });
+  }
+  if (value.length > LIMITS.notesMax) {
+    const message = `Notes can be at most ${LIMITS.notesMax} characters.`;
+    throw createHttpError(400, message, { notes: message });
+  }
+  return value;
+};
+
+// Checks the requested number of flashcards. A missing value means 20.
+const validateFlashcardCount = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return 20;
+  }
+  const count = Number(value);
+  if (FLASHCARD_COUNTS.indexOf(count) === -1) {
+    throw createHttpError(400, `Choose ${FLASHCARD_COUNTS.join(', ')} flashcards.`);
+  }
+  return count;
+};
+
+const validateFlashcardStatus = (value) => {
+  if (FLASHCARD_STATUSES.indexOf(value) === -1) {
+    throw createHttpError(400, '"status" must be new, learning, or learned.');
+  }
+  return value;
+};
+
 // Reads ?page= or ?limit=. Missing values use the fallback; bad values throw a 400 error.
 const parsePositiveNumber = (value, fallback, name) => {
   if (value === undefined || value === '') {
@@ -149,6 +186,9 @@ module.exports = {
   tagsToArray: tagsToArray,
   validateReviewerFields: validateReviewerFields,
   validateDisplayName: validateDisplayName,
+  validateNotes: validateNotes,
+  validateFlashcardCount: validateFlashcardCount,
+  validateFlashcardStatus: validateFlashcardStatus,
   parsePositiveNumber: parsePositiveNumber,
   buildSearchPattern: buildSearchPattern,
 };

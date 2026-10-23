@@ -103,6 +103,11 @@ main:focus {
   outline: none;
 }
 
+/* The "hidden" attribute must win over any display rule a component sets. */
+[hidden] {
+  display: none !important;
+}
+
 /* Hidden visually but still read by screen readers. */
 .visually-hidden {
   position: absolute;

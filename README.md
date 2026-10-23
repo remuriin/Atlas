@@ -7,6 +7,21 @@ social feature: there are no comments, threads, chat, ratings, or written review
 In the code a study reviewer is called a `reviewer` (table, routes, components). In the UI it is
 always written "study reviewer".
 
+Logged-in users also get private study tools:
+
+- **Subject colors.** Every subject has its own color, shown as a stripe on each card and on its
+  subject pill. "Subject colors" above the feed opens the key, and each entry filters the feed.
+- **Saved.** "Save" on any study reviewer keeps it on the Saved page (only you see it). Opening
+  one shows the file inside the app (PDF, images, and text; Word and PowerPoint are download
+  only) next to **your notes**, which save to your account a moment after you stop typing.
+  "Download file" and "Download notes" keep copies on your device for offline use.
+- **Flashcards.** A saved study reviewer can be turned into 10, 20, or 30 flashcards by Google
+  Gemini (`gemini-3.5-flash-lite`, called only from the backend). Study them with flip, next and
+  previous, "Still learning" / "Got it", shuffle, and a "not learned yet" filter. Progress is
+  saved per card.
+- If an uploader deletes a study reviewer, people who saved it keep their notes and flashcards;
+  only the file is gone.
+
 ## Architecture
 
 ```
@@ -77,7 +92,7 @@ Then create the tables:
 ```bash
 cd backend
 npm run db:migrate      # safe to run again at any time
-npm run db:seed         # optional: adds 4 sample study reviewers
+npm run db:seed         # optional: adds 20 sample study reviewers
 ```
 
 Need a throwaway local database? With Docker:
@@ -123,6 +138,8 @@ placeholder database URL.
 | `UPLOAD_DIR` | Folder for uploaded files. Default `./uploads`. |
 | `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. |
 | `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
+| `GEMINI_API_KEY` | Google Gemini key for making flashcards (from https://aistudio.google.com/apikey). **Secret: server only, never in `frontend/.env`.** Leave empty to turn flashcards off; everything else keeps working. |
+| `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
 
 ### `frontend/.env` (template: `frontend/.env.example`)
 
@@ -169,7 +186,9 @@ npm run db:seed      # optional sample data, never runs automatically
 ```
 
 `db/schema.sql` uses only `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`, so running
-it again changes nothing. It creates `users`, `reviewers`, `upvotes`, and `recently_viewed`.
+it again changes nothing. It creates `users`, `reviewers`, `upvotes`, `recently_viewed`,
+`saved_items` (a user's saved study reviewers, with their notes), and `flashcards`. Run it again
+after pulling changes: new tables are added and existing data is left alone.
 
 ## Firebase setup for production
 
@@ -213,7 +232,8 @@ cd .. && firebase deploy --only hosting
 ```
 
 To publish backend changes, copy the changed files to `/var/www/learnhub/backend` on the VPS and
-run `pm2 restart learnhub-api`. The VPS backend only accepts browser requests from the live
+run `pm2 restart learnhub-api`. When `package.json` changed, run `npm ci --omit=dev` first; when
+`db/schema.sql` changed, run `npm run db:migrate` too. The VPS backend only accepts browser requests from the live
 website (`FRONTEND_ORIGIN`), so a frontend running on `localhost` must use a local backend.
 
 ## Deploying to a VPS
@@ -228,6 +248,7 @@ database port then never needs to be open to the internet.
    - delete the `FIREBASE_AUTH_EMULATOR_HOST` line
    - `FRONTEND_ORIGIN=https://learnhub.example.com` (your real domain, no trailing slash)
    - `TRUST_PROXY=true`
+   - `GEMINI_API_KEY=<your key>` (only needed for flashcards)
 3. **Create the tables:** `npm run db:migrate`.
 4. **Keep the API running** with pm2:
 
@@ -329,6 +350,17 @@ add `"fields": { "title": "..." }`.
 | `GET` / `PUT /api/me` | yes | Find-or-create my profile / change my display name |
 | `GET /api/me/reviewers` | yes | My uploads |
 | `GET /api/me/recently-viewed` | yes | My last 20 viewed |
+| `PUT` / `DELETE /api/reviewers/:id/save` | yes | Save to / remove from my Saved list (both safe to repeat). Removing also deletes my notes and flashcards for it |
+| `GET /api/reviewers/:id/file?download=1` | no | The file, always as a download |
+| `GET /api/me/saved` | yes | My saved study reviewers |
+| `GET` / `DELETE /api/saved/:savedId` | mine | One saved item with my notes / remove it |
+| `PUT /api/saved/:savedId/notes` | mine | Save my notes (JSON `{ notes }`, up to 20,000 characters) |
+| `GET` / `DELETE /api/saved/:savedId/flashcards` | mine | My flashcards for it / delete them |
+| `POST /api/saved/:savedId/flashcards` | mine | Make a new set with Gemini (JSON `{ count: 10, 20 or 30 }`), replacing the old one. 10 sets per user per day |
+| `PUT /api/saved/:savedId/flashcards/:cardId` | mine | Mark a card (JSON `{ status: "new", "learning" or "learned" }`) |
+
+"mine" means logged in, and the saved item must be yours: anyone else's gets the same 404 as a
+missing one.
 
 ## Code rules this project follows
 
@@ -378,6 +410,11 @@ Target: WCAG 2.2 AA. What was checked, and how:
 
   The dark theme's header and footer use GitHub's darkest shade (`--color-inset`, `#010409`);
   on it, body text is 17.4:1, muted text 7.1:1, links 6.6:1, and control outlines 3.9:1.
+
+  Subject colors (`--subject-*` tokens): every card stripe and legend swatch is at least 4.6:1
+  on the page (light) and 5.6:1 (dark); every subject pill's text is at least 6.1:1 (light) and
+  9.4:1 (dark) on its own background. The subject name is always written out, so the color is
+  never the only clue.
 
   Adjustments made to the starting palette so every pair passes: a darker control-outline color was
   added for inputs and buttons (the card border color is only 1.4:1 and is used just for decorative
@@ -433,6 +470,16 @@ results, the chosen file, save success, and delete success are announced politel
   regions were verified in the accessibility tree and by axe, but nobody listened to it.
 
 ## Known limitations
+
+- Word and PowerPoint files cannot be shown inside the app, only downloaded. The upload form
+  recommends PDF, image, or text files for that reason. Old `.doc` and `.ppt` files also cannot
+  be turned into flashcards.
+- Some phone browsers show only the first page of a PDF (or a link) inside the study page.
+  "Open in new tab" there always shows the whole file.
+- Flashcards are written by AI and can contain mistakes; the page says so. The daily limit of 10
+  sets per user is kept in memory, like the other rate limits.
+- Large Word or PowerPoint files are cut to about 200,000 characters of text before Gemini sees
+  them, which is far more than 30 cards need.
 
 - The file-type check trusts the file extension and the content type sent by the browser; it does
   not inspect file contents. Files are never executed, are stored under random names, and are

@@ -75,6 +75,13 @@ if (!maxFileSizeMb || maxFileSizeMb <= 0) {
   maxFileSizeMb = 10;
 }
 
+// The Gemini key is optional: without it the app still runs, and only the
+// "Make flashcards" feature answers that it is not set up yet.
+let geminiModel = (process.env.GEMINI_MODEL || '').trim();
+if (geminiModel === '') {
+  geminiModel = 'gemini-3.5-flash-lite';
+}
+
 module.exports = {
   backendRoot: backendRoot,
   port: Number(process.env.PORT) || 4000,
@@ -88,5 +95,7 @@ module.exports = {
   uploadDir: path.resolve(backendRoot, process.env.UPLOAD_DIR || './uploads'),
   maxFileSizeMb: maxFileSizeMb,
   trustProxy: process.env.TRUST_PROXY === 'true',
+  geminiApiKey: (process.env.GEMINI_API_KEY || '').trim(),
+  geminiModel: geminiModel,
   isProduction: isProduction,
 };

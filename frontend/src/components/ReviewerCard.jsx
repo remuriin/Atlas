@@ -12,7 +12,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { describeFileType, formatDate, formatFileSize } from '../services/format';
 import { rememberOpenedReviewer } from '../services/feedMemory';
+import { subjectSlug } from '../services/subjects';
 import Icon from './Icon';
+import SaveButton from './SaveButton';
 import SubjectLink from './SubjectLink';
 import TagList from './TagList';
 import UpvoteButton from './UpvoteButton';
@@ -23,7 +25,8 @@ function ReviewerCard(props) {
   const location = useLocation();
 
   return (
-    <article className="card reviewer-card">
+    // The colored stripe down the left edge shows the subject at a glance.
+    <article className={`card reviewer-card subject--${subjectSlug(reviewer.subject)}`}>
       <div className="reviewer-card__body">
         <p>
           <SubjectLink subject={reviewer.subject} />
@@ -67,12 +70,15 @@ function ReviewerCard(props) {
       </div>
 
       <div className="reviewer-card__footer">
-        <UpvoteButton
-          reviewerId={reviewer.id}
-          title={reviewer.title}
-          count={reviewer.upvoteCount}
-          hasUpvoted={reviewer.hasUpvoted}
-        />
+        <div className="row">
+          <UpvoteButton
+            reviewerId={reviewer.id}
+            title={reviewer.title}
+            count={reviewer.upvoteCount}
+            hasUpvoted={reviewer.hasUpvoted}
+          />
+          <SaveButton reviewerId={reviewer.id} title={reviewer.title} isSaved={reviewer.isSaved} />
+        </div>
 
         {props.showOwnerActions && (
           <div className="row">

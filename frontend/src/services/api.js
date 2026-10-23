@@ -80,6 +80,28 @@ export const apiRequest = async (path, options) => {
   return data;
 };
 
+// Fetches a file (for example a PDF) and returns it as a Blob, so the page can
+// show it with URL.createObjectURL. Errors are turned into the usual Error objects.
+export const apiRequestBlob = async (path) => {
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`);
+  } catch (err) {
+    throw buildApiError(0, { error: { message: NETWORK_MESSAGE } });
+  }
+
+  if (!response.ok) {
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = null;
+    }
+    throw buildApiError(response.status, data);
+  }
+  return response.blob();
+};
+
 // Sends a form that contains a file. fetch cannot report upload progress,
 // so this one uses XMLHttpRequest, which can.
 // onProgress is called with a whole number from 0 to 100.
