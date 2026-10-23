@@ -155,6 +155,7 @@ function StudyPage() {
                 savedId={item.id}
                 title={item.title}
                 initialNotes={item.notes}
+                initialFormat={item.notesFormat}
                 initialSavedAt={item.notesUpdatedAt}
               />
             </div>

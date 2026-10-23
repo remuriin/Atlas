@@ -21,7 +21,9 @@ import FormField from './FormField';
 import Icon from './Icon';
 import Spinner from './Spinner';
 
-const COUNT_OPTIONS = ['10', '20', '30'];
+// Keep the same as LIMITS.flashcardsMin / flashcardsMax in backend/src/utils/validate.js.
+const COUNT_MIN = 5;
+const COUNT_MAX = 100;
 
 const STATUS_TILES = [
   { status: 'new', label: 'Not studied' },
@@ -62,6 +64,9 @@ function FlashcardsPanel(props) {
   const [count, setCount] = useState('20');
   const [isMaking, setIsMaking] = useState(false);
   const [makeError, setMakeError] = useState('');
+  const [countError, setCountError] = useState('');
+  // Shown when the material was too short for the number of cards asked for.
+  const [fewerNote, setFewerNote] = useState('');
   const [isRemakeOpen, setIsRemakeOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -232,11 +237,19 @@ function FlashcardsPanel(props) {
     }
     setIsMaking(true);
     setMakeError('');
+    setFewerNote('');
     try {
-      const data = await createFlashcards(props.savedId, Number(count));
+      const asked = Number(count);
+      const data = await createFlashcards(props.savedId, asked);
       startStudying(data.cards);
       setIsRemakeOpen(false);
       setAnnouncement(`${data.cards.length} flashcards are ready.`);
+      // Short material gives fewer cards on purpose, rather than repeats or filler.
+      if (data.cards.length < asked) {
+        setFewerNote(
+          `Made ${data.cards.length} cards. The material had enough for ${data.cards.length} good ones, not ${asked}.`
+        );
+      }
     } catch (err) {
       setMakeError(err.message);
       setIsRemakeOpen(false);
@@ -244,16 +257,18 @@ function FlashcardsPanel(props) {
     setIsMaking(false);
   };
 
-  // The menu starts on 20, but its empty first choice can still be picked.
+  // The number box must hold a whole number from 5 to 100.
   const hasCount = () => {
-    if (count === '') {
-      setMakeError('Choose how many cards to make.');
-      const select = document.getElementById('flashcard-count');
-      if (select) {
-        select.focus();
+    const number = Number(count);
+    if (count.trim() === '' || !Number.isInteger(number) || number < COUNT_MIN || number > COUNT_MAX) {
+      setCountError(`Enter a whole number from ${COUNT_MIN} to ${COUNT_MAX}.`);
+      const box = document.getElementById('flashcard-count');
+      if (box) {
+        box.focus();
       }
       return false;
     }
+    setCountError('');
     return true;
   };
 
@@ -304,12 +319,16 @@ function FlashcardsPanel(props) {
   const countField = (
     <FormField
       id="flashcard-count"
-      label="How many cards"
-      type="select"
+      label="Number of cards"
+      type="number"
       value={count}
       onChange={(event) => setCount(event.target.value)}
-      options={COUNT_OPTIONS}
-      placeholderOption="Choose a number"
+      min={COUNT_MIN}
+      max={COUNT_MAX}
+      step={1}
+      inputMode="numeric"
+      hint={`From ${COUNT_MIN} to ${COUNT_MAX}. The size of the material sets how many good cards it can give: about 1 card for every 50 to 100 words works well. If it is too short for your number, you get fewer cards instead of filler.`}
+      error={countError}
     />
   );
 
@@ -354,7 +373,7 @@ function FlashcardsPanel(props) {
             them as you study: AI can make mistakes. Only you can see your flashcards.
           </p>
 
-          <form className="flashcards-start__form" onSubmit={handleMakeSubmit}>
+          <form className="flashcards-start__form" onSubmit={handleMakeSubmit} noValidate>
             {countField}
             <button type="submit" className="button button--primary" aria-disabled={isMaking}>
               <Icon name="cards" />
@@ -362,13 +381,14 @@ function FlashcardsPanel(props) {
             </button>
           </form>
 
-          {isMaking && <Spinner label="Making flashcards. This can take up to a minute…" />}
+          {isMaking && <Spinner label="Making flashcards. This can take up to two minutes…" />}
           {makeError !== '' && <Alert type="error">{makeError}</Alert>}
         </div>
       )}
 
       {status === 'ready' && cards.length > 0 && (
         <div className="stack">
+          {fewerNote !== '' && <Alert type="info">{fewerNote}</Alert>}
           <ul className="progress-tiles" aria-label="Your progress">
             {STATUS_TILES.map((tile) => (
               <li key={tile.status} className={`progress-tile progress-tile--${tile.status}`}>
@@ -477,7 +497,7 @@ function FlashcardsPanel(props) {
           <div className="flashcards-manage">
             <h3>Manage this set</h3>
             {props.canMake && (
-              <form className="flashcards-start__form" onSubmit={handleRemakeSubmit}>
+              <form className="flashcards-start__form" onSubmit={handleRemakeSubmit} noValidate>
                 {countField}
                 <button type="submit" className="button" aria-disabled={isMaking}>
                   <Icon name="flip" />
@@ -485,7 +505,7 @@ function FlashcardsPanel(props) {
                 </button>
               </form>
             )}
-            {isMaking && <Spinner label="Making flashcards. This can take up to a minute…" />}
+            {isMaking && <Spinner label="Making flashcards. This can take up to two minutes…" />}
             {makeError !== '' && <Alert type="error">{makeError}</Alert>}
             <div>
               <button

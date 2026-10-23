@@ -34,10 +34,10 @@ app.use(
 
 app.use(rateLimit.generalLimiter);
 
-// Request bodies here are small: a display name, or notes of up to 20,000
-// characters (up to about 80 KB once accents and other alphabets are encoded).
+// Request bodies here are small: a display name, or formatted notes of up to
+// 100,000 characters (up to about 400 KB once accents and other alphabets are encoded).
 // File uploads do not pass through this; multer has its own limit.
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '512kb' }));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

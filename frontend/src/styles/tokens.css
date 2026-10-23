@@ -129,6 +129,24 @@
   --subject-other: #59636e;
   --subject-other-bg: #eff2f5;
   --subject-other-text: #424a53;
+
+  /* Note text colors and highlights. Every text color (and normal text) is
+     5.6:1 or more on the page and on every highlight. */
+  --note-red: #a40e26;
+  --note-orange: #953800;
+  --note-green: #116329;
+  --note-blue: #0550ae;
+  --note-purple: #6639ba;
+  --note-hl-yellow: #fff3a3;
+  --note-hl-green: #ccf5d6;
+  --note-hl-blue: #cce8ff;
+  --note-hl-pink: #ffd6e8;
+  --note-hl-orange: #ffdfc2;
+
+  /* Scrollbars: the thumb is 3.2:1 on its track, the hover color 5.7:1. */
+  --scrollbar-track: #f6f8fa;
+  --scrollbar-thumb: #818b98;
+  --scrollbar-thumb-hover: #59636e;
 }
 
 /* Dark theme */
@@ -206,6 +224,24 @@
   --subject-other: #9198a1;
   --subject-other-bg: #212830;
   --subject-other-text: #d1d7e0;
+
+  /* Note colors: every text color (and normal text) is 5.1:1 or more on the page
+     and on every highlight. */
+  --note-red: #ff8182;
+  --note-orange: #ffa657;
+  --note-green: #56d364;
+  --note-blue: #79c0ff;
+  --note-purple: #d2a8ff;
+  --note-hl-yellow: #3d3100;
+  --note-hl-green: #0f3d1f;
+  --note-hl-blue: #0c2d6b;
+  --note-hl-pink: #4f1c35;
+  --note-hl-orange: #4d2600;
+
+  /* Scrollbars: the thumb is 3.3:1 on its track, the hover color 5.9:1. */
+  --scrollbar-track: #151b23;
+  --scrollbar-thumb: #656c76;
+  --scrollbar-thumb-hover: #9198a1;
 }
 
 /* Visitors who ask for more contrast get stronger borders and darker secondary text. */

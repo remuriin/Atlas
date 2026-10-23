@@ -16,6 +16,8 @@ const toCardJson = (card) => {
 const getSavedItem = (req, res) => {
   const item = reviewerItems.toSavedJson(req.saved);
   item.notes = req.saved.notes;
+  // 'text' for notes written before formatting existed, 'html' for everything since.
+  item.notesFormat = req.saved.notes_format;
   res.json(item);
 };
 
@@ -35,7 +37,11 @@ const updateNotes = async (req, res, next) => {
     const body = req.body || {};
     const notes = validate.validateNotes(body.notes);
     const updated = await savedItemsModel.updateNotes(req.saved.id, notes);
-    res.json({ notes: updated.notes, notesUpdatedAt: updated.notes_updated_at });
+    res.json({
+      notes: updated.notes,
+      notesFormat: updated.notes_format,
+      notesUpdatedAt: updated.notes_updated_at,
+    });
   } catch (err) {
     next(err);
   }

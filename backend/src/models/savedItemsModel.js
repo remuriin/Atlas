@@ -6,7 +6,7 @@ const pool = require('../config/db');
 // for those, every r.*, u.*, and upvote column comes back as NULL or 0.
 const SELECT_SAVED_ITEMS = `
   SELECT s.id, s.user_id, s.reviewer_id, s.title AS saved_title, s.subject AS saved_subject,
-         s.notes, s.notes_updated_at, s.saved_at,
+         s.notes, s.notes_format, s.notes_updated_at, s.saved_at,
          r.id AS live_reviewer_id, r.author_id, r.title, r.description, r.subject, r.tags,
          r.file_name, r.stored_name, r.file_mime, r.file_size,
          r.created_at, r.updated_at,
@@ -69,10 +69,11 @@ const deleteSavedByUserAndReviewer = async (userId, reviewerId) => {
 
 const updateNotes = async (savedItemId, notes) => {
   // Replace the notes of a saved item and return when they were saved.
+  // Notes saved now are always formatted (HTML), so the format is set too.
   const result = await pool.query(
-    `UPDATE saved_items SET notes = $1, notes_updated_at = NOW()
+    `UPDATE saved_items SET notes = $1, notes_format = 'html', notes_updated_at = NOW()
      WHERE id = $2
-     RETURNING notes, notes_updated_at`,
+     RETURNING notes, notes_format, notes_updated_at`,
     [notes, savedItemId]
   );
   return result.rows[0] || null;

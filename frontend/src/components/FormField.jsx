@@ -11,6 +11,7 @@
 //   placeholderOption    for 'select': text of the empty first choice
 //   accept               for 'file': allowed file endings
 //   maxLength, rows
+//   min, max, step, inputMode   for 'number': the allowed range and the phone keyboard
 import { useState } from 'react';
 import Icon from './Icon';
 
@@ -131,6 +132,10 @@ function FormField(props) {
         onChange={props.onChange}
         autoComplete={props.autoComplete}
         maxLength={props.maxLength}
+        min={props.min}
+        max={props.max}
+        step={props.step}
+        inputMode={props.inputMode}
         required={props.required}
         aria-invalid={hasError}
         aria-describedby={describedBy}
