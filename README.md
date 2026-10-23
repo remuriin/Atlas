@@ -15,10 +15,17 @@ Logged-in users also get private study tools:
   one shows the file inside the app (PDF, images, and text; Word and PowerPoint are download
   only) next to **your notes**, which save to your account a moment after you stop typing.
   "Download file" and "Download notes" keep copies on your device for offline use.
-- **Flashcards.** A saved study reviewer can be turned into 10, 20, or 30 flashcards by Google
-  Gemini (`gemini-3.5-flash-lite`, called only from the backend). Study them with flip, next and
-  previous, "Still learning" / "Got it", shuffle, and a "not learned yet" filter. Progress is
-  saved per card.
+- **Formatted notes.** Notes are formatted while you type: bold, italic, three heading sizes,
+  bullets, indents, 5 text colors, and 5 highlights (all readable in both themes). Shortcuts:
+  Ctrl/Cmd+B and +I, Ctrl/Cmd+Alt+1/2/3 for headings, Ctrl/Cmd+Shift+8 for bullets, Ctrl/Cmd+]
+  and +[ to indent. Pasted text arrives as plain text. "Download notes" gives a `.txt` with `#`
+  headings, `-` bullets, and `**bold**`.
+- **Flashcards.** A saved study reviewer can be turned into 5 to 100 flashcards by Google
+  Gemini (`gemini-3.5-flash-lite`, called only from the backend). Short material makes fewer
+  good cards (about 1 card per 50 to 100 words works well); if the material is too short for
+  the number asked, Gemini writes fewer instead of padding, and the page says so. Study them
+  with flip, next and previous, "Still learning" / "Got it", shuffle, and a "not learned yet"
+  filter. Progress is saved per card.
 - If an uploader deletes a study reviewer, people who saved it keep their notes and flashcards;
   only the file is gone.
 
@@ -354,9 +361,9 @@ add `"fields": { "title": "..." }`.
 | `GET /api/reviewers/:id/file?download=1` | no | The file, always as a download |
 | `GET /api/me/saved` | yes | My saved study reviewers |
 | `GET` / `DELETE /api/saved/:savedId` | mine | One saved item with my notes / remove it |
-| `PUT /api/saved/:savedId/notes` | mine | Save my notes (JSON `{ notes }`, up to 20,000 characters) |
+| `PUT /api/saved/:savedId/notes` | mine | Save my notes (JSON `{ notes }`): simple HTML using only `p h1 h2 h3 strong em ul li br blockquote`, `<span class="tc-…">` and `<mark class="hl-…">`, with no other attributes. Up to 20,000 visible characters |
 | `GET` / `DELETE /api/saved/:savedId/flashcards` | mine | My flashcards for it / delete them |
-| `POST /api/saved/:savedId/flashcards` | mine | Make a new set with Gemini (JSON `{ count: 10, 20 or 30 }`), replacing the old one. 10 sets per user per day |
+| `POST /api/saved/:savedId/flashcards` | mine | Make a new set with Gemini (JSON `{ count: 5 to 100 }`; fewer come back for short material), replacing the old one. 10 sets per user per day |
 | `PUT /api/saved/:savedId/flashcards/:cardId` | mine | Mark a card (JSON `{ status: "new", "learning" or "learned" }`) |
 
 "mine" means logged in, and the saved item must be yours: anyone else's gets the same 404 as a
@@ -479,7 +486,12 @@ results, the chosen file, save success, and delete success are announced politel
 - Flashcards are written by AI and can contain mistakes; the page says so. The daily limit of 10
   sets per user is kept in memory, like the other rate limits.
 - Large Word or PowerPoint files are cut to about 200,000 characters of text before Gemini sees
-  them, which is far more than 30 cards need.
+  them, which is far more than 100 cards need. Their text is read by a small built-in ZIP reader
+  (`backend/src/utils/zipReader.js`, Node's own `zlib`), not by an extra package.
+- The notes editor uses the browser's built-in editing commands (`document.execCommand`), which
+  are old but work in every current browser. Underline is not offered; Ctrl+U does nothing.
+- Scrollbars follow the theme everywhere except inside the browser's own PDF viewer, which
+  cannot be styled from the page.
 
 - The file-type check trusts the file extension and the content type sent by the browser; it does
   not inspect file contents. Files are never executed, are stored under random names, and are

@@ -29,11 +29,39 @@ const LIMITS = {
   displayNameMax: 50,
   searchMax: 100,
   notesMax: 20000,
+  notesHtmlMax: 100000,
+  flashcardsMin: 5,
+  flashcardsMax: 100,
 };
 
-// How many flashcards someone may ask for, and how well a card can be known.
-const FLASHCARD_COUNTS = [10, 20, 30];
 const FLASHCARD_STATUSES = ['new', 'learning', 'learned'];
+
+// The only tags formatted notes may contain, written out in full: no other
+// attributes are possible, so nothing in the notes can run code or load anything.
+// Keep in step with frontend/src/services/noteHtml.js.
+const NOTES_TAG_PATTERNS = [
+  /^<\/?(p|h1|h2|h3|strong|em|ul|li|blockquote)>$/,
+  /^<br\s*\/?>$/,
+  /^<span class="tc-(red|orange|green|blue|purple)">$/,
+  /^<mark class="hl-(yellow|green|blue|pink|orange)">$/,
+  /^<\/(span|mark)>$/,
+];
+
+const isAllowedNotesTag = (tag) => {
+  return NOTES_TAG_PATTERNS.some((pattern) => pattern.test(tag));
+};
+
+// The text a person actually sees: tags removed, character codes turned back into characters.
+const visibleNotesText = (html) => {
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
+};
 
 // The largest number a Postgres INTEGER column can hold.
 const MAX_INTEGER = 2147483647;
@@ -124,27 +152,43 @@ const validateDisplayName = (value) => {
   return displayName;
 };
 
-// Checks the notes for a saved item. Notes may be empty, and keep their spacing
-// and line breaks exactly as typed. Returns the notes or throws a 400 error.
+// Checks the formatted notes for a saved item (simple HTML from the notes editor).
+// Notes may be empty. Returns the notes or throws a 400 error.
 const validateNotes = (value) => {
-  if (typeof value !== 'string') {
-    throw createHttpError(400, 'Notes must be text.', { notes: 'Notes must be text.' });
-  }
-  if (value.length > LIMITS.notesMax) {
-    const message = `Notes can be at most ${LIMITS.notesMax} characters.`;
+  const fail = (message) => {
     throw createHttpError(400, message, { notes: message });
+  };
+
+  if (typeof value !== 'string') {
+    fail('Notes must be text.');
+  }
+  if (value.length > LIMITS.notesHtmlMax) {
+    fail('These notes are too long to save. Make them shorter.');
+  }
+  // A "<" that does not start a tag, or a tag that never closes, is not allowed either:
+  // the editor always writes a "<" in the text as "&lt;".
+  const tags = value.match(/<[^>]*>?/g) || [];
+  if (tags.find((tag) => !isAllowedNotesTag(tag))) {
+    fail('These notes contain formatting that is not allowed.');
+  }
+  if (visibleNotesText(value).length > LIMITS.notesMax) {
+    fail(`Notes can be at most ${LIMITS.notesMax} characters.`);
   }
   return value;
 };
 
-// Checks the requested number of flashcards. A missing value means 20.
+// Checks the requested number of flashcards: a whole number from 5 to 100.
+// A missing value means 20.
 const validateFlashcardCount = (value) => {
   if (value === undefined || value === null || value === '') {
     return 20;
   }
   const count = Number(value);
-  if (FLASHCARD_COUNTS.indexOf(count) === -1) {
-    throw createHttpError(400, `Choose ${FLASHCARD_COUNTS.join(', ')} flashcards.`);
+  if (!Number.isInteger(count) || count < LIMITS.flashcardsMin || count > LIMITS.flashcardsMax) {
+    throw createHttpError(
+      400,
+      `Choose a whole number of flashcards from ${LIMITS.flashcardsMin} to ${LIMITS.flashcardsMax}.`
+    );
   }
   return count;
 };
@@ -187,6 +231,7 @@ module.exports = {
   validateReviewerFields: validateReviewerFields,
   validateDisplayName: validateDisplayName,
   validateNotes: validateNotes,
+  visibleNotesText: visibleNotesText,
   validateFlashcardCount: validateFlashcardCount,
   validateFlashcardStatus: validateFlashcardStatus,
   parsePositiveNumber: parsePositiveNumber,

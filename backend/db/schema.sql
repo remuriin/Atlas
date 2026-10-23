@@ -58,8 +58,21 @@ CREATE TABLE IF NOT EXISTS saved_items (
   notes_updated_at TIMESTAMP,
   saved_at TIMESTAMP DEFAULT NOW(),
   UNIQUE (user_id, reviewer_id),
-  CHECK (char_length(notes) <= 20000)
+  -- Notes are stored as simple formatted HTML: 20,000 visible characters plus markup.
+  CONSTRAINT saved_items_notes_size CHECK (char_length(notes) <= 100000)
 );
+
+-- Changes for databases made before notes could be formatted. Each one is safe to repeat.
+-- 'text' = old plain-text notes, 'html' = formatted notes (every save from now on).
+ALTER TABLE saved_items ADD COLUMN IF NOT EXISTS notes_format TEXT NOT NULL DEFAULT 'text';
+-- The old 20,000-character limit counted the markup too, so it is replaced by the one above.
+ALTER TABLE saved_items DROP CONSTRAINT IF EXISTS saved_items_notes_check;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'saved_items_notes_size') THEN
+    ALTER TABLE saved_items ADD CONSTRAINT saved_items_notes_size CHECK (char_length(notes) <= 100000);
+  END IF;
+END $$;
 
 -- Flashcards made from a saved item. Deleting the saved item deletes its cards.
 CREATE TABLE IF NOT EXISTS flashcards (

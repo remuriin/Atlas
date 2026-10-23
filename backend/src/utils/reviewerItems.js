@@ -71,7 +71,8 @@ const toSavedJson = (row) => {
     isRemoved: isRemoved,
     title: row.saved_title,
     subject: row.saved_subject,
-    hasNotes: row.notes.trim() !== '',
+    // Formatted notes can hold only empty tags, so check the text a person would see.
+    hasNotes: validate.visibleNotesText(row.notes).trim() !== '',
     notesUpdatedAt: row.notes_updated_at,
     flashcardCount: Number(row.flashcard_count),
     savedAt: row.saved_at,

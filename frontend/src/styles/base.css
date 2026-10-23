@@ -103,6 +103,55 @@ main:focus {
   outline: none;
 }
 
+/*
+  Scrollbars everywhere: slim, rounded, and in the theme's colors.
+  scrollbar-color is inherited, so setting it on <html> reaches every scrolling box
+  (the page, the notes, the phone menu, dialogs). Safari still needs the
+  ::-webkit-scrollbar rules below; other browsers use the two standard properties.
+*/
+html {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  /* The border in the track color makes the thumb look slimmer and rounder. */
+  border: 2px solid var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: var(--scrollbar-track);
+}
+
+/* Windows High Contrast picks its own colors; keep the system scrollbars there. */
+@media (forced-colors: active) {
+  html {
+    scrollbar-color: auto;
+  }
+
+  * {
+    scrollbar-width: auto;
+  }
+}
+
 /* The "hidden" attribute must win over any display rule a component sets. */
 [hidden] {
   display: none !important;
