@@ -63,7 +63,7 @@ const visibleNotesText = (html) => {
     .replace(/&amp;/g, '&');
 };
 
-// The largest number a Postgres INTEGER column can hold.
+// The largest id accepted (the largest number the old Postgres INTEGER ids could hold).
 const MAX_INTEGER = 2147483647;
 
 // Turns any incoming value into a trimmed string ("" when it is missing).
@@ -137,7 +137,7 @@ const validateReviewerFields = (body) => {
     title: title,
     description: description,
     subject: subject,
-    // Stored as one comma-separated string, as the schema describes.
+    // Stored as one comma-separated string.
     tags: tags.join(','),
   };
 };
@@ -211,16 +211,6 @@ const parsePositiveNumber = (value, fallback, name) => {
   return Number(value);
 };
 
-// In a LIKE pattern, % and _ are wildcards. Putting a backslash in front makes
-// Postgres treat them as ordinary characters, so a search for "100%" works as expected.
-const buildSearchPattern = (searchText) => {
-  if (searchText === '') {
-    return '';
-  }
-  const escaped = searchText.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
-  return `%${escaped}%`;
-};
-
 module.exports = {
   SUBJECTS: SUBJECTS,
   LIMITS: LIMITS,
@@ -235,5 +225,4 @@ module.exports = {
   validateFlashcardCount: validateFlashcardCount,
   validateFlashcardStatus: validateFlashcardStatus,
   parsePositiveNumber: parsePositiveNumber,
-  buildSearchPattern: buildSearchPattern,
 };

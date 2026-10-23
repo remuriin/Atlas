@@ -153,15 +153,12 @@ function ReviewerForm(props) {
     }
     setErrors({});
 
-    // A file has to be sent as "form data" rather than JSON.
-    const formData = new FormData();
-    formData.append('title', title.trim());
-    formData.append('description', description.trim());
-    formData.append('subject', subject);
-    formData.append('tags', tags);
-    if (file) {
-      formData.append('file', file);
-    }
+    const details = {
+      title: title.trim(),
+      description: description.trim(),
+      subject: subject,
+      tags: tags,
+    };
 
     setIsSubmitting(true);
     setProgress(0);
@@ -170,10 +167,10 @@ function ReviewerForm(props) {
       let saved;
       let flash;
       if (isEdit) {
-        saved = await updateReviewer(props.reviewer.id, formData, setProgress);
+        saved = await updateReviewer(props.reviewer.id, details, file, setProgress);
         flash = 'Your changes were saved.';
       } else {
-        saved = await createReviewer(formData, setProgress);
+        saved = await createReviewer(details, file, setProgress);
         flash = 'Your study reviewer is now shared.';
       }
       // The remembered feed would show the old details, so let it load fresh.

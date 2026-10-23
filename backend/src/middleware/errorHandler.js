@@ -1,6 +1,5 @@
 // The last stop for every request that went wrong.
 // Every error leaves the API in the same shape: an "error" object holding a "message".
-const multer = require('multer');
 const env = require('../config/env');
 
 // Statuses whose message we wrote ourselves: every 4xx, plus 502 and 503, which are
@@ -15,18 +14,6 @@ const notFoundHandler = (req, res) => {
   res.status(404).json({ error: { message: 'That address does not exist on this API.' } });
 };
 
-// Turns upload problems reported by multer into a status code and a plain message.
-const describeUploadError = (err) => {
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    const message = `That file is too large. The limit is ${env.maxFileSizeMb} MB.`;
-    return { status: 413, message: message, fields: { file: message } };
-  }
-  if (err.code === 'LIMIT_UNEXPECTED_FILE' || err.code === 'LIMIT_FILE_COUNT') {
-    return { status: 400, message: 'Upload one file at a time, in the "file" field.' };
-  }
-  return { status: 400, message: 'The upload could not be read. Please try again.' };
-};
-
 // Express knows this is an error handler because it has four parameters.
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
@@ -34,12 +21,7 @@ const errorHandler = (err, req, res, next) => {
   let message = 'Something went wrong on our side. Please try again.';
   let fields = null;
 
-  if (err instanceof multer.MulterError) {
-    const uploadError = describeUploadError(err);
-    status = uploadError.status;
-    message = uploadError.message;
-    fields = uploadError.fields || null;
-  } else if (err.type === 'entity.too.large') {
+  if (err.type === 'entity.too.large') {
     status = 413;
     message = 'The request is too large.';
   } else if (err.type === 'entity.parse.failed') {

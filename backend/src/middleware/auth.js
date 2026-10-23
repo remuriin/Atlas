@@ -1,11 +1,8 @@
 // Works out WHO is making a request by checking the Firebase ID token
 // sent in the "Authorization: Bearer <token>" header.
-const firebaseAdmin = require('../config/firebaseAdmin');
+const firebase = require('../config/firebase');
 const usersModel = require('../models/usersModel');
 const createHttpError = require('../utils/httpError');
-
-// Postgres error code for "this value must be unique and already exists".
-const UNIQUE_VIOLATION = '23505';
 
 const readBearerToken = (req) => {
   const header = req.headers.authorization;
@@ -33,28 +30,19 @@ const chooseDisplayName = (decodedToken) => {
 };
 
 // The "upsert" is done in plain JavaScript: look the user up first, add them only if missing.
+// (createUser is safe when two requests from a new user arrive together.)
 const findOrCreateUser = async (decodedToken) => {
   const existingUser = await usersModel.findUserByFirebaseUid(decodedToken.uid);
   if (existingUser) {
     return existingUser;
   }
 
-  try {
-    const newUser = await usersModel.createUser(
-      decodedToken.uid,
-      chooseDisplayName(decodedToken),
-      decodedToken.email || ''
-    );
-    return newUser;
-  } catch (err) {
-    // Two requests from a new user can arrive together and both try to INSERT.
-    // The UNIQUE rule stops the second one, so just read the row the first one made.
-    if (err.code === UNIQUE_VIOLATION) {
-      const user = await usersModel.findUserByFirebaseUid(decodedToken.uid);
-      return user;
-    }
-    throw err;
-  }
+  const newUser = await usersModel.createUser(
+    decodedToken.uid,
+    chooseDisplayName(decodedToken),
+    decodedToken.email || ''
+  );
+  return newUser;
 };
 
 // For routes that need a logged-in user. Replies 401 when the token is missing or bad.
@@ -67,7 +55,7 @@ const requireAuth = async (req, res, next) => {
 
   let decodedToken;
   try {
-    decodedToken = await firebaseAdmin.verifyIdToken(token);
+    decodedToken = await firebase.verifyIdToken(token);
   } catch (err) {
     next(createHttpError(401, 'Your session has expired. Please log in again.'));
     return;
@@ -93,7 +81,7 @@ const optionalAuth = async (req, res, next) => {
 
   let decodedToken;
   try {
-    decodedToken = await firebaseAdmin.verifyIdToken(token);
+    decodedToken = await firebase.verifyIdToken(token);
   } catch (err) {
     next();
     return;

@@ -1,73 +1,35 @@
-// Reads settings from backend/.env once, checks them, and shares them with the app.
+// Reads the API's settings once, checks them, and shares them with the app.
 // Doing all the checks here means the rest of the code can trust these values.
-const path = require('path');
-const dotenv = require('dotenv');
+//
+// Where the settings come from:
+//   live (Cloud Functions):  backend/.env.<project id>, plus the GEMINI_API_KEY secret
+//   local (emulators):       backend/.env.local, plus backend/.secret.local
+// Firebase loads those files by itself, so no extra package is needed to read them.
 
-const backendRoot = path.join(__dirname, '..', '..');
-
-// quiet: true stops dotenv from printing its own banner on every start.
-dotenv.config({ path: path.join(backendRoot, '.env'), quiet: true });
-
-const PLACEHOLDER_DATABASE_URL = 'postgres://USER:PASSWORD@HOST:5432/DBNAME';
-
-// Prints a friendly explanation and stops, instead of crashing later
-// with a confusing database stack trace.
+// Stops the API with a plain explanation, instead of crashing later
+// with a confusing stack trace. The message appears in the function's logs.
 const stopWithMessage = (lines) => {
-  console.error('');
-  console.error('LearnHub backend cannot start yet.');
-  console.error('----------------------------------');
-  lines.forEach((line) => {
-    console.error(line);
-  });
-  console.error('');
-  process.exit(1);
+  throw new Error(['LearnHub API cannot start yet.'].concat(lines).join('\n'));
 };
 
-const databaseUrl = (process.env.DATABASE_URL || '').trim();
+// Firebase sets this by itself when the local emulator runs the code.
+const isEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
+// K_SERVICE is only set on Google's servers (Cloud Run runs the function there).
+const isOnGoogleCloud = Boolean(process.env.K_SERVICE) && !isEmulator;
 
-if (databaseUrl === '' || databaseUrl === PLACEHOLDER_DATABASE_URL) {
+const authEmulatorHost = (process.env.FIREBASE_AUTH_EMULATOR_HOST || '').trim();
+const firestoreEmulatorHost = (process.env.FIRESTORE_EMULATOR_HOST || '').trim();
+const storageEmulatorHost = (process.env.FIREBASE_STORAGE_EMULATOR_HOST || '').trim();
+
+// Emulator logins are not signed, so anyone could forge one.
+// Refusing to start is safer than silently accepting fake logins on the live site.
+if (isOnGoogleCloud && (authEmulatorHost !== '' || firestoreEmulatorHost !== '' || storageEmulatorHost !== '')) {
   stopWithMessage([
-    'DATABASE_URL is missing or is still the placeholder.',
-    '',
-    'What to do:',
-    '  1. Open backend/.env',
-    '  2. Replace the DATABASE_URL line with your own Postgres URL, for example:',
-    '       DATABASE_URL=postgres://learnhub:your-password@localhost:5432/learnhub',
-    '  3. Run "npm run db:migrate" once to create the tables',
-    '  4. Start the server again',
+    'An emulator address (FIREBASE_AUTH_EMULATOR_HOST, FIRESTORE_EMULATOR_HOST or',
+    'FIREBASE_STORAGE_EMULATOR_HOST) is set on the live server.',
+    'The emulators are for development only. Remove that line from backend/.env.<project id>',
+    'and make sure there is no plain backend/.env file, then deploy again.',
   ]);
-}
-
-const firebaseProjectId = (process.env.FIREBASE_PROJECT_ID || '').trim();
-
-if (firebaseProjectId === '') {
-  stopWithMessage([
-    'FIREBASE_PROJECT_ID is empty.',
-    '',
-    'What to do:',
-    '  1. Open backend/.env',
-    '  2. Set FIREBASE_PROJECT_ID to your Firebase project id',
-    '     (the same value as VITE_FIREBASE_PROJECT_ID in frontend/.env)',
-  ]);
-}
-
-const isProduction = process.env.NODE_ENV === 'production';
-const emulatorHost = (process.env.FIREBASE_AUTH_EMULATOR_HOST || '').trim();
-
-// Emulator tokens are not signed, so anyone could forge one.
-// Refusing to start is safer than silently accepting fake logins in production.
-if (isProduction && emulatorHost !== '') {
-  stopWithMessage([
-    'FIREBASE_AUTH_EMULATOR_HOST is set while NODE_ENV=production.',
-    '',
-    'The Auth emulator is for development only.',
-    'Remove the FIREBASE_AUTH_EMULATOR_HOST line from backend/.env on your server.',
-  ]);
-}
-
-// dotenv loads an empty value as "", and firebase-admin would treat that as "use the emulator".
-if (emulatorHost === '') {
-  delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
 }
 
 let maxFileSizeMb = Number(process.env.MAX_FILE_SIZE_MB);
@@ -83,19 +45,16 @@ if (geminiModel === '') {
 }
 
 module.exports = {
-  backendRoot: backendRoot,
-  port: Number(process.env.PORT) || 4000,
-  databaseUrl: databaseUrl,
-  databaseSsl: process.env.DATABASE_SSL === 'true',
-  firebaseProjectId: firebaseProjectId,
-  isUsingAuthEmulator: emulatorHost !== '',
+  isOnGoogleCloud: isOnGoogleCloud,
+  isUsingAuthEmulator: authEmulatorHost !== '',
+  isUsingStorageEmulator: storageEmulatorHost !== '',
   frontendOrigin: (process.env.FRONTEND_ORIGIN || 'http://localhost:5173').trim(),
-  // path.resolve turns "./uploads" into a full path, so it does not depend on
-  // which folder the server was started from.
-  uploadDir: path.resolve(backendRoot, process.env.UPLOAD_DIR || './uploads'),
+  // Empty means "the project's default bucket".
+  storageBucket: (process.env.STORAGE_BUCKET || '').trim(),
   maxFileSizeMb: maxFileSizeMb,
   trustProxy: process.env.TRUST_PROXY === 'true',
   geminiApiKey: (process.env.GEMINI_API_KEY || '').trim(),
   geminiModel: geminiModel,
-  isProduction: isProduction,
+  // Error details are only added to replies while developing, never on the live site.
+  isProduction: isOnGoogleCloud,
 };

@@ -1,5 +1,9 @@
 // Limits how many requests one visitor can make, to slow down abuse.
+// The 15-minute limits are counted in memory. That works because the function
+// runs as one single copy (maxInstances: 1 in src/index.js).
 const { rateLimit } = require('express-rate-limit');
+const flashcardUsageModel = require('../models/flashcardUsageModel');
+const createHttpError = require('../utils/httpError');
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
@@ -37,18 +41,46 @@ const studyLimiter = buildLimiter(
 // Making flashcards calls Gemini, which costs money per request, so each account
 // gets a small daily allowance. Counted per logged-in user (it runs after
 // requireAuth), so sharing a network with others does not use up your share.
-const flashcardLimiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000,
-  limit: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => `user-${req.user.id}`,
+// The count is kept in Firestore, so a restart of the server does not reset it.
+const FLASHCARD_DAILY_LIMIT = 10;
+const ONE_DAY = 24 * 60 * 60 * 1000;
+
+const flashcardLimiter = async (req, res, next) => {
+  let isAllowed = false;
+  try {
+    isAllowed = await flashcardUsageModel.takeTurn(req.user.id, FLASHCARD_DAILY_LIMIT, ONE_DAY);
+  } catch (err) {
+    next(err);
+    return;
+  }
+  if (!isAllowed) {
+    next(
+      createHttpError(
+        429,
+        `You have made flashcards ${FLASHCARD_DAILY_LIMIT} times today. Please try again tomorrow.`
+      )
+    );
+    return;
+  }
+
   // Only sets that were really made count; a failed attempt does not use up a turn.
-  skipFailedRequests: true,
-  message: {
-    error: { message: 'You have made flashcards 10 times today. Please try again tomorrow.' },
-  },
-});
+  // "close" also runs when the visitor leaves before the answer is ready.
+  let isSettled = false;
+  const settle = () => {
+    if (isSettled) {
+      return;
+    }
+    isSettled = true;
+    if (res.statusCode >= 400 || !res.writableFinished) {
+      flashcardUsageModel.giveBackTurn(req.user.id).catch((err) => {
+        console.error('Could not give back a flashcard turn:', err.message);
+      });
+    }
+  };
+  res.on('finish', settle);
+  res.on('close', settle);
+  next();
+};
 
 module.exports = {
   generalLimiter: generalLimiter,

@@ -1,56 +1,51 @@
-// All SQL for the "recently_viewed" table lives in this file.
-const pool = require('../config/db');
+// All database code for "recently viewed" lives in this file.
+// Each view is one document named "<user id>_<reviewer id>", so opening the same
+// reviewer again simply moves its time to "just now".
+const { db } = require('../config/firebase');
+const modelHelpers = require('./modelHelpers');
+const reviewersModel = require('./reviewersModel');
 
-const findView = async (userId, reviewerId) => {
-  // Check whether this user has opened this reviewer before.
-  const result = await pool.query(
-    'SELECT viewed_at FROM recently_viewed WHERE user_id = $1 AND reviewer_id = $2',
-    [userId, reviewerId]
-  );
-  return result.rows[0] || null;
-};
+const viewsCollection = db.collection('recentlyViewed');
 
-const createView = async (userId, reviewerId) => {
-  // Remember that this user opened this reviewer for the first time.
-  await pool.query('INSERT INTO recently_viewed (user_id, reviewer_id) VALUES ($1, $2)', [
-    userId,
-    reviewerId,
-  ]);
-};
-
-const updateViewTime = async (userId, reviewerId) => {
-  // Move an existing view to "just now".
-  await pool.query(
-    'UPDATE recently_viewed SET viewed_at = NOW() WHERE user_id = $1 AND reviewer_id = $2',
-    [userId, reviewerId]
-  );
+const recordView = async (userId, reviewerId) => {
+  // Remember that this user opened this reviewer just now.
+  await viewsCollection.doc(`${userId}_${reviewerId}`).set({
+    userId: userId,
+    reviewerId: reviewerId,
+    viewedAt: new Date(),
+  });
 };
 
 const listRecentlyViewedReviewers = async (userId, limit) => {
   // List the reviewers a user opened most recently, newest view first.
-  const result = await pool.query(
-    `SELECT r.id, r.author_id, r.title, r.description, r.subject, r.tags,
-            r.file_name, r.stored_name, r.file_mime, r.file_size,
-            r.created_at, r.updated_at,
-            u.display_name AS author_name,
-            rv.viewed_at,
-            COUNT(up.user_id) AS upvote_count
-     FROM recently_viewed rv
-     INNER JOIN reviewers r ON r.id = rv.reviewer_id
-     INNER JOIN users u ON u.id = r.author_id
-     LEFT JOIN upvotes up ON up.reviewer_id = r.id
-     WHERE rv.user_id = $1
-     GROUP BY r.id, u.id, rv.viewed_at
-     ORDER BY rv.viewed_at DESC
-     LIMIT $2`,
-    [userId, limit]
-  );
-  return result.rows;
+  // (This query needs the index in firestore.indexes.json.)
+  const snapshot = await viewsCollection
+    .where('userId', '==', userId)
+    .orderBy('viewedAt', 'desc')
+    .limit(limit)
+    .get();
+
+  const views = snapshot.docs.map((doc) => doc.data());
+  const reviewers = await reviewersModel.findReviewersByIds(views.map((view) => view.reviewerId));
+
+  // Keep the order of the views, and skip any reviewer that has since been deleted.
+  const rows = [];
+  views.forEach((view) => {
+    const row = reviewers.find((reviewer) => reviewer.id === view.reviewerId);
+    if (row) {
+      rows.push(Object.assign({}, row, { viewed_at: modelHelpers.toDate(view.viewedAt) }));
+    }
+  });
+  return rows;
+};
+
+const deleteViewsForReviewer = async (reviewerId) => {
+  // Remove every view of a reviewer that is being deleted.
+  await modelHelpers.deleteAllFound(viewsCollection.where('reviewerId', '==', reviewerId));
 };
 
 module.exports = {
-  findView: findView,
-  createView: createView,
-  updateViewTime: updateViewTime,
+  recordView: recordView,
   listRecentlyViewedReviewers: listRecentlyViewedReviewers,
+  deleteViewsForReviewer: deleteViewsForReviewer,
 };

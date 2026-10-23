@@ -1,5 +1,6 @@
 // API calls about study reviewers.
-import { API_URL, apiRequest, uploadWithProgress } from './api';
+import { API_URL, apiRequest, apiRequestBlob, fetchBlob } from './api';
+import { uploadToInbox } from './fileUpload';
 
 // filters: { sort, subject, q, page }
 export const listReviewers = (filters) => {
@@ -29,12 +30,37 @@ export const getFileUrl = (reviewerId, isDownload) => {
   return `${API_URL}/api/reviewers/${reviewerId}/file`;
 };
 
-export const createReviewer = (formData, onProgress) => {
-  return uploadWithProgress('POST', '/api/reviewers', formData, onProgress);
+// Gets the file itself as a Blob, for showing it inside the page. The API answers
+// with a short-lived link, and the file is then fetched straight from Cloud Storage.
+export const fetchReviewerFile = async (reviewerId) => {
+  const link = await apiRequest(`/api/reviewers/${reviewerId}/file-link`);
+  if (link.url) {
+    return fetchBlob(link.url);
+  }
+  // The local emulators cannot make such links, so there the API sends the file itself.
+  return apiRequestBlob(`/api/reviewers/${reviewerId}/file`);
 };
 
-export const updateReviewer = (reviewerId, formData, onProgress) => {
-  return uploadWithProgress('PUT', `/api/reviewers/${reviewerId}`, formData, onProgress);
+// details: { title, description, subject, tags }. file: the chosen File, or null.
+// The file goes to Cloud Storage first (that is what the progress bar shows),
+// then the details and the file's path are sent to the API.
+const sendReviewer = async (method, path, details, file, onProgress) => {
+  const body = Object.assign({}, details);
+  if (file) {
+    body.file = await uploadToInbox(file, onProgress);
+  } else {
+    onProgress(100);
+  }
+  return apiRequest(path, { method: method, json: body });
+};
+
+export const createReviewer = (details, file, onProgress) => {
+  return sendReviewer('POST', '/api/reviewers', details, file, onProgress);
+};
+
+// Leave file as null to keep the current file.
+export const updateReviewer = (reviewerId, details, file, onProgress) => {
+  return sendReviewer('PUT', `/api/reviewers/${reviewerId}`, details, file, onProgress);
 };
 
 export const deleteReviewer = (reviewerId) => {

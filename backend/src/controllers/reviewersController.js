@@ -1,29 +1,27 @@
 // Request handlers for study reviewers.
-// Controllers decide WHAT should happen; the SQL itself lives in the models folder.
-const fs = require('fs');
+// Controllers decide WHAT should happen; the database code itself lives in the models folder.
 const reviewersModel = require('../models/reviewersModel');
 const upvotesModel = require('../models/upvotesModel');
 const recentlyViewedModel = require('../models/recentlyViewedModel');
 const savedItemsModel = require('../models/savedItemsModel');
-const upload = require('../middleware/upload');
+const storedFiles = require('../utils/storedFiles');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
 const createHttpError = require('../utils/httpError');
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
-const UNIQUE_VIOLATION = '23505';
 
 // These file types are safe and useful to show inside the browser tab.
 // Everything else is offered as a download.
 const INLINE_MIME_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
 
 // Picks the model function that matches the chosen tab.
-const fetchReviewerRows = async (sort, subject, searchPattern, limit, offset) => {
+const fetchReviewerRows = async (sort, subject, searchText, limit, offset) => {
   if (sort === 'new') {
-    return reviewersModel.listNewReviewers(subject, searchPattern, limit, offset);
+    return reviewersModel.listNewReviewers(subject, searchText, limit, offset);
   }
-  return reviewersModel.listTopReviewers(subject, searchPattern, limit, offset);
+  return reviewersModel.listTopReviewers(subject, searchText, limit, offset);
 };
 
 // GET /api/reviewers
@@ -43,13 +41,7 @@ const listReviewers = async (req, res, next) => {
     }
 
     // Ask for one extra row. If it comes back, there is at least one more page.
-    const rows = await fetchReviewerRows(
-      sort,
-      subject,
-      validate.buildSearchPattern(searchText),
-      limit + 1,
-      (page - 1) * limit
-    );
+    const rows = await fetchReviewerRows(sort, subject, searchText, limit + 1, (page - 1) * limit);
     const hasMore = rows.length > limit;
     const pageRows = rows.filter((row, index) => index < limit);
     const items = await reviewerItems.buildReviewerItems(pageRows, req.user);
@@ -70,75 +62,84 @@ const getReviewer = async (req, res, next) => {
   }
 };
 
-// Builds a download name that is safe to put inside a response header.
-const buildContentDisposition = (mode, fileName) => {
-  // Older browsers read the plain name, so it may only contain simple characters.
-  const simpleName = fileName.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
-  // Modern browsers read the encoded name, which keeps accents and other alphabets.
-  const encodedName = encodeURIComponent(fileName);
-  return `${mode}; filename="${simpleName}"; filename*=UTF-8''${encodedName}`;
+// Picks 'inline' (show it in the browser tab) or 'attachment' (always save it).
+const chooseFileMode = (req) => {
+  if (req.query.download !== '1' && INLINE_MIME_TYPES.indexOf(req.reviewer.file_mime) !== -1) {
+    return 'inline';
+  }
+  return 'attachment';
 };
 
 // GET /api/reviewers/:id/file   (add ?download=1 to always save it instead of showing it)
+// Sends the visitor on to a short-lived link to the file in Cloud Storage.
 const sendReviewerFile = async (req, res, next) => {
   try {
-    const reviewer = req.reviewer;
-    const filePath = upload.getStoredFilePath(reviewer.stored_name);
-
-    try {
-      await fs.promises.access(filePath);
-    } catch (err) {
-      throw createHttpError(404, 'The file for this study reviewer is missing.');
+    const mode = chooseFileMode(req);
+    if (!storedFiles.canMakeFileLinks) {
+      await storedFiles.sendStoredFile(res, req.reviewer, mode);
+      return;
     }
-
-    let mode = 'attachment';
-    const isDownloadAsked = req.query.download === '1';
-    if (!isDownloadAsked && INLINE_MIME_TYPES.indexOf(reviewer.file_mime) !== -1) {
-      mode = 'inline';
-    }
-
-    // nosniff tells the browser to trust our content type and not guess its own,
-    // which stops a disguised file from being run as a web page.
-    res.setHeader('Content-Type', reviewer.file_mime);
-    res.setHeader('Content-Length', reviewer.file_size);
-    res.setHeader('Content-Disposition', buildContentDisposition(mode, reviewer.file_name));
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    const stream = fs.createReadStream(filePath);
-    stream.on('error', (err) => {
-      // The headers may already be sent, so the only safe option is to end the reply.
-      console.error('Could not read uploaded file:', err.message);
-      res.destroy();
-    });
-    stream.pipe(res);
+    const url = await storedFiles.createFileLink(req.reviewer, mode);
+    res.redirect(302, url);
   } catch (err) {
     next(err);
   }
 };
 
-// POST /api/reviewers
+// GET /api/reviewers/:id/file-link   (same ?download=1 option)
+// Answers with that link as JSON, so the page can fetch the file itself.
+// url is null with the local emulators: the page then uses /file instead.
+const getReviewerFileLink = async (req, res, next) => {
+  try {
+    if (!storedFiles.canMakeFileLinks) {
+      res.json({ url: null });
+      return;
+    }
+    const url = await storedFiles.createFileLink(req.reviewer, chooseFileMode(req));
+    res.json({ url: url });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Removes an upload that will not be used: the moved file if it got that far,
+// or else the file still waiting in the user's inbox.
+const removeUnusedUpload = async (req, body, claimed) => {
+  if (claimed) {
+    await storedFiles.removeStoredFile(claimed.storedName);
+    return;
+  }
+  if (body.file) {
+    await storedFiles.removePendingFile(req.user.firebase_uid, body.file);
+  }
+};
+
+// POST /api/reviewers   (JSON: title, description, subject, tags, file: { path, name })
+// The browser has already put the file in the user's inbox in Cloud Storage.
 const createReviewer = async (req, res, next) => {
-  // Remembers whether the database now points at the uploaded file.
+  const body = req.body || {};
+  // Remembers the file once it is out of the inbox, and whether the database now points at it.
+  let claimed = null;
   let isSaved = false;
 
   try {
-    if (!req.file) {
+    if (!body.file) {
       throw createHttpError(400, 'Choose a file to upload.', { file: 'Choose a file to upload.' });
     }
-    const input = validate.validateReviewerFields(req.body);
-    const allowedType = upload.findAllowedType(req.file.originalname);
+    const input = validate.validateReviewerFields(body);
+    claimed = await storedFiles.claimPendingFile(req.user.firebase_uid, body.file);
 
     const created = await reviewersModel.createReviewer({
       authorId: req.user.id,
+      authorName: req.user.display_name,
       title: input.title,
       description: input.description,
       subject: input.subject,
       tags: input.tags,
-      fileName: upload.cleanOriginalName(req.file.originalname),
-      storedName: req.file.filename,
-      // Save the content type from our own allowlist, not the one the browser claimed.
-      fileMime: allowedType.mime,
-      fileSize: req.file.size,
+      fileName: claimed.fileName,
+      storedName: claimed.storedName,
+      fileMime: claimed.fileMime,
+      fileSize: claimed.fileSize,
     });
     isSaved = true;
 
@@ -147,36 +148,39 @@ const createReviewer = async (req, res, next) => {
     res.status(201).json(item);
   } catch (err) {
     // If nothing was saved, the uploaded file would be left behind with no owner.
-    if (!isSaved && req.file) {
-      await upload.removeStoredFile(req.file.filename);
+    if (!isSaved) {
+      await removeUnusedUpload(req, body, claimed);
     }
     next(err);
   }
 };
 
 // PUT /api/reviewers/:id   (requireOwner has already checked permission)
+// Same JSON as creating; leave "file" out to keep the current file.
 const updateReviewer = async (req, res, next) => {
+  const body = req.body || {};
+  let claimed = null;
   let isSaved = false;
 
   try {
     const reviewerId = req.reviewer.id;
-    const input = validate.validateReviewerFields(req.body);
+    const input = validate.validateReviewerFields(body);
 
-    if (req.file) {
-      const allowedType = upload.findAllowedType(req.file.originalname);
+    if (body.file) {
+      claimed = await storedFiles.claimPendingFile(req.user.firebase_uid, body.file);
       await reviewersModel.updateReviewerWithFile(reviewerId, {
         title: input.title,
         description: input.description,
         subject: input.subject,
         tags: input.tags,
-        fileName: upload.cleanOriginalName(req.file.originalname),
-        storedName: req.file.filename,
-        fileMime: allowedType.mime,
-        fileSize: req.file.size,
+        fileName: claimed.fileName,
+        storedName: claimed.storedName,
+        fileMime: claimed.fileMime,
+        fileSize: claimed.fileSize,
       });
       isSaved = true;
       // The database now points at the new file, so the old one can go.
-      await upload.removeStoredFile(req.reviewer.stored_name);
+      await storedFiles.removeStoredFile(req.reviewer.stored_name);
     } else {
       await reviewersModel.updateReviewer(reviewerId, input);
       isSaved = true;
@@ -194,8 +198,8 @@ const updateReviewer = async (req, res, next) => {
     res.json(item);
   } catch (err) {
     // The update failed, so the old file is still the real one. Remove the new upload.
-    if (!isSaved && req.file) {
-      await upload.removeStoredFile(req.file.filename);
+    if (!isSaved) {
+      await removeUnusedUpload(req, body, claimed);
     }
     next(err);
   }
@@ -204,40 +208,34 @@ const updateReviewer = async (req, res, next) => {
 // DELETE /api/reviewers/:id   (requireOwner has already checked permission)
 const deleteReviewer = async (req, res, next) => {
   try {
-    // Delete the row first. If that fails, the file is still there and nothing is broken.
-    await reviewersModel.deleteReviewer(req.reviewer.id);
-    await upload.removeStoredFile(req.reviewer.stored_name);
-    res.json({ deleted: true, id: req.reviewer.id });
+    const reviewerId = req.reviewer.id;
+    // Delete the reviewer first. If that fails, the file is still there and nothing is broken.
+    await reviewersModel.deleteReviewer(reviewerId);
+    // Then tidy up everything that pointed at it. Saved copies are kept, with their
+    // notes and flashcards; they just stop pointing at the deleted original.
+    await upvotesModel.deleteUpvotesForReviewer(reviewerId);
+    await recentlyViewedModel.deleteViewsForReviewer(reviewerId);
+    await savedItemsModel.detachReviewer(reviewerId);
+    await storedFiles.removeStoredFile(req.reviewer.stored_name);
+    res.json({ deleted: true, id: reviewerId });
   } catch (err) {
     next(err);
   }
 };
 
-// Sends the fresh upvote total, counted in the database at this moment.
+// Sends the fresh upvote total, read from the database at this moment.
 const sendUpvoteState = async (res, reviewerId, hasUpvoted) => {
   const upvoteCount = await upvotesModel.countUpvotes(reviewerId);
   res.json({ upvoteCount: upvoteCount, hasUpvoted: hasUpvoted });
 };
 
 // PUT /api/reviewers/:id/upvote
+// A double click can send two requests at once. That is fine: createUpvote only
+// adds the upvote when it is not there yet, and that is what was asked for.
 const addUpvote = async (req, res, next) => {
   try {
-    const reviewerId = req.reviewer.id;
-    const existingUpvote = await upvotesModel.findUpvote(reviewerId, req.user.id);
-
-    if (!existingUpvote) {
-      try {
-        await upvotesModel.createUpvote(reviewerId, req.user.id);
-      } catch (err) {
-        // A double click can send two requests at once. The primary key blocks the
-        // second INSERT, which is fine: the upvote exists, and that is what was asked for.
-        if (err.code !== UNIQUE_VIOLATION) {
-          throw err;
-        }
-      }
-    }
-
-    await sendUpvoteState(res, reviewerId, true);
+    await upvotesModel.createUpvote(req.reviewer.id, req.user.id);
+    await sendUpvoteState(res, req.reviewer.id, true);
   } catch (err) {
     next(err);
   }
@@ -256,22 +254,7 @@ const removeUpvote = async (req, res, next) => {
 // POST /api/reviewers/:id/view
 const recordView = async (req, res, next) => {
   try {
-    const reviewerId = req.reviewer.id;
-    const existingView = await recentlyViewedModel.findView(req.user.id, reviewerId);
-
-    if (existingView) {
-      await recentlyViewedModel.updateViewTime(req.user.id, reviewerId);
-    } else {
-      try {
-        await recentlyViewedModel.createView(req.user.id, reviewerId);
-      } catch (err) {
-        // Same idea as upvotes: a duplicate from two quick requests is harmless.
-        if (err.code !== UNIQUE_VIOLATION) {
-          throw err;
-        }
-      }
-    }
-
+    await recentlyViewedModel.recordView(req.user.id, req.reviewer.id);
     res.json({ recorded: true });
   } catch (err) {
     next(err);
@@ -282,25 +265,13 @@ const recordView = async (req, res, next) => {
 const saveReviewer = async (req, res, next) => {
   try {
     const reviewer = req.reviewer;
-    let saved = await savedItemsModel.findSavedByUserAndReviewer(req.user.id, reviewer.id);
-
-    if (!saved) {
-      try {
-        saved = await savedItemsModel.createSavedItem(
-          req.user.id,
-          reviewer.id,
-          reviewer.title,
-          reviewer.subject
-        );
-      } catch (err) {
-        // Same idea as upvotes: two quick clicks can both try to INSERT.
-        if (err.code !== UNIQUE_VIOLATION) {
-          throw err;
-        }
-        saved = await savedItemsModel.findSavedByUserAndReviewer(req.user.id, reviewer.id);
-      }
-    }
-
+    // createSavedItem gives back the existing copy when there already is one.
+    const saved = await savedItemsModel.createSavedItem(
+      req.user.id,
+      reviewer.id,
+      reviewer.title,
+      reviewer.subject
+    );
     res.json({ isSaved: true, savedId: saved.id });
   } catch (err) {
     next(err);
@@ -323,6 +294,7 @@ module.exports = {
   listReviewers: listReviewers,
   getReviewer: getReviewer,
   sendReviewerFile: sendReviewerFile,
+  getReviewerFileLink: getReviewerFileLink,
   createReviewer: createReviewer,
   updateReviewer: updateReviewer,
   deleteReviewer: deleteReviewer,

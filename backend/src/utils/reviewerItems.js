@@ -5,16 +5,11 @@ const savedItemsModel = require('../models/savedItemsModel');
 const validate = require('./validate');
 
 // "user" is the logged-in user's database row, or null for a visitor.
-// "saved" is the user's saved_items row for this reviewer, or null.
-const toReviewerJson = (row, hasUpvoted, saved, user) => {
+// "savedId" is the id of the user's saved copy of this reviewer, or null.
+const toReviewerJson = (row, hasUpvoted, savedId, user) => {
   let isOwner = false;
   if (user && user.id === row.author_id) {
     isOwner = true;
-  }
-
-  let savedId = null;
-  if (saved) {
-    savedId = saved.id;
   }
 
   return {
@@ -37,29 +32,35 @@ const toReviewerJson = (row, hasUpvoted, saved, user) => {
   };
 };
 
-// Checks one reviewer for the current user's upvote and saved copy, then formats it.
-const buildReviewerItem = async (row, user) => {
-  let hasUpvoted = false;
-  let saved = null;
-  if (user) {
-    const upvote = await upvotesModel.findUpvote(row.id, user.id);
-    hasUpvoted = Boolean(upvote);
-    saved = await savedItemsModel.findSavedByUserAndReviewer(user.id, row.id);
-  }
-  return toReviewerJson(row, hasUpvoted, saved, user);
-};
-
-// Two small queries per item keep the SQL simple. A page has at most 50 items.
+// Checks the reviewers for the current user's upvotes and saved copies, then formats them.
+// Two database trips cover the whole list, however long it is.
 const buildReviewerItems = async (rows, user) => {
-  const items = [];
-  for (const row of rows) {
-    const item = await buildReviewerItem(row, user);
-    items.push(item);
+  let upvotedIds = [];
+  let savedIds = {};
+  if (user) {
+    upvotedIds = await upvotesModel.findUpvotedReviewerIds(
+      rows.map((row) => row.id),
+      user.id
+    );
+    savedIds = await savedItemsModel.listSavedIdsByReviewer(user.id);
   }
-  return items;
+
+  return rows.map((row) => {
+    let savedId = null;
+    if (savedIds[row.id]) {
+      savedId = savedIds[row.id];
+    }
+    return toReviewerJson(row, upvotedIds.indexOf(row.id) !== -1, savedId, user);
+  });
 };
 
-// Turns a saved_items row (joined with its reviewer, see savedItemsModel) into the
+// The same for a single reviewer.
+const buildReviewerItem = async (row, user) => {
+  const items = await buildReviewerItems([row], user);
+  return items[0];
+};
+
+// Turns a saved item row (joined with its reviewer, see savedItemsModel) into the
 // shape the Saved page expects. When the original was deleted, isRemoved is true and
 // only the copied title and subject are left.
 const toSavedJson = (row) => {

@@ -82,6 +82,8 @@ function RegisterPage() {
       const profile = await register(cleanName, cleanEmail, password);
       // Put the saved profile (with the chosen display name) into the app straight away.
       auth.setProfile(profile);
+      // Only now move on (see below), so the chosen name is saved before the page changes.
+      setIsSubmitting(false);
     } catch (err) {
       setSubmitError(describeAuthError(err));
       setIsSubmitting(false);
@@ -92,8 +94,9 @@ function RegisterPage() {
     return <Spinner label="Checking your login…" />;
   }
 
-  // The account exists as soon as Firebase confirms it, so move on.
-  if (auth.firebaseUser) {
+  // Someone who is logged in has nothing to do here, so move on. While an account is
+  // being created, wait until its display name is saved too.
+  if (auth.firebaseUser && !isSubmitting) {
     return <Navigate to={returnPath} replace />;
   }
 

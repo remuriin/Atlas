@@ -5,11 +5,11 @@ node_modules/
 .env
 .env.local
 .env.*.local
+.secret.local
 !.env.example
 
-# Uploaded files (keep the empty folder)
-backend/uploads/*
-!backend/uploads/.gitkeep
+# Files uploaded while the old server was in use (files now live in Cloud Storage)
+backend/uploads/
 
 # Build output
 frontend/dist/

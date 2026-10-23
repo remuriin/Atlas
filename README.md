@@ -26,7 +26,7 @@ Logged-in users also get private study tools:
   and +[ to indent. Pasted text arrives as plain text. "Download notes" gives a `.txt` with `#`
   headings, `-` bullets, and `**bold**`.
 - **Flashcards.** A saved study reviewer can be turned into 5 to 100 flashcards by Google
-  Gemini (`gemini-3.5-flash-lite`, called only from the backend). Short material makes fewer
+  Gemini (`gemini-3.5-flash-lite`, called only from the API). Short material makes fewer
   good cards (about 1 card per 50 to 100 words works well); if the material is too short for
   the number asked, Gemini writes fewer instead of padding, and the page says so. Study them
   with flip, next and previous, "Still learning" / "Got it", shuffle, and a "not learned yet"
@@ -36,315 +36,207 @@ Logged-in users also get private study tools:
 
 ## Architecture
 
+Everything runs on Firebase (project `learnhub-ea4291`, **Blaze** plan, kept inside the free
+allowances).
+
 ```
  Browser
- ┌──────────────────────────────────────────┐
- │ React app (Vite build, plain JS + CSS)   │
- │  - react-router-dom v6 (<BrowserRouter>) │
- │  - Firebase client SDK: AUTH ONLY        │
- └───────┬─────────────────────┬────────────┘
-         │ email + password    │ fetch / XMLHttpRequest
-         │                     │ Authorization: Bearer <Firebase ID token>
-         ▼                     ▼
- ┌────────────────┐   ┌─────────────────────────────────────────┐
- │ Firebase       │   │ Express API (Node 20+, CommonJS)        │
- │ Authentication │   │  routes → middleware → controllers      │
- │ (accounts,     │   │  → models (ALL the SQL, via pg pool)    │
- │  passwords,    │◄──┤  firebase-admin: verifies ID tokens     │
- │  reset emails) │   │  multer: files saved to UPLOAD_DIR      │
- └────────────────┘   └──────────┬──────────────────┬───────────┘
-                                 │ parameterized SQL│ files
-                                 ▼                  ▼
-                        ┌────────────────┐   ┌─────────────┐
-                        │ PostgreSQL     │   │ uploads/    │
-                        │ (your VPS)     │   │ (disk)      │
-                        └────────────────┘   └─────────────┘
+ ┌───────────────────────────────────────────────┐
+ │ React app (Vite build, plain JS + CSS)        │
+ │  - react-router-dom v6 (<BrowserRouter>)      │
+ │  - Firebase client SDK: Auth + Storage upload │
+ └───┬──────────────┬────────────────────┬───────┘
+     │ log in       │ 1. put the file in │ 2. fetch, Authorization: Bearer <ID token>
+     │              │ pending/<uid>/     │    JSON with the file's path
+     ▼              ▼                    ▼
+ ┌──────────┐  ┌───────────────┐  ┌─────────────────────────────────────────┐
+ │ Firebase │  │ Cloud Storage │◄─┤ Cloud Function "api" (Express, Node 22) │
+ │ Auth     │  │ pending/      │  │  routes → middleware → controllers      │
+ │          │  │ reviewers/    │  │  → models (ALL the database code)       │
+ └──────────┘  └───────┬───────┘  │  firebase-admin: tokens, Firestore,     │
+                       │          │  Storage; Gemini key in Secret Manager  │
+     3. short-lived    │          └──────────────────┬──────────────────────┘
+        file links     ▼                             ▼
+                    browser                    ┌───────────┐
+                                               │ Firestore │
+                                               └───────────┘
 ```
 
-- **Passwords never touch Postgres.** Firebase Authentication owns accounts. The `users` table only
-  stores the Firebase user id, a display name, and the email.
-- **Firestore and Firebase Storage are not used**, so the free Spark plan is enough and no billing
-  account is needed.
-- **Upvote counts are never stored.** They are counted with `COUNT(*)` each time, so they cannot
-  drift out of sync.
+- **The whole Express app is one Cloud Function** called `api` (`backend/src/index.js`), in
+  `us-central1`, with at most **one** instance. One instance keeps the in-memory rate limits
+  correct and caps the cost.
+- **Browsers never read or write the database directly.** `firestore.rules` denies everything;
+  only the function (with admin access) uses Firestore, after checking logins, owners, and input.
+- **Uploads go to Cloud Storage first.** The browser may only create a file in its own inbox,
+  `pending/<uid>/` (`storage.rules`: allowed types, up to 10 MB). The API then checks the file
+  again and moves it to `reviewers/<random name>`. Inbox files that are never used are removed
+  after a day by a lifecycle rule on the bucket.
+- **Files are read through short-lived links** (signed URLs, 10 minutes) that the API makes, so
+  downloads come straight from Cloud Storage.
+- **Passwords never touch the database.** Firebase Authentication owns accounts. A user document
+  only stores a number id, a display name, and the email.
+- **Ids are numbers** (`/reviewers/12`, `/saved/7`), handed out by counter documents
+  (`counters/reviewers` and so on), like the old Postgres ids.
 
 ```
 learnhub/
-  frontend/      React app
-  backend/       Express + Postgres API
-  firebase.json  Auth emulator settings only
-  .firebaserc    default project id for the emulator
+  frontend/               React app
+  backend/                Express API, deployed as the "api" Cloud Function
+  firebase.json           Hosting, Functions, Firestore, Storage, and emulator settings
+  firestore.rules         database rules (deny all browser access)
+  firestore.indexes.json  the one composite index (recently viewed)
+  storage.rules           upload rules (own inbox only)
+  .firebaserc             default project id
   README.md
 ```
 
+### Firestore collections
+
+| Collection | Document name | Holds |
+| --- | --- | --- |
+| `users` | Firebase uid | `id`, `displayName`, `email`, `createdAt` |
+| `reviewers` | the reviewer's number | details, file info, `authorId`, `authorName` (copied in), `upvoteCount` |
+| `upvotes` | `<reviewer id>_<user id>` | one per upvote, so a second upvote is impossible |
+| `recentlyViewed` | `<user id>_<reviewer id>` | `viewedAt` |
+| `savedItems` | the saved item's number | `userId`, `reviewerId` (null once the original is deleted), copied `title` and `subject`, `notes`, `notesFormat`, `flashcardCount` |
+| `flashcards` | the card's number | `savedItemId`, `position`, `front`, `back`, `status` |
+| `flashcardUsage` | user id | the 24-hour flashcard allowance |
+| `counters` | `users`, `reviewers`, `savedItems`, `flashcards` | the last number handed out |
+
+Firestore cannot join collections, so the author's name and the upvote total are kept on each
+reviewer and updated together with the change that affects them. Firestore cannot search inside
+text either, so the API keeps a copy of all reviewers in memory for up to a minute (cleared on
+every change) and filters, sorts, and pages them in JavaScript, exactly like the old SQL did.
+
 ## Prerequisites
 
-- Node.js 20 or newer (LTS)
-- PostgreSQL 14 or newer (your VPS database, or a local one for development)
-- Firebase CLI: `npm install -g firebase-tools` (the Auth emulator also needs Java 11+)
+- Node.js 22 (LTS)
+- Firebase CLI: `npm install -g firebase-tools` (the Firestore and Storage emulators need Java 11+)
 
 ## Run it locally
 
-Local development uses the **Firebase Auth emulator**, so no real Firebase project or internet
-connection is needed. You need four terminals.
+Local development uses the **Firebase emulators** (Auth, Firestore, Storage, and Functions), so no
+real Firebase project or internet connection is needed. You need two terminals.
 
-**1. Install dependencies (once)**
+**1. Install dependencies and settings (once)**
 
 ```bash
 cd backend && npm install
+cp .env.example .env.local
 cd ../frontend && npm install
+cp .env.example .env
 ```
 
-**2. Point the backend at a database (once)**
+Use `backend/.env.local`, **never** a plain `backend/.env`: Firebase uploads a plain `.env` to
+the live function when deploying.
 
-Open `backend/.env` and replace the `DATABASE_URL` placeholder with a Postgres URL you can use for
-development (see [Putting your Postgres URL into backend/.env](#putting-your-postgres-url-into-backendenv)).
-Then create the tables:
-
-```bash
-cd backend
-npm run db:migrate      # safe to run again at any time
-npm run db:seed         # optional: adds 20 sample study reviewers
-```
-
-Need a throwaway local database? With Docker:
+**2. Start everything**
 
 ```bash
-docker run --name learnhub-db -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=learnhub -p 5432:5432 -d postgres:16
-# then: DATABASE_URL=postgres://postgres:devpass@localhost:5432/learnhub
-```
+# terminal 1: the emulators (the API runs at http://127.0.0.1:5001/demo-learnhub/us-central1/api)
+cd backend && npm run serve
 
-**3. Start everything**
-
-```bash
-# terminal 1, from the project root: the Auth emulator on port 9099
-firebase emulators:start --only auth
-
-# terminal 2: the API on http://localhost:4000
-cd backend && npm run dev
-
-# terminal 3: the website on http://localhost:5173
+# terminal 2: the website on http://localhost:5173
 cd frontend && npm run dev
 ```
 
-Open http://localhost:5173 and create an account. Emulator accounts live only in memory and vanish
-when the emulator stops. The matching rows in your `users` table stay, which is harmless: sign up
-again with the same email and a new row is made.
+Optional, while the emulators run: `cd backend && npm run seed` adds 20 sample study reviewers.
 
-If the backend prints **"LearnHub backend cannot start yet"**, it is telling you exactly which
-setting in `backend/.env` still needs a value. That is on purpose: it never starts with a
-placeholder database URL.
+Open http://localhost:5173 and create an account. Emulator data lives only in memory and vanishes
+when the emulators stop. The emulator UI is at http://127.0.0.1:4001.
+
+For flashcards locally, put `GEMINI_API_KEY=your-key` in `backend/.secret.local` (ignored by git).
 
 ## Environment variables
 
-### `backend/.env` (template: `backend/.env.example`)
+### Backend
+
+| File | Used by |
+| --- | --- |
+| `backend/.env.learnhub-ea4291` | The live function (committed: it holds no secrets) |
+| `backend/.env.local` | The emulators only (template: `backend/.env.example`) |
+| Secret Manager `GEMINI_API_KEY` | The live function. Set with `firebase functions:secrets:set GEMINI_API_KEY` |
+| `backend/.secret.local` | The emulators' Gemini key (ignored by git) |
 
 | Key | Meaning |
 | --- | --- |
-| `PORT` | Port the API listens on. Default `4000`. |
-| `DATABASE_URL` | **Replace with your VPS Postgres URL.** `postgres://USER:PASSWORD@HOST:5432/DBNAME` |
-| `DATABASE_SSL` | `true` only when Postgres is on another machine and requires SSL. Default `false`. |
-| `FIREBASE_PROJECT_ID` | Your Firebase project id. Tokens from any other project are rejected. `demo-learnhub` works only with the emulator. |
-| `FIREBASE_AUTH_EMULATOR_HOST` | `127.0.0.1:9099` in development. **Delete this line in production.** The server refuses to start if it is set while `NODE_ENV=production`. |
-| `FRONTEND_ORIGIN` | Exact address of the website, for example `https://learnhub.example.com`. Only this origin may call the API from a browser. |
-| `UPLOAD_DIR` | Folder for uploaded files. Default `./uploads`. |
-| `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. |
-| `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
-| `GEMINI_API_KEY` | Google Gemini key for making flashcards (from https://aistudio.google.com/apikey). **Secret: server only, never in `frontend/.env`.** Leave empty to turn flashcards off; everything else keeps working. |
+| `FRONTEND_ORIGIN` | Exact address of the website. Only this origin may call the API from a browser. |
+| `STORAGE_BUCKET` | The bucket for uploaded files (live: `learnhub-ea4291.firebasestorage.app`). Empty = the project's default bucket. |
+| `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. Keep equal to `storage.rules` and the frontend. |
+| `TRUST_PROXY` | `true` on the live function, so rate limiting sees each visitor's real IP. |
 | `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
+| `GEMINI_API_KEY` | **Secret.** Only from Secret Manager or `.secret.local`, never in a `.env` file or the frontend. Without it, flashcards say they are not set up; everything else works. |
 
-### `frontend/.env` (template: `frontend/.env.example`)
+Never add a `*_EMULATOR_HOST` setting to the live file: the API refuses to start on Google's
+servers if one is set, because emulator logins are not signed.
+
+### `frontend/.env` (template: `frontend/.env.example`) and `frontend/.env.production`
 
 These values are built into the public website, so they must never be secrets. Firebase web config
-values are public identifiers, not passwords.
+values are public identifiers, not passwords. `.env.production` (committed) overrides `.env` for
+`npm run build`.
 
 | Key | Meaning |
 | --- | --- |
-| `VITE_API_URL` | Address of the API, no trailing slash. `http://localhost:4000` locally. |
-| `VITE_USE_AUTH_EMULATOR` | `true` for local development, `false` for real Firebase. |
+| `VITE_API_URL` | Address of the API, no trailing slash. Live: `https://us-central1-learnhub-ea4291.cloudfunctions.net/api`. |
+| `VITE_USE_EMULATORS` | `true` for local development, `false` for real Firebase. |
 | `VITE_MAX_FILE_SIZE_MB` | Keep equal to the backend's `MAX_FILE_SIZE_MB`. |
+| `VITE_FIREBASE_STORAGE_BUCKET` | The upload bucket (emulators: `demo-learnhub.appspot.com`). |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | From `firebase apps:sdkconfig WEB <appId> --project <id>`. |
 
 After changing `frontend/.env`, restart `npm run dev` (or rebuild) so Vite picks the values up.
 
-## Putting your Postgres URL into `backend/.env`
+## Firebase setup for production (one time)
 
-1. On the VPS, create a database and a user for LearnHub (run as the `postgres` superuser):
+In the [Firebase console](https://console.firebase.google.com):
 
-   ```sql
-   CREATE USER learnhub WITH PASSWORD 'choose-a-long-random-password';
-   CREATE DATABASE learnhub OWNER learnhub;
-   ```
+1. **Plan:** upgrade to **Blaze** and add a **budget alert** (Google Cloud console → Billing →
+   Budgets & alerts) of $1 with emails at 50%, 90%, and 100%. Blaze has no hard spending cap; the
+   free allowances keep normal use at $0.
+2. **Authentication** → Sign-in method: turn on **Email/Password** and **Google**. Settings →
+   Authorized domains: add any custom domain the site is served from.
+3. **Firestore Database** → Create database → Standard edition, **Native mode**, location
+   **`us-central1`** (cannot be changed later).
+4. **Storage** → Get started → location **`us-central1`** (free Storage exists only in
+   `us-central1`, `us-east1`, and `us-west1`; cannot be changed later).
+5. In **Google Cloud Shell** (console.cloud.google.com, the `>_` button):
+   - `gcloud services enable iamcredentials.googleapis.com --project learnhub-ea4291`
+   - allow the function to sign file links:
+     `gcloud iam service-accounts add-iam-policy-binding 520424815416-compute@developer.gserviceaccount.com --member=serviceAccount:520424815416-compute@developer.gserviceaccount.com --role=roles/iam.serviceAccountTokenCreator --project learnhub-ea4291`
+   - let the website fetch files: a `cors.json` with
+     `[{"origin":["https://learnhub-ea4291.web.app","https://learnhub-ea4291.firebaseapp.com","http://localhost:5173"],"method":["GET"],"maxAgeSeconds":3600}]`, then
+     `gcloud storage buckets update gs://learnhub-ea4291.firebasestorage.app --cors-file=cors.json`
+   - remove unused inbox files after a day: a `lifecycle.json` with
+     `{"rule":[{"action":{"type":"Delete"},"condition":{"age":1,"matchesPrefix":["pending/"]}}]}`, then
+     `gcloud storage buckets update gs://learnhub-ea4291.firebasestorage.app --lifecycle-file=lifecycle.json`
+6. **Gemini key:** the key must belong to a Google project **without billing** (check at
+   https://aistudio.google.com/apikey), or Gemini is charged. Then, from the project root:
+   `firebase functions:secrets:set GEMINI_API_KEY` and type the key when asked.
 
-2. Open `backend/.env` and replace the placeholder line:
+## Deploying
 
-   ```
-   DATABASE_URL=postgres://learnhub:choose-a-long-random-password@localhost:5432/learnhub
-   ```
-
-   If the password contains characters such as `@ : / # ?`, percent-encode them
-   (for example `@` becomes `%40`).
-
-3. Create the tables: `npm run db:migrate`
-
-`backend/.env` is listed in `.gitignore`. Never commit it and never paste it anywhere public.
-
-## Migrations
-
-```bash
-cd backend
-npm run db:migrate   # runs db/schema.sql
-npm run db:seed      # optional sample data, never runs automatically
-```
-
-`db/schema.sql` uses only `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`, so running
-it again changes nothing. It creates `users`, `reviewers`, `upvotes`, `recently_viewed`,
-`saved_items` (a user's saved study reviewers, with their notes), and `flashcards`. Run it again
-after pulling changes: new tables are added and existing data is left alone.
-
-## Firebase setup for production
-
-The Firebase CLI can create the project and the web app, but two settings exist only in the
-console.
+Merging a pull request deploys nothing. From the project root in Git Bash:
 
 ```bash
-firebase login
-firebase projects:create learnhub-<short-unique-suffix> --display-name "LearnHub"
-firebase apps:create WEB "LearnHub Web" --project <project-id>
-firebase apps:sdkconfig WEB <app-id> --project <project-id>
+# Rules, indexes, and the API
+firebase deploy --only firestore,storage,functions
+
+# The website
+cd frontend && npm ci && npm run build && cd .. && firebase deploy --only hosting
 ```
 
-Copy the printed values into `frontend/.env` (`apiKey` → `VITE_FIREBASE_API_KEY`, `authDomain` →
-`VITE_FIREBASE_AUTH_DOMAIN`, `projectId` → `VITE_FIREBASE_PROJECT_ID`, `appId` →
-`VITE_FIREBASE_APP_ID`), and put the project id into `FIREBASE_PROJECT_ID` in `backend/.env`.
+After the first functions deploy, run `firebase functions:artifacts:setpolicy` once, so old
+function images are cleaned up and do not cost storage.
 
-Then, in the [Firebase console](https://console.firebase.google.com):
+- **Website:** https://learnhub-ea4291.web.app (Firebase Hosting serves `frontend/dist`).
+- **API:** https://us-central1-learnhub-ea4291.cloudfunctions.net/api (for example
+  `/api/health` at the end).
 
-1. Open your project → **Build → Authentication** → **Get started** (first time only).
-2. **Sign-in method** tab → **Email/Password** → switch **Enable** on → **Save**.
-   Then **Add new provider** → **Google** → switch **Enable** on → choose a project support
-   email → **Save**. (Until this is done, "Continue with Google" says Google sign-in is not
-   turned on yet.)
-3. **Settings** tab → **Authorized domains** → **Add domain** → enter the domain the website will be
-   served from (for example `learnhub.example.com`) → **Add**. `localhost` is already allowed.
+### Copying data from the old Postgres server
 
-The free **Spark** plan is enough.
-
-## Current live deployment
-
-- **Website:** https://learnhub-ea4291.web.app (Firebase Hosting, serves `frontend/dist`).
-- **API:** https://api.140-245-60-8.sslip.io (the backend on the VPS under pm2 as `learnhub-api`,
-  behind nginx with a Let's Encrypt certificate). `sslip.io` is a free service that turns the
-  name into the server's IP address; swap it for a real domain when you have one.
-- `frontend/.env.production` holds the live API address and is used only by `npm run build`.
-  `frontend/.env` keeps pointing at your local backend for development.
-
-To publish frontend changes:
-
-```bash
-cd frontend && npm run build
-cd .. && firebase deploy --only hosting
-```
-
-To publish backend changes, copy the changed files to `/var/www/learnhub/backend` on the VPS and
-run `pm2 restart learnhub-api`. When `package.json` changed, run `npm ci --omit=dev` first; when
-`db/schema.sql` changed, run `npm run db:migrate` too. The VPS backend only accepts browser requests from the live
-website (`FRONTEND_ORIGIN`), so a frontend running on `localhost` must use a local backend.
-
-## Deploying to a VPS
-
-**Recommended: run the backend on the same VPS as Postgres** and connect through `localhost`. The
-database port then never needs to be open to the internet.
-
-1. **Copy the project** to the server and install: `cd backend && npm ci --omit=dev`.
-2. **Backend settings** in `backend/.env`:
-   - `DATABASE_URL=postgres://learnhub:...@localhost:5432/learnhub`
-   - `FIREBASE_PROJECT_ID=<your real project id>`
-   - delete the `FIREBASE_AUTH_EMULATOR_HOST` line
-   - `FRONTEND_ORIGIN=https://learnhub.example.com` (your real domain, no trailing slash)
-   - `TRUST_PROXY=true`
-   - `GEMINI_API_KEY=<your key>` (only needed for flashcards)
-3. **Create the tables:** `npm run db:migrate`.
-4. **Keep the API running** with pm2:
-
-   ```bash
-   npm install -g pm2
-   cd backend
-   NODE_ENV=production pm2 start src/server.js --name learnhub-api
-   pm2 save && pm2 startup
-   ```
-
-   or with systemd (`/etc/systemd/system/learnhub-api.service`):
-
-   ```ini
-   [Unit]
-   Description=LearnHub API
-   After=network.target postgresql.service
-
-   [Service]
-   WorkingDirectory=/var/www/learnhub/backend
-   ExecStart=/usr/bin/node src/server.js
-   Environment=NODE_ENV=production
-   Restart=always
-   User=www-data
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-
-   `NODE_ENV=production` matters: it hides internal error details from API responses.
-   The user that runs the API needs write access to `UPLOAD_DIR`. Back that folder up together
-   with the database: a reviewer is a database row **plus** a file.
-
-5. **Build the frontend** with production values in `frontend/.env`
-   (`VITE_API_URL=https://learnhub.example.com`, `VITE_USE_AUTH_EMULATOR=false`, the four real
-   `VITE_FIREBASE_*` values), then `cd frontend && npm ci && npm run build`. The result is the
-   static folder `frontend/dist`.
-
-6. **nginx** serves `dist` and passes `/api` to the backend, with HTTPS (for example from
-   Let's Encrypt via `certbot --nginx`):
-
-   ```nginx
-   server {
-     listen 443 ssl;
-     server_name learnhub.example.com;
-     # ssl_certificate lines are added by certbot
-
-     # Must be larger than MAX_FILE_SIZE_MB, or nginx rejects uploads before the API sees them.
-     client_max_body_size 12m;
-
-     root /var/www/learnhub/frontend/dist;
-     index index.html;
-
-     # Every page address is handled by the React app.
-     location / {
-       try_files $uri /index.html;
-     }
-
-     location /api/ {
-       proxy_pass http://127.0.0.1:4000;
-       proxy_set_header Host $host;
-       proxy_set_header X-Forwarded-For $remote_addr;
-       proxy_set_header X-Forwarded-Proto $scheme;
-     }
-   }
-   ```
-
-7. **Add the domain to Firebase authorized domains** (console steps above), or logins from the real
-   site are refused.
-
-### If the database must be on a different machine
-
-Avoid this if you can. If you cannot:
-
-- `postgresql.conf`: set `listen_addresses` to the server's private address (not `'*'`).
-- `pg_hba.conf`: allow only the backend server's IP, with SSL and password hashing:
-  `hostssl learnhub learnhub 203.0.113.10/32 scram-sha-256`
-- Firewall: open port 5432 only to that one IP (`ufw allow from 203.0.113.10 to any port 5432`).
-- Turn on SSL in Postgres (`ssl = on`) and set `DATABASE_SSL=true` in `backend/.env`. That setting
-  encrypts the connection but does not verify the server's certificate, which suits a self-signed
-  certificate on a private network.
-- Reload Postgres after editing either file.
+`backend/scripts/import-postgres-export.js` copies an export of the old Postgres tables and the
+old `uploads` folder into Firestore and Cloud Storage, keeping every id. Run it with
+`--dry-run` first; running it twice is safe. See the comments at the top of the script.
 
 ## API summary
 
@@ -356,9 +248,10 @@ add `"fields": { "title": "..." }`.
 | `GET /api/health` | no | Health check |
 | `GET /api/reviewers?sort=top\|new&subject=&q=&page=1&limit=12` | optional | Feed: `{ items, page, hasMore }` |
 | `GET /api/reviewers/:id` | optional | One reviewer |
-| `GET /api/reviewers/:id/file` | no | The file (inline for PDF and images, download otherwise) |
-| `POST /api/reviewers` | yes | Create (multipart: title, description, subject, tags, file) |
-| `PUT /api/reviewers/:id` | owner | Update details, optionally replace the file |
+| `GET /api/reviewers/:id/file` | no | Redirects to a 10-minute link to the file (inline for PDF and images, download otherwise). The emulators send the file itself |
+| `GET /api/reviewers/:id/file-link` | no | The same link as JSON `{ url }` (`null` with the emulators), so the page can fetch the file |
+| `POST /api/reviewers` | yes | Create (JSON: title, description, subject, tags, `file: { path, name }` where `path` is the uploaded file in `pending/<uid>/`) |
+| `PUT /api/reviewers/:id` | owner | Update details; add `file` to replace the file |
 | `DELETE /api/reviewers/:id` | owner | Delete the reviewer and its file |
 | `PUT` / `DELETE /api/reviewers/:id/upvote` | yes | Add / remove my upvote (both safe to repeat) |
 | `POST /api/reviewers/:id/view` | yes | Record in my recently viewed |
@@ -384,10 +277,11 @@ missing one.
   components and hooks (`useNavigate`, `useParams`, `useLocation`, `useSearchParams`), plain CSS
   with custom properties. Runtime dependencies: `react`, `react-dom`, `react-router-dom`,
   `firebase`.
-- **Backend:** plain JavaScript, CommonJS, no ORM or query builder. Every SQL statement is in
-  `backend/src/models/` (plus `backend/db/` for schema and seed), uses `$1, $2` placeholders, and
-  sticks to textbook CRUD. "Upserts" are a `SELECT` followed by an `INSERT` or `UPDATE` in
-  JavaScript.
+- **Backend:** plain JavaScript, CommonJS. All database code is in `backend/src/models/` and
+  uses only the plain `firebase-admin` Firestore calls (get, set, update, delete, simple
+  `where` queries, transactions). Each model returns the same row shape the old SQL did, so the
+  controllers did not change much. Runtime dependencies: `express`, `cors`, `helmet`,
+  `express-rate-limit`, `firebase-admin`, `firebase-functions`.
 - **No "advanced" syntax:** no optional chaining, nullish coalescing, spread/rest, classes, custom
   hooks, `useReducer`, `useMemo`, or `useCallback`. `npm run lint` in `frontend/` enforces the
   syntax rules together with the accessibility rules.
@@ -492,7 +386,7 @@ results, the chosen file, save success, and delete success are announced politel
 - Some phone browsers show only the first page of a PDF (or a link) inside the study page.
   "Open in new tab" there always shows the whole file.
 - Flashcards are written by AI and can contain mistakes; the page says so. The daily limit of 10
-  sets per user is kept in memory, like the other rate limits.
+  sets per user is kept in Firestore, so it survives restarts.
 - Large Word or PowerPoint files are cut to about 200,000 characters of text before Gemini sees
   them, which is far more than 100 cards need. Their text is read by a small built-in ZIP reader
   (`backend/src/utils/zipReader.js`, Node's own `zlib`), not by an extra package.
@@ -501,19 +395,24 @@ results, the chosen file, save success, and delete success are announced politel
 - Scrollbars follow the theme everywhere except inside the browser's own PDF viewer, which
   cannot be styled from the page.
 
-- The file-type check trusts the file extension and the content type sent by the browser; it does
-  not inspect file contents. Files are never executed, are stored under random names, and are
-  served with their allowlisted content type plus `nosniff`, so a disguised file cannot run as a
-  web page, but it could still be a mislabelled download.
-- Some systems report an unusual content type for Office files (for example when Office is not
-  installed). Those uploads are rejected with the "file type is not allowed" message.
-- Rate limits are kept in memory: they reset when the API restarts and are per process.
+- The file-type check trusts the file extension; it does not inspect file contents. Files are
+  never executed, are stored under random names, and are served from Google's own storage
+  address (never from the website's) with their allowlisted content type, so a disguised file
+  cannot run as a web page, but it could still be a mislabelled download.
+- The 15-minute rate limits are kept in memory: they reset when the function restarts (for
+  example after a quiet period). The function runs as one instance, so they still count every
+  visitor.
+- The first request after a quiet period is slower (about 2 to 5 seconds) while the function
+  starts. Everything after that is quick.
+- The feed, search, and "top" sorting work on an in-memory copy of all reviewers, which is fine
+  for a few thousand reviewers. Far beyond that, a search service would be needed.
+- A logged-in user could fill their own upload inbox with files they never share; those are
+  deleted after a day, and each is at most 10 MB.
 - The remembered feed (for the Back button) lives in the page's memory only. After a reload the
   filters are still restored from the address, but the list starts again from page 1 at the top.
 - Text inside the clickable part of a card cannot be selected by dragging; it can on the
   reviewer's own page.
 - Choosing a tag searches titles, descriptions, and tags for that word, so it can also match
   reviewers that mention the word without having the tag.
-- Deleting a Firebase account does not delete its row in `users` (there is no account-deletion
-  feature yet).
-- Timestamps are stored as `TIMESTAMP` (no time zone) in the database server's local time.
+- Deleting a Firebase account does not delete its document in `users` (there is no
+  account-deletion feature yet).

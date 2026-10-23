@@ -3,7 +3,8 @@
 // into Error objects with a message that is safe to show to people.
 import { auth } from '../firebase';
 
-let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+// Without a setting, use the "api" function in the local emulators.
+let apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/demo-learnhub/us-central1/api';
 // Remove a trailing slash so "http://host/" + "/api" does not become "//api".
 if (apiUrl.endsWith('/')) {
   apiUrl = apiUrl.slice(0, -1);
@@ -80,12 +81,13 @@ export const apiRequest = async (path, options) => {
   return data;
 };
 
-// Fetches a file (for example a PDF) and returns it as a Blob, so the page can
-// show it with URL.createObjectURL. Errors are turned into the usual Error objects.
-export const apiRequestBlob = async (path) => {
+// Fetches a file (for example a PDF) from any full address and returns it as a Blob,
+// so the page can show it with URL.createObjectURL. Errors are turned into the usual
+// Error objects.
+export const fetchBlob = async (url) => {
   let response;
   try {
-    response = await fetch(`${API_URL}${path}`);
+    response = await fetch(url);
   } catch (err) {
     throw buildApiError(0, { error: { message: NETWORK_MESSAGE } });
   }
@@ -102,44 +104,7 @@ export const apiRequestBlob = async (path) => {
   return response.blob();
 };
 
-// Sends a form that contains a file. fetch cannot report upload progress,
-// so this one uses XMLHttpRequest, which can.
-// onProgress is called with a whole number from 0 to 100.
-export const uploadWithProgress = async (method, path, formData, onProgress) => {
-  const token = await getToken();
-
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(method, `${API_URL}${path}`);
-    if (token) {
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    }
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable && onProgress) {
-        onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    };
-
-    xhr.onload = () => {
-      let data = null;
-      try {
-        data = JSON.parse(xhr.responseText);
-      } catch (err) {
-        data = null;
-      }
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(data);
-      } else {
-        reject(buildApiError(xhr.status, data));
-      }
-    };
-
-    xhr.onerror = () => {
-      reject(buildApiError(0, { error: { message: NETWORK_MESSAGE } }));
-    };
-
-    xhr.send(formData);
-  });
+// The same, for a file sent by the LearnHub API itself.
+export const apiRequestBlob = (path) => {
+  return fetchBlob(`${API_URL}${path}`);
 };

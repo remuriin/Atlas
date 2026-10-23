@@ -1,11 +1,22 @@
-// Adds a demo user and a few sample study reviewers for local demos.
-// Usage: npm run db:seed   (never runs automatically)
+// Adds a demo user and a few sample study reviewers to the LOCAL EMULATORS, for demos.
+// Usage (from the backend folder, while "npm run serve" is running in another terminal):
+//   npm run seed
+// It refuses to run unless the emulator addresses are set, so it can never touch
+// the live database.
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
-const env = require('../src/config/env');
-const pool = require('../src/config/db');
+const { initializeApp } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const { getStorage } = require('firebase-admin/storage');
 
+// The addresses from firebase.json. Set here so "npm run seed" needs no extra setup.
+if (!process.env.FIRESTORE_EMULATOR_HOST) {
+  process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+}
+if (!process.env.FIREBASE_STORAGE_EMULATOR_HOST) {
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST = '127.0.0.1:9199';
+}
+
+const PROJECT_ID = 'demo-learnhub';
 const SEED_FIREBASE_UID = 'seed-demo-user';
 
 const SAMPLES = [
@@ -132,59 +143,76 @@ const SAMPLES = [
 ];
 
 const runSeed = async () => {
-  try {
-    // Look for the demo user so running the seed twice does not add duplicates.
-    const existing = await pool.query('SELECT id FROM users WHERE firebase_uid = $1', [
-      SEED_FIREBASE_UID,
-    ]);
-    if (existing.rows.length > 0) {
-      console.log('Sample data is already there. Nothing to do.');
-      await pool.end();
-      return;
-    }
+  // "demo-" projects only ever exist in the emulators, never on Google's servers.
+  const app = initializeApp({ projectId: PROJECT_ID, storageBucket: `${PROJECT_ID}.appspot.com` });
+  const db = getFirestore(app);
+  const bucket = getStorage(app).bucket();
 
-    // Add the demo author.
-    const userResult = await pool.query(
-      'INSERT INTO users (firebase_uid, display_name, email) VALUES ($1, $2, $3) RETURNING id',
-      [SEED_FIREBASE_UID, 'LearnHub Demo', 'demo@learnhub.example']
-    );
-    const authorId = userResult.rows[0].id;
-
-    fs.mkdirSync(env.uploadDir, { recursive: true });
-
-    for (const sample of SAMPLES) {
-      // Each sample gets a small real text file, so "Download" works in the demo.
-      const storedName = `${crypto.randomBytes(16).toString('hex')}.txt`;
-      const fileText = `${sample.title}\n\n${sample.description}\n\n(Sample file created by npm run db:seed.)\n`;
-      fs.writeFileSync(path.join(env.uploadDir, storedName), fileText);
-
-      // Add one sample reviewer.
-      await pool.query(
-        `INSERT INTO reviewers
-           (author_id, title, description, subject, tags, file_name, stored_name, file_mime, file_size)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          authorId,
-          sample.title,
-          sample.description,
-          sample.subject,
-          sample.tags,
-          'sample-notes.txt',
-          storedName,
-          'text/plain',
-          Buffer.byteLength(fileText),
-        ]
-      );
-    }
-
-    console.log(`Added ${SAMPLES.length} sample study reviewers.`);
-  } catch (err) {
-    console.error('Seeding failed:', err.message);
-    console.error('Did you run "npm run db:migrate" first?');
-    process.exitCode = 1;
+  // Look for the demo user so running the seed twice does not add duplicates.
+  const existing = await db.collection('users').doc(SEED_FIREBASE_UID).get();
+  if (existing.exists) {
+    console.log('Sample data is already there. Nothing to do.');
+    return;
   }
 
-  await pool.end();
+  // Reserve ids the same way the API does (see src/models/countersModel.js).
+  const takeIds = async (name, howMany) => {
+    const ref = db.collection('counters').doc(name);
+    return db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      let last = 0;
+      if (snapshot.exists) {
+        last = snapshot.get('last');
+      }
+      transaction.set(ref, { last: last + howMany });
+      return last + 1;
+    });
+  };
+
+  // Add the demo author.
+  const authorId = await takeIds('users', 1);
+  await db.collection('users').doc(SEED_FIREBASE_UID).set({
+    id: authorId,
+    displayName: 'LearnHub Demo',
+    email: 'demo@learnhub.example',
+    createdAt: new Date(),
+  });
+
+  const firstId = await takeIds('reviewers', SAMPLES.length);
+  for (let index = 0; index < SAMPLES.length; index += 1) {
+    const sample = SAMPLES[index];
+    // Each sample gets a small real text file, so "Download" works in the demo.
+    const storedName = `${crypto.randomBytes(16).toString('hex')}.txt`;
+    const fileText = `${sample.title}\n\n${sample.description}\n\n(Sample file created by npm run seed.)\n`;
+    await bucket.file(`reviewers/${storedName}`).save(fileText, { contentType: 'text/plain' });
+
+    // Each one is a second older than the one before, so "New" shows them in list order.
+    const createdAt = new Date(Date.now() - index * 1000);
+    await db
+      .collection('reviewers')
+      .doc(String(firstId + index))
+      .set({
+        authorId: authorId,
+        authorName: 'LearnHub Demo',
+        title: sample.title,
+        description: sample.description,
+        subject: sample.subject,
+        tags: sample.tags,
+        fileName: 'sample-notes.txt',
+        storedName: storedName,
+        fileMime: 'text/plain',
+        fileSize: Buffer.byteLength(fileText),
+        upvoteCount: 0,
+        createdAt: createdAt,
+        updatedAt: createdAt,
+      });
+  }
+
+  console.log(`Added ${SAMPLES.length} sample study reviewers.`);
 };
 
-runSeed();
+runSeed().catch((err) => {
+  console.error('Seeding failed:', err.message);
+  console.error('Are the emulators running? Start them with "npm run serve" first.');
+  process.exitCode = 1;
+});
