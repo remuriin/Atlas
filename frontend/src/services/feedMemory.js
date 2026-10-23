@@ -79,3 +79,16 @@ export const updateRememberedUpvote = (reviewerId, upvoteCount, hasUpvoted) => {
     return Object.assign({}, item, { upvoteCount: upvoteCount, hasUpvoted: hasUpvoted });
   });
 };
+
+// The same for the Save button, so the remembered list shows "Saved" correctly.
+export const updateRememberedSave = (reviewerId, isSaved, savedId) => {
+  if (!savedFeed) {
+    return;
+  }
+  savedFeed.items = savedFeed.items.map((item) => {
+    if (item.id !== reviewerId) {
+      return item;
+    }
+    return Object.assign({}, item, { isSaved: isSaved, savedId: savedId });
+  });
+};

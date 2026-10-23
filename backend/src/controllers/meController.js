@@ -2,6 +2,7 @@
 const usersModel = require('../models/usersModel');
 const reviewersModel = require('../models/reviewersModel');
 const recentlyViewedModel = require('../models/recentlyViewedModel');
+const savedItemsModel = require('../models/savedItemsModel');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
 
@@ -59,7 +60,18 @@ const listMyRecentlyViewed = async (req, res, next) => {
   }
 };
 
+// GET /api/me/saved
+const listMySaved = async (req, res, next) => {
+  try {
+    const rows = await savedItemsModel.listSavedItems(req.user.id);
+    res.json({ items: rows.map(reviewerItems.toSavedJson) });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
+  listMySaved: listMySaved,
   getMe: getMe,
   updateMe: updateMe,
   listMyReviewers: listMyReviewers,

@@ -14,3 +14,25 @@ export const SUBJECTS = [
   'Arts',
   'Other',
 ];
+
+// A short name for each subject, used in CSS class names such as "subject--math".
+// The colors themselves are the --subject-* tokens in styles/tokens.css.
+const SUBJECT_SLUGS = {
+  Mathematics: 'math',
+  Science: 'science',
+  English: 'english',
+  History: 'history',
+  'Social Studies': 'social',
+  'Computer Science': 'cs',
+  Engineering: 'engineering',
+  Business: 'business',
+  'Health and Medicine': 'health',
+  Languages: 'languages',
+  Arts: 'arts',
+  Other: 'other',
+};
+
+// "Social Studies" -> "social". Anything unknown gets the "other" color.
+export const subjectSlug = (subject) => {
+  return SUBJECT_SLUGS[subject] || 'other';
+};

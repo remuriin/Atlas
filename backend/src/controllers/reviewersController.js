@@ -4,6 +4,7 @@ const fs = require('fs');
 const reviewersModel = require('../models/reviewersModel');
 const upvotesModel = require('../models/upvotesModel');
 const recentlyViewedModel = require('../models/recentlyViewedModel');
+const savedItemsModel = require('../models/savedItemsModel');
 const upload = require('../middleware/upload');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
@@ -78,7 +79,7 @@ const buildContentDisposition = (mode, fileName) => {
   return `${mode}; filename="${simpleName}"; filename*=UTF-8''${encodedName}`;
 };
 
-// GET /api/reviewers/:id/file
+// GET /api/reviewers/:id/file   (add ?download=1 to always save it instead of showing it)
 const sendReviewerFile = async (req, res, next) => {
   try {
     const reviewer = req.reviewer;
@@ -91,7 +92,8 @@ const sendReviewerFile = async (req, res, next) => {
     }
 
     let mode = 'attachment';
-    if (INLINE_MIME_TYPES.indexOf(reviewer.file_mime) !== -1) {
+    const isDownloadAsked = req.query.download === '1';
+    if (!isDownloadAsked && INLINE_MIME_TYPES.indexOf(reviewer.file_mime) !== -1) {
       mode = 'inline';
     }
 
@@ -179,6 +181,10 @@ const updateReviewer = async (req, res, next) => {
       await reviewersModel.updateReviewer(reviewerId, input);
       isSaved = true;
     }
+
+    // Saved copies keep their own title and subject for the day the original is
+    // deleted, so bring those up to date as well.
+    await savedItemsModel.refreshSnapshot(reviewerId, input.title, input.subject);
 
     const row = await reviewersModel.findReviewerById(reviewerId);
     if (!row) {
@@ -272,7 +278,48 @@ const recordView = async (req, res, next) => {
   }
 };
 
+// PUT /api/reviewers/:id/save   (safe to repeat: saving twice keeps one copy)
+const saveReviewer = async (req, res, next) => {
+  try {
+    const reviewer = req.reviewer;
+    let saved = await savedItemsModel.findSavedByUserAndReviewer(req.user.id, reviewer.id);
+
+    if (!saved) {
+      try {
+        saved = await savedItemsModel.createSavedItem(
+          req.user.id,
+          reviewer.id,
+          reviewer.title,
+          reviewer.subject
+        );
+      } catch (err) {
+        // Same idea as upvotes: two quick clicks can both try to INSERT.
+        if (err.code !== UNIQUE_VIOLATION) {
+          throw err;
+        }
+        saved = await savedItemsModel.findSavedByUserAndReviewer(req.user.id, reviewer.id);
+      }
+    }
+
+    res.json({ isSaved: true, savedId: saved.id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// DELETE /api/reviewers/:id/save   (also deletes the notes and flashcards for it)
+const unsaveReviewer = async (req, res, next) => {
+  try {
+    await savedItemsModel.deleteSavedByUserAndReviewer(req.user.id, req.reviewer.id);
+    res.json({ isSaved: false, savedId: null });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
+  saveReviewer: saveReviewer,
+  unsaveReviewer: unsaveReviewer,
   listReviewers: listReviewers,
   getReviewer: getReviewer,
   sendReviewerFile: sendReviewerFile,

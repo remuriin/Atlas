@@ -7,6 +7,7 @@ const rateLimit = require('./middleware/rateLimit');
 const errorHandler = require('./middleware/errorHandler');
 const reviewersRoutes = require('./routes/reviewersRoutes');
 const meRoutes = require('./routes/meRoutes');
+const savedRoutes = require('./routes/savedRoutes');
 
 const app = express();
 
@@ -33,9 +34,10 @@ app.use(
 
 app.use(rateLimit.generalLimiter);
 
-// Request bodies here are tiny (a display name), so a small limit is plenty.
+// Request bodies here are small: a display name, or notes of up to 20,000
+// characters (up to about 80 KB once accents and other alphabets are encoded).
 // File uploads do not pass through this; multer has its own limit.
-app.use(express.json({ limit: '50kb' }));
+app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -43,6 +45,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/reviewers', reviewersRoutes);
 app.use('/api/me', meRoutes);
+app.use('/api/saved', savedRoutes);
 
 app.use(errorHandler.notFoundHandler);
 app.use(errorHandler.errorHandler);

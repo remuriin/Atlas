@@ -24,6 +24,7 @@ import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
 import ReviewerList from '../components/ReviewerList';
 import SkeletonList from '../components/SkeletonList';
+import SubjectLegend from '../components/SubjectLegend';
 import TabBar from '../components/TabBar';
 
 const TABS = [
@@ -382,6 +383,8 @@ function HomePage() {
             />
           </div>
         </div>
+
+        <SubjectLegend activeSubject={subject} />
 
         <TabBar
           label="Sort study reviewers"

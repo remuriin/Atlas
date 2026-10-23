@@ -1,5 +1,6 @@
 // Creates the tables by running db/schema.sql.
-// Usage: npm run db:migrate   (safe to run more than once)
+// Usage: npm run db:migrate   (safe to run more than once, and run it again after
+// pulling changes: new tables are added and existing ones are left alone)
 const fs = require('fs');
 const path = require('path');
 const pool = require('../src/config/db');

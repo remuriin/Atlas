@@ -13,6 +13,8 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
 import RegisterPage from './pages/RegisterPage';
 import ReviewerPage from './pages/ReviewerPage';
+import SavedPage from './pages/SavedPage';
+import StudyPage from './pages/StudyPage';
 import UploadPage from './pages/UploadPage';
 
 function App() {
@@ -58,6 +60,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage key={userKey} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <ProtectedRoute>
+                <SavedPage key={userKey} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved/:savedId"
+            element={
+              <ProtectedRoute>
+                <StudyPage key={userKey} />
               </ProtectedRoute>
             }
           />

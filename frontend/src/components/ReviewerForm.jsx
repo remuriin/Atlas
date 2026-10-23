@@ -13,6 +13,7 @@ import {
   ACCEPT_ATTRIBUTE,
   ALLOWED_TYPES_TEXT,
   MAX_FILE_SIZE_MB,
+  describeOfficeLimits,
   validateFile,
 } from '../services/fileRules';
 import Alert from './Alert';
@@ -194,7 +195,7 @@ function ReviewerForm(props) {
   });
 
   let fileLabel = 'File';
-  let fileHint = `${ALLOWED_TYPES_TEXT}. Up to ${MAX_FILE_SIZE_MB} MB.`;
+  let fileHint = `${ALLOWED_TYPES_TEXT}. Up to ${MAX_FILE_SIZE_MB} MB. PDF, image, or text files work best: they open right inside LearnHub.`;
   let submitText = 'Share study reviewer';
   let cancelPath = '/';
   if (isEdit) {
@@ -294,6 +295,11 @@ function ReviewerForm(props) {
               <span className="visually-hidden"> selected file</span>
             </button>
           </div>
+        )}
+        {/* Word and PowerPoint files are allowed, but cannot be shown inside the
+            app, so uploaders are told what a PDF would add. */}
+        {file && !errors.file && describeOfficeLimits(file.name) !== '' && (
+          <Alert type="info">{describeOfficeLimits(file.name)}</Alert>
         )}
       </div>
 

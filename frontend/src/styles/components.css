@@ -1144,11 +1144,444 @@ input[type="file"].input {
   font-weight: var(--font-weight-medium);
 }
 
+/* ---------- Subject colors ---------- */
+
+/* A "subject--X" class picks that subject's three colors from tokens.css. The
+   pieces below (card stripe, pill, legend swatch) only use the short names. */
+.subject--math { --subject-color: var(--subject-math); --subject-bg: var(--subject-math-bg); --subject-text: var(--subject-math-text); }
+.subject--science { --subject-color: var(--subject-science); --subject-bg: var(--subject-science-bg); --subject-text: var(--subject-science-text); }
+.subject--english { --subject-color: var(--subject-english); --subject-bg: var(--subject-english-bg); --subject-text: var(--subject-english-text); }
+.subject--history { --subject-color: var(--subject-history); --subject-bg: var(--subject-history-bg); --subject-text: var(--subject-history-text); }
+.subject--social { --subject-color: var(--subject-social); --subject-bg: var(--subject-social-bg); --subject-text: var(--subject-social-text); }
+.subject--cs { --subject-color: var(--subject-cs); --subject-bg: var(--subject-cs-bg); --subject-text: var(--subject-cs-text); }
+.subject--engineering { --subject-color: var(--subject-engineering); --subject-bg: var(--subject-engineering-bg); --subject-text: var(--subject-engineering-text); }
+.subject--business { --subject-color: var(--subject-business); --subject-bg: var(--subject-business-bg); --subject-text: var(--subject-business-text); }
+.subject--health { --subject-color: var(--subject-health); --subject-bg: var(--subject-health-bg); --subject-text: var(--subject-health-text); }
+.subject--languages { --subject-color: var(--subject-languages); --subject-bg: var(--subject-languages-bg); --subject-text: var(--subject-languages-text); }
+.subject--arts { --subject-color: var(--subject-arts); --subject-bg: var(--subject-arts-bg); --subject-text: var(--subject-arts-text); }
+.subject--other { --subject-color: var(--subject-other); --subject-bg: var(--subject-other-bg); --subject-text: var(--subject-other-text); }
+
+/* A thick stripe down the left edge of a card. Cards without a subject
+   (the grey loading placeholders) keep the plain border color. */
+.reviewer-card {
+  border-left: 4px solid var(--subject-color, var(--color-border));
+}
+
+.label--subject {
+  background-color: var(--subject-bg);
+  border-color: var(--subject-color);
+  color: var(--subject-text);
+}
+
+.chip-link:hover .label--subject {
+  background-color: var(--subject-bg);
+}
+
+/* ---------- Subject legend ---------- */
+
+.subject-legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.subject-legend__summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.subject-legend__summary:hover {
+  text-decoration: underline;
+}
+
+.subject-legend__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.subject-legend__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.subject-legend__link:hover {
+  text-decoration: underline;
+}
+
+/* The subject the feed is showing: bold text and a ring round its swatch. */
+.subject-legend__link[aria-current="true"] {
+  font-weight: var(--font-weight-bold);
+}
+
+.subject-legend__link[aria-current="true"] .subject-legend__swatch {
+  box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--subject-color);
+}
+
+.subject-legend__swatch {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background-color: var(--subject-color);
+  border-radius: 0.25rem;
+}
+
+/* ---------- Save button ---------- */
+
+/* Like the upvote button: the word, the icon (outline to solid), and the
+   border all change, so the saved state never depends on color alone. */
+.save-button[aria-pressed="true"] {
+  background-color: var(--color-success-subtle);
+  border-color: var(--color-success-text);
+  box-shadow: inset 0 0 0 1px var(--color-success-text);
+  color: var(--color-success-text);
+}
+
+/* ---------- Saved page ---------- */
+
+.status-note {
+  display: flex;
+  gap: var(--space-2);
+  margin-block: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.status-note .icon {
+  margin-top: 0.2em;
+}
+
+/* ---------- Study page ---------- */
+
+.study-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  padding-top: var(--space-5);
+}
+
+.study-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.study-section .section-heading {
+  margin-bottom: 0;
+}
+
+.flashcards-panel {
+  padding-top: var(--space-5);
+}
+
+.viewer-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.file-frame {
+  width: 100%;
+  height: 75vh;
+  min-height: 24rem;
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.file-image-wrap {
+  padding: var(--space-2);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.file-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.file-text {
+  margin: 0;
+  padding: var(--space-4);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  /* Keeps the author's line breaks but wraps long lines instead of scrolling sideways. */
+  white-space: pre-wrap;
+}
+
+.file-unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Notes */
+
+.notes-panel textarea.input {
+  min-height: 16rem;
+  line-height: var(--line-height-base);
+}
+
+.notes-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.notes-panel__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 1.5em;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.notes-panel__status .icon {
+  color: var(--color-success-text);
+}
+
+/* Wide screens: the file on the left, the notes beside it and in view while scrolling. */
+@media (min-width: 64rem) {
+  .study-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+
+  .notes-panel {
+    position: sticky;
+    top: var(--header-clearance);
+  }
+}
+
+/* ---------- Flashcards ---------- */
+
+.flashcards-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+  text-align: center;
+}
+
+.flashcards-start__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-3);
+  text-align: left;
+}
+
+.progress-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: var(--reading-width);
+}
+
+/* Each tile has a colored bar on top as well as its written label. */
+.progress-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3) var(--space-2);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.progress-tile--learning {
+  border-top-color: var(--color-attention);
+}
+
+.progress-tile--learned {
+  border-top-color: var(--color-success-text);
+}
+
+.progress-tile__count {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-tight);
+}
+
+.progress-tile__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.flashcards-options .button[aria-pressed="true"] {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.flashcard-study {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+}
+
+.flashcard-study__position {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.flashcard-study__progress {
+  width: 100%;
+  height: 0.5rem;
+  accent-color: var(--color-success);
+}
+
+/* The card is one button. Its two faces sit in the same grid cell, so the card
+   is as tall as the longer side, and turning it over never changes its size. */
+.flashcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text);
+  text-align: center;
+  cursor: pointer;
+  perspective: 80rem;
+}
+
+.flashcard__inner {
+  display: grid;
+  transition: transform var(--motion-base) var(--motion-ease);
+  transform-style: preserve-3d;
+}
+
+.flashcard--flipped .flashcard__inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard__face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 16rem;
+  padding: var(--space-6) var(--space-5);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12);
+  backface-visibility: hidden;
+}
+
+.flashcard__face--back {
+  background-color: var(--color-subtle);
+  transform: rotateY(180deg);
+}
+
+.flashcard:hover .flashcard__face {
+  border-color: var(--color-accent);
+}
+
+.flashcard__side {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flashcard__text {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  white-space: pre-wrap;
+}
+
+.flashcard__hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.flashcard-study__nav,
+.flashcard-study__rate {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.flashcards-manage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.flashcards-manage .flashcards-start__form {
+  justify-content: flex-start;
+}
+
+@media (min-width: 40rem) {
+  .viewer-toolbar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .flashcard__face {
+    min-height: 20rem;
+  }
+
+  .flashcard__text {
+    font-size: var(--font-size-xl);
+  }
+}
+
 /* ---------- Windows High Contrast (forced colors) ---------- */
 
 @media (forced-colors: active) {
   /* Colored backgrounds are removed in this mode, so states use borders instead. */
   .upvote-button[aria-pressed="true"],
+  .save-button[aria-pressed="true"],
+  .flashcards-options .button[aria-pressed="true"],
   .tab[aria-selected="true"],
   .site-nav__link[aria-current="page"] {
     border-color: Highlight;
@@ -1160,6 +1593,16 @@ input[type="file"].input {
 
   .skeleton {
     border: var(--border-width) solid GrayText;
+  }
+
+  /* Subject colors are replaced by system colors here; the written subject
+     names still say which is which. */
+  .subject-legend__swatch {
+    border: var(--border-width) solid CanvasText;
+  }
+
+  .flashcard__face {
+    border-color: ButtonText;
   }
 
   /* The drawn arrow uses a fixed color that may vanish here, so the

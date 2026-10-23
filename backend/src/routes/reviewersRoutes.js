@@ -58,6 +58,22 @@ router.delete(
   reviewersController.removeUpvote
 );
 
+router.put(
+  '/:id/save',
+  rateLimit.writeLimiter,
+  auth.requireAuth,
+  reviewerAccess.loadReviewer,
+  reviewersController.saveReviewer
+);
+
+router.delete(
+  '/:id/save',
+  rateLimit.writeLimiter,
+  auth.requireAuth,
+  reviewerAccess.loadReviewer,
+  reviewersController.unsaveReviewer
+);
+
 router.post(
   '/:id/view',
   rateLimit.writeLimiter,

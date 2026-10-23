@@ -21,7 +21,11 @@ export const getReviewer = (reviewerId) => {
 
 // A plain link to the file. File reads are public, so no token is needed
 // and the link can be opened in a new tab or shared.
-export const getFileUrl = (reviewerId) => {
+// isDownload: true makes the browser save the file instead of showing it.
+export const getFileUrl = (reviewerId, isDownload) => {
+  if (isDownload) {
+    return `${API_URL}/api/reviewers/${reviewerId}/file?download=1`;
+  }
   return `${API_URL}/api/reviewers/${reviewerId}/file`;
 };
 
@@ -43,6 +47,16 @@ export const addUpvote = (reviewerId) => {
 
 export const removeUpvote = (reviewerId) => {
   return apiRequest(`/api/reviewers/${reviewerId}/upvote`, { method: 'DELETE' });
+};
+
+// Adds this reviewer to the user's "Saved" list. Answers { isSaved, savedId }.
+export const saveReviewer = (reviewerId) => {
+  return apiRequest(`/api/reviewers/${reviewerId}/save`, { method: 'PUT' });
+};
+
+// Removes it again, together with the notes and flashcards made for it.
+export const unsaveReviewer = (reviewerId) => {
+  return apiRequest(`/api/reviewers/${reviewerId}/save`, { method: 'DELETE' });
 };
 
 // Adds this reviewer to the user's "Recently viewed" list.

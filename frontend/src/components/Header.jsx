@@ -94,6 +94,14 @@ function Header() {
                 Browse
               </NavLink>
             </li>
+            {auth.firebaseUser && (
+              <li>
+                <NavLink className="site-nav__link" to="/saved">
+                  <Icon name="bookmark" />
+                  Saved
+                </NavLink>
+              </li>
+            )}
             <li>
               <NavLink className="site-nav__link" to="/upload">
                 <Icon name="upload" />

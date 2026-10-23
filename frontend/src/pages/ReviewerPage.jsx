@@ -20,6 +20,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import FlashMessage from '../components/FlashMessage';
 import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
+import SaveButton from '../components/SaveButton';
 import Spinner from '../components/Spinner';
 import SubjectLink from '../components/SubjectLink';
 import TagList from '../components/TagList';
@@ -111,6 +112,11 @@ function ReviewerPage() {
       setDeleteError(err.message);
       setIsDeleting(false);
     }
+  };
+
+  // Saving makes the "Study" link appear; unsaving hides it again.
+  const handleSaveChange = (result) => {
+    setReviewer(Object.assign({}, reviewer, { isSaved: result.isSaved, savedId: result.savedId }));
   };
 
   const handleCloseDelete = () => {
@@ -216,6 +222,18 @@ function ReviewerPage() {
                 count={reviewer.upvoteCount}
                 hasUpvoted={reviewer.hasUpvoted}
               />
+              <SaveButton
+                reviewerId={reviewer.id}
+                title={reviewer.title}
+                isSaved={reviewer.isSaved}
+                onChange={handleSaveChange}
+              />
+              {reviewer.isSaved && (
+                <Link className="button" to={`/saved/${reviewer.savedId}`}>
+                  <Icon name="cards" />
+                  Study with notes and flashcards
+                </Link>
+              )}
               {reviewer.isOwner && (
                 <Link className="button" to={`/reviewers/${reviewer.id}/edit`}>
                   <Icon name="pencil" />
