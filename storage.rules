@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Uploaded files. Browsers may do exactly one thing: put a new file in their OWN
+// inbox folder, "pending/<their uid>/". The API then checks the file again and moves
+// it to "reviewers/". Reading files happens through short-lived links the API makes,
+// so nobody can list, read, change, or delete files here directly.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /pending/{uid}/{fileName} {
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        // 10 MB, the same limit as MAX_FILE_SIZE_MB in the backend settings.
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.size > 0
+        // Keep in step with ALLOWED_FILE_TYPES in backend/src/utils/storedFiles.js.
+        && request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'text/plain',
+          'image/png',
+          'image/jpeg'
+        ];
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

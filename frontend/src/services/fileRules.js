@@ -23,6 +23,24 @@ export const getExtension = (fileName) => {
   return parts[parts.length - 1];
 };
 
+// The content type each allowed extension is stored with. Keep in step with
+// ALLOWED_FILE_TYPES in backend/src/utils/storedFiles.js and with storage.rules.
+const CONTENT_TYPES = {
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  txt: 'text/plain',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
+
+export const findContentType = (fileName) => {
+  return CONTENT_TYPES[getExtension(fileName)] || 'application/octet-stream';
+};
+
 // Word and PowerPoint files are accepted, but they can only be downloaded, not
 // opened inside LearnHub. Returns a friendly note for those, or '' for other files.
 export const describeOfficeLimits = (fileName) => {

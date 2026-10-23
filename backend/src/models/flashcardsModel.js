@@ -1,56 +1,88 @@
-// All SQL for the "flashcards" table lives in this file.
-const pool = require('../config/db');
+// All database code for flashcards lives in this file.
+// Each card is one document in the "flashcards" collection, named after its number,
+// and remembers which saved item it belongs to.
+const { db } = require('../config/firebase');
+const countersModel = require('./countersModel');
+
+const cardsCollection = db.collection('flashcards');
+
+const toCardRow = (doc) => {
+  const data = doc.data();
+  return {
+    id: Number(doc.id),
+    position: data.position,
+    front: data.front,
+    back: data.back,
+    status: data.status,
+  };
+};
 
 const listFlashcards = async (savedItemId) => {
   // List the cards of one saved item in the order they were made.
-  const result = await pool.query(
-    `SELECT id, position, front, back, status
-     FROM flashcards
-     WHERE saved_item_id = $1
-     ORDER BY position ASC, id ASC`,
-    [savedItemId]
-  );
-  return result.rows;
+  const snapshot = await cardsCollection.where('savedItemId', '==', savedItemId).get();
+  const cards = snapshot.docs.map(toCardRow);
+  cards.sort((a, b) => {
+    if (a.position !== b.position) {
+      return a.position - b.position;
+    }
+    return a.id - b.id;
+  });
+  return cards;
 };
 
 const replaceFlashcards = async (savedItemId, cards) => {
-  // Swap the old set for a new one. A transaction makes it all-or-nothing:
-  // if any INSERT fails, the old cards are kept instead of a half-made set.
-  // The same client must run every statement, so it is borrowed from the pool.
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    await client.query('DELETE FROM flashcards WHERE saved_item_id = $1', [savedItemId]);
-    for (let index = 0; index < cards.length; index += 1) {
-      await client.query(
-        'INSERT INTO flashcards (saved_item_id, position, front, back) VALUES ($1, $2, $3, $4)',
-        [savedItemId, index + 1, cards[index].front, cards[index].back]
-      );
-    }
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
+  // Swap the old set for a new one. The transaction makes it all-or-nothing:
+  // if anything fails, the old cards are kept instead of a half-made set.
+  // (At most 100 old and 100 new cards: well inside Firestore's 500 writes per transaction.)
+  const savedRef = db.collection('savedItems').doc(String(savedItemId));
+  const oldCardsQuery = cardsCollection.where('savedItemId', '==', savedItemId);
+
+  await db.runTransaction(async (transaction) => {
+    const oldCards = await transaction.get(oldCardsQuery);
+    const firstId = await countersModel.takeIds(transaction, 'flashcards', cards.length);
+
+    oldCards.docs.forEach((doc) => {
+      transaction.delete(doc.ref);
+    });
+    const now = new Date();
+    cards.forEach((card, index) => {
+      transaction.set(cardsCollection.doc(String(firstId + index)), {
+        savedItemId: savedItemId,
+        position: index + 1,
+        front: card.front,
+        back: card.back,
+        status: 'new',
+        createdAt: now,
+      });
+    });
+    transaction.update(savedRef, { flashcardCount: cards.length });
+  });
 };
 
 const deleteFlashcardsForItem = async (savedItemId) => {
   // Remove every card of one saved item.
-  await pool.query('DELETE FROM flashcards WHERE saved_item_id = $1', [savedItemId]);
+  const savedRef = db.collection('savedItems').doc(String(savedItemId));
+  const snapshot = await cardsCollection.where('savedItemId', '==', savedItemId).get();
+  const batch = db.batch();
+  snapshot.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  batch.update(savedRef, { flashcardCount: 0 });
+  await batch.commit();
 };
 
 const updateFlashcardStatus = async (cardId, savedItemId, status) => {
-  // Change how well a card is known. Checking saved_item_id too means a card can
+  // Change how well a card is known. Checking savedItemId too means a card can
   // only be changed through the saved item it belongs to.
-  const result = await pool.query(
-    `UPDATE flashcards SET status = $1
-     WHERE id = $2 AND saved_item_id = $3
-     RETURNING id, position, front, back, status`,
-    [status, cardId, savedItemId]
-  );
-  return result.rows[0] || null;
+  const ref = cardsCollection.doc(String(cardId));
+  const doc = await ref.get();
+  if (!doc.exists || doc.get('savedItemId') !== savedItemId) {
+    return null;
+  }
+  await ref.update({ status: status });
+  const updated = toCardRow(doc);
+  updated.status = status;
+  return updated;
 };
 
 module.exports = {

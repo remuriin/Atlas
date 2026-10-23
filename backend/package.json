@@ -2,25 +2,22 @@
   "name": "learnhub-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "LearnHub API: Express + Postgres (plain SQL) + Firebase token verification",
-  "main": "src/server.js",
+  "description": "LearnHub API: Express on Cloud Functions + Firestore + Cloud Storage + Firebase Auth",
+  "main": "src/index.js",
   "engines": {
-    "node": ">=20"
+    "node": "22"
   },
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
-    "db:migrate": "node db/migrate.js",
-    "db:seed": "node db/seed.js"
+    "serve": "firebase emulators:start --project demo-learnhub",
+    "seed": "node scripts/seed-demo.js",
+    "import": "node scripts/import-postgres-export.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.1",
     "firebase-admin": "^14.5.0",
-    "helmet": "^8.3.0",
-    "multer": "^2.4.0",
-    "pg": "^8.23.1"
+    "firebase-functions": "^7.4.0",
+    "helmet": "^8.3.0"
   }
 }

@@ -26,7 +26,6 @@ const loadReviewer = async (req, res, next) => {
 };
 
 // Runs after requireAuth and loadReviewer. Only the author may continue.
-// This runs BEFORE the file upload step, so strangers cannot fill the disk.
 const requireOwner = (req, res, next) => {
   if (req.reviewer.author_id !== req.user.id) {
     next(createHttpError(403, 'Only the person who uploaded this study reviewer can change it.'));

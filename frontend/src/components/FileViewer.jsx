@@ -8,8 +8,7 @@
 //
 // props: item   the saved item from the API (item.reviewer is null when removed)
 import { useEffect, useState } from 'react';
-import { apiRequestBlob } from '../services/api';
-import { getFileUrl } from '../services/reviewersService';
+import { fetchReviewerFile, getFileUrl } from '../services/reviewersService';
 import { describeFileType, formatFileSize } from '../services/format';
 import Alert from './Alert';
 import Icon from './Icon';
@@ -59,7 +58,7 @@ function FileViewer(props) {
     const loadFile = async () => {
       setStatus('loading');
       try {
-        const blob = await apiRequestBlob(`/api/reviewers/${reviewerId}/file`);
+        const blob = await fetchReviewerFile(reviewerId);
         if (isCancelled) {
           return;
         }

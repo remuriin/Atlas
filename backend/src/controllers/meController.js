@@ -28,7 +28,9 @@ const updateMe = async (req, res, next) => {
   try {
     const body = req.body || {};
     const displayName = validate.validateDisplayName(body.displayName);
-    const updatedUser = await usersModel.updateUserDisplayName(req.user.id, displayName);
+    const updatedUser = await usersModel.updateUserDisplayName(req.user.firebase_uid, displayName);
+    // Every reviewer shows its author's name, so update those too.
+    await reviewersModel.renameAuthor(req.user.id, displayName);
     res.json(toProfileJson(updatedUser));
   } catch (err) {
     next(err);

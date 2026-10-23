@@ -1,34 +1,68 @@
-// All SQL for the "users" table lives in this file.
-const pool = require('../config/db');
+// All database code for users lives in this file.
+// Each user is one document in the "users" collection, named after their Firebase uid.
+// Passwords are NOT stored here: Firebase Authentication owns them.
+const { db } = require('../config/firebase');
+const countersModel = require('./countersModel');
+const modelHelpers = require('./modelHelpers');
+
+const usersCollection = db.collection('users');
+
+// Turns a user document into the row shape the rest of the API uses.
+const toUserRow = (doc) => {
+  const data = doc.data();
+  return {
+    id: data.id,
+    firebase_uid: doc.id,
+    display_name: data.displayName,
+    email: data.email,
+    created_at: modelHelpers.toDate(data.createdAt),
+  };
+};
 
 const findUserByFirebaseUid = async (firebaseUid) => {
   // Find the user that belongs to a Firebase account.
-  const result = await pool.query(
-    'SELECT id, firebase_uid, display_name, email, created_at FROM users WHERE firebase_uid = $1',
-    [firebaseUid]
-  );
-  return result.rows[0] || null;
+  const doc = await usersCollection.doc(firebaseUid).get();
+  if (!doc.exists) {
+    return null;
+  }
+  return toUserRow(doc);
 };
+
+// Firestore's error code for "that document already exists".
+const ALREADY_EXISTS = 6;
 
 const createUser = async (firebaseUid, displayName, email) => {
-  // Add a new user row and return it.
-  const result = await pool.query(
-    `INSERT INTO users (firebase_uid, display_name, email)
-     VALUES ($1, $2, $3)
-     RETURNING id, firebase_uid, display_name, email, created_at`,
-    [firebaseUid, displayName, email]
-  );
-  return result.rows[0];
+  // Add a new user and return it. Two requests from a brand new user can arrive
+  // together (for example loading the profile while saving the chosen name).
+  // "create" never overwrites, so the second one simply finds the first one's user
+  // instead of replacing a name that was saved in between.
+  const ref = usersCollection.doc(firebaseUid);
+  try {
+    await db.runTransaction(async (transaction) => {
+      const existing = await transaction.get(ref);
+      if (existing.exists) {
+        return;
+      }
+      const id = await countersModel.takeIds(transaction, 'users', 1);
+      transaction.create(ref, {
+        id: id,
+        displayName: displayName,
+        email: email,
+        createdAt: new Date(),
+      });
+    });
+  } catch (err) {
+    if (err.code !== ALREADY_EXISTS) {
+      throw err;
+    }
+  }
+  return findUserByFirebaseUid(firebaseUid);
 };
 
-const updateUserDisplayName = async (userId, displayName) => {
-  // Change a user's display name and return the updated row.
-  const result = await pool.query(
-    `UPDATE users SET display_name = $1 WHERE id = $2
-     RETURNING id, firebase_uid, display_name, email, created_at`,
-    [displayName, userId]
-  );
-  return result.rows[0] || null;
+const updateUserDisplayName = async (firebaseUid, displayName) => {
+  // Change a user's display name and return the updated user.
+  await usersCollection.doc(firebaseUid).update({ displayName: displayName });
+  return findUserByFirebaseUid(firebaseUid);
 };
 
 module.exports = {

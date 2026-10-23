@@ -5,8 +5,7 @@
 //   PPTX:           the text of each slide is pulled out of ppt/slides/slideN.xml
 //   DOC, PPT:       old binary formats that cannot be read; the person is told why
 // DOCX and PPTX files are ZIP archives of XML files; zipReader opens them.
-const fs = require('fs');
-const upload = require('../middleware/upload');
+const storedFiles = require('./storedFiles');
 const createHttpError = require('./httpError');
 const zipReader = require('./zipReader');
 
@@ -105,12 +104,8 @@ const buildMaterialParts = async (reviewer) => {
     );
   }
 
-  let fileBuffer;
-  try {
-    fileBuffer = await fs.promises.readFile(upload.getStoredFilePath(reviewer.stored_name));
-  } catch (err) {
-    throw createHttpError(404, 'The file for this study reviewer is missing.');
-  }
+  // Throws a 404 error when the file is missing.
+  const fileBuffer = await storedFiles.readStoredFile(reviewer.stored_name);
 
   if (DIRECT_MIME_TYPES.indexOf(reviewer.file_mime) !== -1) {
     return [{ inlineData: { mimeType: reviewer.file_mime, data: fileBuffer.toString('base64') } }];

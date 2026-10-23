@@ -28,7 +28,14 @@ export function AuthProvider(props) {
       // Calling GET /api/me also creates the profile row for a brand new account.
       try {
         const loadedProfile = await getMyProfile();
-        setProfile(loadedProfile);
+        // Creating an account saves the chosen display name at the same time. If that
+        // finished first, its profile is newer than this one, so keep it.
+        setProfile((currentProfile) => {
+          if (currentProfile && currentProfile.id === loadedProfile.id) {
+            return currentProfile;
+          }
+          return loadedProfile;
+        });
       } catch (err) {
         // The person is still logged in; pages that need the profile show their own error.
         setProfile(null);
