@@ -1,14 +1,20 @@
 // Everything that talks to Firebase Authentication.
 // Pages call these functions and never import Firebase themselves.
 import {
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
   signOut,
   sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { updateMyProfile } from './profileService';
+
+// Where to go after a Google sign-in that had to leave the page (see below).
+const RETURN_PATH_KEY = 'learnhub-return-path';
 
 // Creates the Firebase account, then saves the chosen display name in our API.
 // Returns the saved LearnHub profile.
@@ -21,6 +27,49 @@ export const register = async (displayName, email, password) => {
 
 export const login = async (email, password) => {
   await signInWithEmailAndPassword(auth, email, password);
+};
+
+// Signs in with a Google account in a small pop-up window. The Google account's
+// name and profile picture come along with it. A new Google user gets a LearnHub
+// profile the same way as anyone else (on their first request to /api/me).
+// returnPath: the page to come back to if the pop-up is blocked and the whole
+// page has to go to Google instead.
+export const loginWithGoogle = async (returnPath) => {
+  const provider = new GoogleAuthProvider();
+  // Always show the account chooser, so people with several Google accounts can pick one.
+  provider.setCustomParameters({ prompt: 'select_account' });
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    if (err.code !== 'auth/popup-blocked') {
+      throw err;
+    }
+    // The browser blocked the pop-up: go to Google in this tab instead. The page
+    // reloads afterwards, so the return path is remembered for that moment.
+    try {
+      window.sessionStorage.setItem(RETURN_PATH_KEY, returnPath || '/');
+    } catch (storageErr) {
+      // Storage can be blocked (private browsing); the home page is used then.
+    }
+    await signInWithRedirect(auth, provider);
+  }
+};
+
+// The page to return to after a redirected Google sign-in ('' when there is none).
+export const readReturnPath = () => {
+  try {
+    return window.sessionStorage.getItem(RETURN_PATH_KEY) || '';
+  } catch (err) {
+    return '';
+  }
+};
+
+export const clearReturnPath = () => {
+  try {
+    window.sessionStorage.removeItem(RETURN_PATH_KEY);
+  } catch (err) {
+    // Nothing to clear if storage is blocked.
+  }
 };
 
 export const logout = async () => {
@@ -67,6 +116,19 @@ export const describeAuthError = (err) => {
   }
   if (code === 'auth/network-request-failed') {
     return 'Could not reach the login service. Check your internet connection and try again.';
+  }
+  // Google sign-in. Closing the pop-up on purpose is not an error worth showing.
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    return '';
+  }
+  if (code === 'auth/operation-not-allowed') {
+    return 'Google sign-in is not turned on yet. Use your email and password for now.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return 'Google sign-in is not allowed on this web address yet. Use your email and password for now.';
+  }
+  if (code === 'auth/account-exists-with-different-credential') {
+    return 'An account with this email already exists. Log in with your email and password instead.';
   }
   // Errors from our own API already have a friendly message.
   if (code === '' && err.message) {
