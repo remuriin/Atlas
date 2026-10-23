@@ -1,13 +1,20 @@
 // Log in. This page has a second view for resetting a forgotten password,
 // reached at /login?mode=reset, so the browser's Back button returns to the
 // login form.
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { describeAuthError, login, sendPasswordReset } from '../services/authService';
+import {
+  clearReturnPath,
+  describeAuthError,
+  login,
+  readReturnPath,
+  sendPasswordReset,
+} from '../services/authService';
 import Alert from '../components/Alert';
 import ErrorSummary from '../components/ErrorSummary';
 import FormField from '../components/FormField';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import PageHeading from '../components/PageHeading';
 import Spinner from '../components/Spinner';
 
@@ -44,6 +51,18 @@ function LoginPage() {
       reasonMessage = location.state.message;
     }
   }
+  // Coming back from a Google sign-in that left the page (pop-up was blocked).
+  const rememberedPath = readReturnPath();
+  if (rememberedPath !== '') {
+    returnPath = rememberedPath;
+  }
+
+  // Once logged in, the remembered path has done its job.
+  useEffect(() => {
+    if (auth.firebaseUser) {
+      clearReturnPath();
+    }
+  }, [auth.firebaseUser]);
 
   // Shows the problems and puts the cursor in the first field that has one.
   const showErrors = (found) => {
@@ -211,6 +230,11 @@ function LoginPage() {
         {reasonMessage !== '' && <Alert type="info">{reasonMessage}</Alert>}
         <ErrorSummary errors={summaryErrors} />
         {submitError !== '' && <Alert type="error">{submitError}</Alert>}
+
+        <GoogleSignInButton returnPath={returnPath} onError={setSubmitError} />
+        <p className="form-divider">
+          <span>or log in with email</span>
+        </p>
 
         <FormField
           id="login-email"

@@ -6,6 +6,7 @@ import { describeAuthError, register } from '../services/authService';
 import Alert from '../components/Alert';
 import ErrorSummary from '../components/ErrorSummary';
 import FormField from '../components/FormField';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import PageHeading from '../components/PageHeading';
 import Spinner from '../components/Spinner';
 
@@ -115,6 +116,12 @@ function RegisterPage() {
       <form className="form" onSubmit={handleSubmit} noValidate>
         <ErrorSummary errors={summaryErrors} />
         {submitError !== '' && <Alert type="error">{submitError}</Alert>}
+
+        {/* A Google account needs no form: its name and picture come with it. */}
+        <GoogleSignInButton returnPath={returnPath} onError={setSubmitError} />
+        <p className="form-divider">
+          <span>or sign up with email</span>
+        </p>
 
         <FormField
           id="register-displayName"

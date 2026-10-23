@@ -15,6 +15,7 @@ import Alert from '../components/Alert';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import FlashMessage from '../components/FlashMessage';
+import Avatar from '../components/Avatar';
 import FormField from '../components/FormField';
 import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
@@ -212,6 +213,19 @@ function ProfilePage() {
     memberSince = formatDate(auth.profile.createdAt);
   }
 
+  // Google accounts bring their picture with them; email accounts show initials.
+  let photoUrl = null;
+  let signInText = 'Signed in with email. Accounts signed in with Google show their Google picture.';
+  if (auth.firebaseUser) {
+    photoUrl = auth.firebaseUser.photoURL;
+    const usesGoogle = auth.firebaseUser.providerData.some(
+      (provider) => provider.providerId === 'google.com'
+    );
+    if (usesGoogle) {
+      signInText = 'Signed in with Google. Your picture comes from your Google account.';
+    }
+  }
+
   let dialogMessage = '';
   if (reviewerToDelete) {
     dialogMessage = `“${reviewerToDelete.title}” and its file will be removed for everyone. This cannot be undone.`;
@@ -251,6 +265,13 @@ function ProfilePage() {
 
         {auth.profile && (
           <div className="card card--padded card--narrow">
+            <div className="profile-identity">
+              <Avatar photoUrl={photoUrl} name={auth.profile.displayName} size="large" />
+              <div>
+                <p className="profile-identity__name">{auth.profile.displayName}</p>
+                <p className="text-muted text-small">{signInText}</p>
+              </div>
+            </div>
             <dl className="profile-details">
               <dt>Email (only you can see this)</dt>
               <dd>{email}</dd>

@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { logout } from '../services/authService';
+import Avatar from './Avatar';
 import Icon from './Icon';
 import ThemeToggle from './ThemeToggle';
 
@@ -120,7 +121,10 @@ function Header() {
 
           <div className="site-nav__actions">
             {auth.firebaseUser && displayName !== '' && (
-              <span className="site-nav__user">Logged in as {displayName}</span>
+              <span className="site-nav__user">
+                <Avatar photoUrl={auth.firebaseUser.photoURL} name={displayName} size="small" />
+                <span>Logged in as {displayName}</span>
+              </span>
             )}
             <ThemeToggle />
             {auth.firebaseUser && (

@@ -7,6 +7,11 @@ social feature: there are no comments, threads, chat, ratings, or written review
 In the code a study reviewer is called a `reviewer` (table, routes, components). In the UI it is
 always written "study reviewer".
 
+People can sign up with an email and password, or with **"Continue with Google"**. Google
+accounts bring their name and profile picture; the picture shows beside "Logged in as …" and on
+the Profile page. Everyone else (and anyone whose picture fails to load) gets a circle with their
+initials. A Google sign-in with the same email as an existing account opens that same account.
+
 Logged-in users also get private study tools:
 
 - **Subject colors.** Every subject has its own color, shown as a stripe on each card and on its
@@ -217,6 +222,9 @@ Then, in the [Firebase console](https://console.firebase.google.com):
 
 1. Open your project → **Build → Authentication** → **Get started** (first time only).
 2. **Sign-in method** tab → **Email/Password** → switch **Enable** on → **Save**.
+   Then **Add new provider** → **Google** → switch **Enable** on → choose a project support
+   email → **Save**. (Until this is done, "Continue with Google" says Google sign-in is not
+   turned on yet.)
 3. **Settings** tab → **Authorized domains** → **Add domain** → enter the domain the website will be
    served from (for example `learnhub.example.com`) → **Add**. `localhost` is already allowed.
 
