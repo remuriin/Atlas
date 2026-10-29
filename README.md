@@ -85,6 +85,14 @@ Logged-in users also get private study tools:
   account is needed.
 - **Upvote counts are never stored.** They are counted with `COUNT(*)` each time, so they cannot
   drift out of sync.
+- **Every upload is checked before it is saved** (`backend/src/middleware/checkUpload.js`). The
+  extension and the browser's content type must match the allowlist, then the file's own bytes must
+  match too: a PDF must start with `%PDF-`, a PNG or JPG with its image signature, a DOCX or PPTX
+  must be a real Office archive, and a text file must hold no binary bytes. PDFs with scripts or
+  attached files (`/JavaScript`, `/JS`, `/Launch`, `/EmbeddedFile`) and Office files with macros
+  (`vbaProject.bin`) are refused. Old `.doc` and `.ppt` are not accepted, because they can carry
+  macros. Last, ClamAV scans the file (`CLAMAV_MODE`). A refused file is deleted at once, and if
+  the scan cannot run, the upload is refused instead of let through.
 
 ```
 atlas/
@@ -171,6 +179,8 @@ placeholder database URL.
 | `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
 | `GEMINI_API_KEY` | Google Gemini key for making flashcards (from https://aistudio.google.com/apikey). **Secret: server only, never in `frontend/.env`.** Leave empty to turn flashcards off; everything else keeps working. |
 | `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
+| `CLAMAV_MODE` | Virus scan for uploads: `off` (default, development only), `daemon` (the ClamAV service; fast, keeps about 1-1.5 GB of RAM in use), or `command` (runs `clamscan` per upload; low RAM, 10-30 s per upload). In production, `off` logs a warning at start. |
+| `CLAMAV_SOCKET` | `daemon` mode only: the ClamAV service's socket. Default `/var/run/clamav/clamd.ctl` (Ubuntu and Debian). |
 
 ### `frontend/.env` (template: `frontend/.env.example`)
 
@@ -293,8 +303,19 @@ database port then never needs to be open to the internet.
    - `FRONTEND_ORIGIN=https://atlas.example.com` (your real domain, no trailing slash)
    - `TRUST_PROXY=true`
    - `GEMINI_API_KEY=<your key>` (only needed for flashcards)
-3. **Create the tables:** `npm run db:migrate`.
-4. **Keep the API running** with pm2:
+   - `CLAMAV_MODE=daemon` (or `command` on a server with less than 2 GB of RAM; check with `free -h`)
+3. **Install ClamAV** (about 15 minutes; `freshclam` downloads the virus list and keeps it updated):
+
+   ```bash
+   sudo apt install clamav clamav-daemon
+   sudo systemctl stop clamav-freshclam && sudo freshclam && sudo systemctl start clamav-freshclam
+   sudo systemctl enable --now clamav-daemon   # daemon mode only
+   ```
+
+   Check it with the harmless EICAR test file: uploading it must be refused with "The virus scan
+   flagged this file as unsafe". The log shows `Virus scan blocked an upload ... Eicar-Signature`.
+4. **Create the tables:** `npm run db:migrate`.
+5. **Keep the API running** with pm2:
 
    ```bash
    npm install -g pm2
@@ -325,12 +346,12 @@ database port then never needs to be open to the internet.
    The user that runs the API needs write access to `UPLOAD_DIR`. Back that folder up together
    with the database: a reviewer is a database row **plus** a file.
 
-5. **Build the frontend** with production values in `frontend/.env`
+6. **Build the frontend** with production values in `frontend/.env`
    (`VITE_API_URL=https://atlas.example.com`, `VITE_USE_AUTH_EMULATOR=false`, the four real
    `VITE_FIREBASE_*` values), then `cd frontend && npm ci && npm run build`. The result is the
    static folder `frontend/dist`.
 
-6. **nginx** serves `dist` and passes `/api` to the backend, with HTTPS (for example from
+7. **nginx** serves `dist` and passes `/api` to the backend, with HTTPS (for example from
    Let's Encrypt via `certbot --nginx`):
 
    ```nginx
@@ -359,7 +380,7 @@ database port then never needs to be open to the internet.
    }
    ```
 
-7. **Add the domain to Firebase authorized domains** (console steps above), or logins from the real
+8. **Add the domain to Firebase authorized domains** (console steps above), or logins from the real
    site are refused.
 
 ### If the database must be on a different machine
@@ -520,8 +541,11 @@ results, the chosen file, save success, and delete success are announced politel
   example "Mathematics") is added to their tags. Uploaders should edit them to the right category.
   One that already had 8 tags then has 9, and must drop one before it can be saved again.
 - Word and PowerPoint files cannot be shown inside the app, only downloaded. The upload form
-  recommends PDF, image, or text files for that reason. Old `.doc` and `.ppt` files also cannot
-  be turned into flashcards.
+  recommends PDF, image, or text files for that reason. Old `.doc` and `.ppt` files can no longer
+  be uploaded; ones uploaded before still download, but cannot be turned into flashcards.
+- The PDF script check reads the file as it is stored. A script hidden inside a compressed part of
+  the PDF is not seen by it; ClamAV is the second line there, and the report button (planned) the third.
+- ClamAV only knows malware that is already on its list, so a brand-new threat can pass it.
 - Some phone browsers show only the first page of a PDF (or a link) inside the study page.
   "Open in new tab" there always shows the whole file.
 - Flashcards are written by AI and can contain mistakes; the page says so. The daily limit of 10

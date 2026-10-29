@@ -82,6 +82,21 @@ if (geminiModel === '') {
   geminiModel = 'gemini-3.5-flash-lite';
 }
 
+// How uploads are virus-scanned (see src/utils/virusScan.js): off, daemon, or command.
+let clamavMode = (process.env.CLAMAV_MODE || 'off').trim();
+if (['off', 'daemon', 'command'].indexOf(clamavMode) === -1) {
+  stopWithMessage([
+    `CLAMAV_MODE is "${clamavMode}", which is not one of: off, daemon, command.`,
+    '',
+    'What to do:',
+    '  1. Open backend/.env',
+    '  2. Set CLAMAV_MODE to daemon (ClamAV service running) or command (clamscan per upload)',
+  ]);
+}
+if (isProduction && clamavMode === 'off') {
+  console.warn('Warning: CLAMAV_MODE is off, so uploads are not virus-scanned.');
+}
+
 module.exports = {
   backendRoot: backendRoot,
   port: Number(process.env.PORT) || 4000,
@@ -97,5 +112,8 @@ module.exports = {
   trustProxy: process.env.TRUST_PROXY === 'true',
   geminiApiKey: (process.env.GEMINI_API_KEY || '').trim(),
   geminiModel: geminiModel,
+  clamavMode: clamavMode,
+  // The Ubuntu/Debian ClamAV service listens here by default.
+  clamavSocket: (process.env.CLAMAV_SOCKET || '/var/run/clamav/clamd.ctl').trim(),
   isProduction: isProduction,
 };
