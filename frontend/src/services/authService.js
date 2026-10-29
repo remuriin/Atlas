@@ -7,11 +7,12 @@ import {
   signInWithPopup,
   signInWithRedirect,
   signOut,
+  deleteUser,
   sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase';
-import { updateMyProfile } from './profileService';
+import { deleteMyAccount, updateMyProfile } from './profileService';
 
 // Where to go after a Google sign-in that had to leave the page (see below).
 const RETURN_PATH_KEY = 'atlas-return-path';
@@ -74,6 +75,18 @@ export const clearReturnPath = () => {
 
 export const logout = async () => {
   await signOut(auth);
+};
+
+// Deletes everything in Atlas first, then the Firebase login. The server only agrees
+// within 5 minutes of logging in, which is also what Firebase needs for its part.
+// If Firebase still refuses, the person is logged out: their Atlas data is gone either way.
+export const deleteAccount = async () => {
+  await deleteMyAccount();
+  try {
+    await deleteUser(auth.currentUser);
+  } catch (err) {
+    await signOut(auth);
+  }
 };
 
 export const sendPasswordReset = async (email) => {

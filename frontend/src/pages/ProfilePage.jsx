@@ -1,6 +1,6 @@
 // Your own page: account details, recently viewed, and your uploads.
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import {
   getMyProfile,
@@ -9,6 +9,7 @@ import {
   updateMyProfile,
 } from '../services/profileService';
 import { deleteReviewer } from '../services/reviewersService';
+import { deleteAccount, logout } from '../services/authService';
 import { countLabel, formatDate } from '../services/format';
 import { clearFeed } from '../services/feedMemory';
 import Alert from '../components/Alert';
@@ -27,6 +28,7 @@ const NAME_MAX = 50;
 
 function ProfilePage() {
   const auth = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Display name form.
   let startName = '';
@@ -54,6 +56,13 @@ function ProfilePage() {
   const [deleteError, setDeleteError] = useState('');
   const [deleteMessage, setDeleteMessage] = useState('');
   const [deletedCount, setDeletedCount] = useState(0);
+
+  // Deleting the whole account.
+  const [isAccountDeleteOpen, setIsAccountDeleteOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [accountDeleteError, setAccountDeleteError] = useState('');
+  // True when the server asked for a fresh login first.
+  const [needsFreshLogin, setNeedsFreshLogin] = useState(false);
 
   // If the profile could not be loaded when the app started, try once more here.
   useEffect(() => {
@@ -225,6 +234,33 @@ function ProfilePage() {
       signInText = 'Signed in with Google. Your picture comes from your Google account.';
     }
   }
+
+  const handleAccountDelete = async () => {
+    setIsDeletingAccount(true);
+    setAccountDeleteError('');
+    try {
+      await deleteAccount();
+      clearFeed();
+      navigate('/', { state: { flash: 'Your account and everything in it were deleted.' } });
+    } catch (err) {
+      setIsDeletingAccount(false);
+      if (err.status === 401) {
+        // The login is too old: close the dialog and offer a fresh one.
+        setIsAccountDeleteOpen(false);
+        setNeedsFreshLogin(true);
+      } else {
+        setAccountDeleteError(err.message);
+      }
+    }
+  };
+
+  // Logs out and comes back here after logging in, so deleting can be done right away.
+  const handleFreshLogin = async () => {
+    await logout();
+    navigate('/login', {
+      state: { from: '/profile', message: 'Log in again to delete your account.' },
+    });
+  };
 
   let dialogMessage = '';
   if (reviewerToDelete) {
@@ -401,6 +437,56 @@ function ProfilePage() {
           )}
         </div>
       </section>
+
+      <section aria-labelledby="delete-account-heading">
+        <h2 id="delete-account-heading" className="section-heading">
+          Delete account
+        </h2>
+        <div className="card card--padded card--narrow stack">
+          <p>
+            This deletes your profile, every study reviewer you shared (and its file), your upvotes,
+            saved list, notes, flashcards, and reports, and your login. It cannot be undone.
+            Other people keep their own notes on reviewers they saved from you.
+          </p>
+          {needsFreshLogin && (
+            <div className="stack">
+              <Alert type="info">
+                For your safety, log in again, then delete your account within 5 minutes.
+              </Alert>
+              <div>
+                <button type="button" className="button button--primary" onClick={handleFreshLogin}>
+                  Log in again
+                </button>
+              </div>
+            </div>
+          )}
+          <div>
+            <button
+              type="button"
+              className="button button--danger-outline"
+              onClick={() => setIsAccountDeleteOpen(true)}
+            >
+              <Icon name="trash" />
+              Delete my account
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <ConfirmDialog
+        id="delete-account-dialog"
+        isOpen={isAccountDeleteOpen}
+        title="Delete your account?"
+        message="Everything listed above is removed for good. This cannot be undone."
+        confirmLabel="Delete my account"
+        isBusy={isDeletingAccount}
+        error={accountDeleteError}
+        onConfirm={handleAccountDelete}
+        onCancel={() => {
+          setIsAccountDeleteOpen(false);
+          setAccountDeleteError('');
+        }}
+      />
 
       <ConfirmDialog
         id="delete-upload-dialog"

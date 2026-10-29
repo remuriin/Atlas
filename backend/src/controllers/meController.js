@@ -6,6 +6,13 @@ const savedItemsModel = require('../models/savedItemsModel');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
 const env = require('../config/env');
+const upload = require('../middleware/upload');
+const createHttpError = require('../utils/httpError');
+
+// Deleting an account needs a login from the last few minutes, so someone who finds
+// a phone that was left logged in cannot do it. Firebase asks the same before it
+// deletes the login itself, so this also makes that step work.
+const RECENT_LOGIN_SECONDS = 5 * 60;
 
 const RECENTLY_VIEWED_LIMIT = 20;
 
@@ -80,7 +87,33 @@ const listMySaved = async (req, res, next) => {
   }
 };
 
+// DELETE /api/me   (removes the account and everything in it)
+const deleteMe = async (req, res, next) => {
+  try {
+    const secondsSinceLogin = Date.now() / 1000 - req.authTime;
+    if (!req.authTime || secondsSinceLogin > RECENT_LOGIN_SECONDS) {
+      throw createHttpError(
+        401,
+        'For your safety, log in again, then delete your account within 5 minutes.'
+      );
+    }
+
+    // Read the file names first: once the rows are gone, nothing points at the files.
+    const storedNames = await reviewersModel.listStoredNamesByAuthor(req.user.id);
+    await usersModel.deleteUser(req.user.id);
+    for (const storedName of storedNames) {
+      await upload.removeStoredFile(storedName);
+    }
+
+    console.log(`User ${req.user.id} deleted their account (${storedNames.length} files).`);
+    res.json({ deleted: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
+  deleteMe: deleteMe,
   listMySaved: listMySaved,
   getMe: getMe,
   updateMe: updateMe,

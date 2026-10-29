@@ -75,6 +75,9 @@ const requireAuth = async (req, res, next) => {
 
   try {
     req.user = await findOrCreateUser(decodedToken);
+    // When this person last typed their password or picked their Google account
+    // (seconds since 1970). Deleting an account asks for a recent one.
+    req.authTime = decodedToken.auth_time;
     next();
   } catch (err) {
     next(err);
