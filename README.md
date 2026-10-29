@@ -553,16 +553,15 @@ and admins, who must send their login with the file request too (the app does th
 
 ## How the feed behaves
 
-- **Visitors see a short intro above the feed** (`frontend/src/components/LandingIntro.jsx`):
-  who Atlas is for, four things it does that a shared drive or group chat does not, and
-  "Sign up free" / "Log in". It is on the feed itself, not a separate page, so the real study
-  reviewers below it back up the pitch. Logged-in users get one short line instead, and neither
-  shows until the login check finishes, so the intro never flashes past a logged-in user.
+- **The feed is at `/browse`.** `/` is the landing page (`frontend/src/pages/LandingPage.jsx`):
+  who Atlas is for, why it beats a shared drive or group chat, how it works, a card per strand
+  that opens the feed filtered to it, and "Sign up free". Logged-in users who open `/` go straight
+  to `/browse`. Old feed links such as `/?strand=STEM` are forwarded to `/browse?strand=STEM`.
 - **The header stays at the top** while you scroll (it is `position: sticky`). On very short
   screens, such as a phone on its side or a page zoomed to 400%, it scrolls away instead so it
   does not cover the content.
 - **Filters are in the address.** The tab, strand, grade, quarter, subject, and search words are
-  stored as `/?sort=new&strand=STEM&grade=11&q=cells`, so a filtered list can be bookmarked or shared and the
+  stored as `/browse?sort=new&strand=STEM&grade=11&q=cells`, so a filtered list can be bookmarked or shared and the
   browser's Back button steps through filter changes.
 - **Back returns you to the same place.** Opening a study reviewer and coming back (with the
   page's "Back" link or the browser's Back button) shows the same loaded cards at the same scroll

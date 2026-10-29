@@ -1,7 +1,7 @@
 // The feed: browse study reviewers by tab, strand, grade, quarter, subject, and search.
 //
 // The chosen tab, filters, and search words live in the page address
-// (for example /?sort=new&strand=STEM&grade=11). That way the browser's Back button
+// (for example /browse?sort=new&strand=STEM&grade=11). That way the browser's Back button
 // brings them back, and a filtered list can be bookmarked or shared.
 import { useContext, useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
@@ -21,7 +21,6 @@ import EmptyState from '../components/EmptyState';
 import FlashMessage from '../components/FlashMessage';
 import FormField from '../components/FormField';
 import Icon from '../components/Icon';
-import LandingIntro from '../components/LandingIntro';
 import PageHeading from '../components/PageHeading';
 import ReviewerList from '../components/ReviewerList';
 import SkeletonList from '../components/SkeletonList';
@@ -395,15 +394,10 @@ function HomePage() {
   return (
     <div className="feed-page">
       <PageHeading title="Study reviewers" />
-      {/* Visitors get the pitch; logged-in users the short line. Neither shows until
-          Firebase knows which one this is, so a logged-in user never sees the pitch flash by. */}
-      {!auth.isLoading && !auth.firebaseUser && <LandingIntro />}
-      {!auth.isLoading && auth.firebaseUser && (
-        <p className="page-intro">
-          Reviewers, notes, and practice tests made by Senior High students. Upvote the ones that
-          help you.
-        </p>
-      )}
+      <p className="page-intro">
+        Reviewers, notes, and practice tests made by Senior High students. Upvote the ones that
+        help you.
+      </p>
 
       <div className="flash-slot">
         <FlashMessage />

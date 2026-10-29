@@ -9,6 +9,7 @@ import SkipLink from './components/SkipLink';
 import AdminPage from './pages/AdminPage';
 import EditReviewerPage from './pages/EditReviewerPage';
 import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
@@ -37,7 +38,8 @@ function App() {
       {/* tabIndex -1 lets the skip link move focus here without adding a Tab stop. */}
       <main id="main-content" className="container main" tabIndex="-1">
         <Routes>
-          <Route path="/" element={<HomePage key={userKey} />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/browse" element={<HomePage key={userKey} />} />
           <Route path="/reviewers/:id" element={<ReviewerPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

@@ -199,7 +199,7 @@ function ReviewerPage() {
   return (
     <div className="page-narrow stack">
       <div>
-        <Link className="back-link" to="/" onClick={handleBackClick}>
+        <Link className="back-link" to="/browse" onClick={handleBackClick}>
           <Icon name="arrow-left" />
           {backText}
         </Link>
@@ -212,7 +212,7 @@ function ReviewerPage() {
         <div className="stack">
           <p>This study reviewer may have been deleted, or the link may be wrong.</p>
           <div>
-            <Link className="button" to="/">
+            <Link className="button" to="/browse">
               Browse study reviewers
             </Link>
           </div>

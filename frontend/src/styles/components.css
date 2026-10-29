@@ -612,60 +612,116 @@
   margin-bottom: var(--space-3);
 }
 
-/* ---------- Landing intro (visitors only, above the feed) ---------- */
+/* ---------- Landing page (/) ---------- */
 
-.landing-intro {
-  margin-bottom: var(--space-5);
-  padding: var(--space-5);
+.landing__hero {
+  padding: var(--space-6) var(--space-5);
   background-color: var(--color-subtle);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius);
 }
 
-.landing-intro__title {
-  margin-bottom: var(--space-2);
-  font-size: var(--font-size-lg);
+.landing__hero .page-heading {
+  font-size: var(--font-size-xl);
 }
 
-.landing-intro__lead {
-  margin-bottom: var(--space-4);
+.landing__lead {
+  max-width: 40rem;
+  margin: var(--space-3) 0 var(--space-5);
   color: var(--color-text-muted);
+  font-size: var(--font-size-md);
 }
 
-/* One column on phones, two side by side from tablet width. */
-.landing-intro__list {
-  display: grid;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-  padding: 0;
-  list-style: none;
-}
-
-.landing-intro__item {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-.landing-intro__item .icon {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  color: var(--color-accent);
-}
-
-.landing-intro__item-title {
-  display: block;
-}
-
-.landing-intro__actions {
+.landing__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
+/* One column on phones, two from tablet width, four strand cards per row on wide screens. */
+.landing__grid {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.landing__point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.landing__point .icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-accent);
+}
+
+.landing__point-title {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.landing__steps {
+  display: grid;
+  gap: var(--space-3);
+  padding-left: var(--space-5);
+}
+
+/* Each strand card carries its strand's color as a stripe, like the reviewer cards. */
+.landing__strand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  height: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--strand-color);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.landing__strand:hover strong {
+  text-decoration: underline;
+}
+
+.landing__strand-text {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.landing__closing {
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.landing__closing p {
+  margin-bottom: var(--space-4);
+}
+
 @media (min-width: 40rem) {
-  .landing-intro__list {
+  .landing__hero {
+    padding: var(--space-7) var(--space-6);
+  }
+
+  .landing__hero .page-heading {
+    font-size: 2rem;
+  }
+
+  .landing__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing__steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .landing__grid--strands {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

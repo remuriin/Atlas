@@ -114,7 +114,7 @@ function Header() {
         <nav id="main-menu" className={navClassName} aria-label="Main">
           <ul className="site-nav__list">
             <li>
-              <NavLink className="site-nav__link" to="/" end>
+              <NavLink className="site-nav__link" to="/browse">
                 <Icon name="home" />
                 Browse
               </NavLink>

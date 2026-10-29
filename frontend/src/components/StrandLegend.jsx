@@ -21,7 +21,7 @@ function StrandLegend(props) {
             <li key={strand}>
               <Link
                 className={`strand-legend__link strand--${strandSlug(strand)}`}
-                to={`/?strand=${encodeURIComponent(strand)}`}
+                to={`/browse?strand=${encodeURIComponent(strand)}`}
                 aria-current={ariaCurrent}
               >
                 <span className="strand-legend__swatch" aria-hidden="true"></span>

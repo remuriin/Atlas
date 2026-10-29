@@ -135,7 +135,7 @@ function SavedPage() {
           title="Nothing saved yet"
           message="Press Save on any study reviewer to keep it here, with room for your own notes and flashcards."
         >
-          <Link className="button button--primary" to="/">
+          <Link className="button button--primary" to="/browse">
             Browse study reviewers
           </Link>
         </EmptyState>
