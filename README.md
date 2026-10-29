@@ -25,6 +25,24 @@ need replacing once this year's Grade 12 finishes.
 In the code a study reviewer is called a `reviewer` (table, routes, components). In the UI it is
 always written "study reviewer".
 
+**Reports.** Any logged-in user can report someone else's study reviewer from its page, with a
+reason (Offensive, Spam, Irrelevant, Wrong category, Copyright) and optional details. Each person
+can have one open report per study reviewer. After **3 open reports from different people** it is
+hidden: it leaves the feed and Recently viewed, and its page, file, upvote, and save answer 404 to
+everyone except its uploader and the admins. Its uploader sees a "hidden" note. Admins see every
+reported study reviewer on the **Reports** page (`/admin`, linked in the menu only for admins) and
+choose one of: **Restore** (show it again), **Fix category** (move it and show it again), or
+**Delete** (remove it and its file). Each choice closes its open reports, which are kept as a
+record. Reporters are never shown to anyone.
+
+**Making an admin.** There is no admin sign-up. Log in once with the account, then on the server:
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+```
+
+They see the Reports link after their next page load. `role = 'member'` turns it off again.
+
 People can sign up with an email and password, or with **"Continue with Google"**. Google
 accounts bring their name and profile picture; the picture shows beside "Logged in as …" and on
 the Profile page. Everyone else (and anyone whose picture fails to load) gets a circle with their
@@ -423,9 +441,16 @@ add `"fields": { "title": "..." }`.
 | `GET` / `DELETE /api/saved/:savedId/flashcards` | mine | My flashcards for it / delete them |
 | `POST /api/saved/:savedId/flashcards` | mine | Make a new set with Gemini (JSON `{ count: 5 to 100 }`; fewer come back for short material), replacing the old one. 10 sets per user per day |
 | `PUT /api/saved/:savedId/flashcards/:cardId` | mine | Mark a card (JSON `{ status: "new", "learning" or "learned" }`) |
+| `POST /api/reviewers/:id/report` | yes | Report it (JSON `{ reason, details }`). 403 for your own, 409 if you already have an open report on it. The 3rd open report hides it |
+| `GET /api/admin/reports` | admin | Every study reviewer with open reports, with the reasons and details (no reporter names) |
+| `POST /api/admin/reviewers/:id/restore` | admin | Close its reports and show it again |
+| `PUT /api/admin/reviewers/:id/category` | admin | Move it (JSON `{ strand, grade, quarter, subject, materialType }`), close its reports, show it again |
+| `DELETE /api/admin/reviewers/:id` | admin | Delete it and its file |
 
 "mine" means logged in, and the saved item must be yours: anyone else's gets the same 404 as a
-missing one.
+missing one. "admin" means logged in with `users.role = 'admin'`; anyone else gets 403. A study
+reviewer hidden by reports answers 404 on every `/api/reviewers/:id` route except to its uploader
+and admins, who must send their login with the file request too (the app does this for them).
 
 ## Code rules this project follows
 

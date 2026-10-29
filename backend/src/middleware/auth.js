@@ -107,7 +107,17 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
+// Runs after requireAuth. Only admins may continue.
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    next(createHttpError(403, 'Only admins can do that.'));
+    return;
+  }
+  next();
+};
+
 module.exports = {
   requireAuth: requireAuth,
   optionalAuth: optionalAuth,
+  requireAdmin: requireAdmin,
 };

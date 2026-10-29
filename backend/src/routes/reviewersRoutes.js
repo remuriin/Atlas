@@ -12,8 +12,20 @@ const router = express.Router();
 
 // Public: anyone can browse, open, and download. A token is optional.
 router.get('/', auth.optionalAuth, reviewersController.listReviewers);
-router.get('/:id', auth.optionalAuth, reviewerAccess.loadReviewer, reviewersController.getReviewer);
-router.get('/:id/file', reviewerAccess.loadReviewer, reviewersController.sendReviewerFile);
+router.get(
+  '/:id',
+  auth.optionalAuth,
+  reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
+  reviewersController.getReviewer
+);
+router.get(
+  '/:id/file',
+  auth.optionalAuth,
+  reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
+  reviewersController.sendReviewerFile
+);
 
 // Logged-in users only. Login is checked BEFORE the upload is accepted.
 router.post(
@@ -50,6 +62,7 @@ router.put(
   rateLimit.writeLimiter,
   auth.requireAuth,
   reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
   reviewersController.addUpvote
 );
 
@@ -66,6 +79,7 @@ router.put(
   rateLimit.writeLimiter,
   auth.requireAuth,
   reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
   reviewersController.saveReviewer
 );
 
@@ -82,7 +96,17 @@ router.post(
   rateLimit.writeLimiter,
   auth.requireAuth,
   reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
   reviewersController.recordView
+);
+
+router.post(
+  '/:id/report',
+  rateLimit.writeLimiter,
+  auth.requireAuth,
+  reviewerAccess.loadReviewer,
+  reviewerAccess.hideIfHidden,
+  reviewersController.reportReviewer
 );
 
 module.exports = router;

@@ -21,6 +21,11 @@ const LIMITS = {
 
 const FLASHCARD_STATUSES = ['new', 'learning', 'learned'];
 
+// Why a study reviewer can be reported.
+// Keep this list the same as frontend/src/services/reportsService.js.
+const REPORT_REASONS = ['Offensive', 'Spam', 'Irrelevant', 'Wrong category', 'Copyright'];
+const REPORT_DETAILS_MAX = 500;
+
 // The only tags formatted notes may contain, written out in full: no other
 // attributes are possible, so nothing in the notes can run code or load anything.
 // Keep in step with frontend/src/services/noteHtml.js.
@@ -89,26 +94,15 @@ const tagsToArray = (storedTags) => {
   return storedTags.split(',').filter((tag) => tag !== '');
 };
 
-// Checks the text fields of the upload/edit form.
-// Returns clean values, or throws a 400 error listing every problem.
-const validateReviewerFields = (body) => {
-  const input = body || {};
-  const title = cleanText(input.title);
-  const description = cleanText(input.description);
+// Checks strand, grade, quarter, subject, and material type. Problems are added to
+// "fields"; the clean values are returned.
+const checkCategoryFields = (input, fields) => {
   const strand = cleanText(input.strand);
   const grade = cleanText(input.grade);
   const quarter = cleanText(input.quarter);
   const subject = cleanText(input.subject);
   const materialType = cleanText(input.materialType);
-  const tags = parseTags(input.tags);
-  const fields = {};
 
-  if (title.length < LIMITS.titleMin || title.length > LIMITS.titleMax) {
-    fields.title = `Title must be between ${LIMITS.titleMin} and ${LIMITS.titleMax} characters.`;
-  }
-  if (description.length < LIMITS.descriptionMin || description.length > LIMITS.descriptionMax) {
-    fields.description = `Description must be between ${LIMITS.descriptionMin} and ${LIMITS.descriptionMax} characters.`;
-  }
   if (categories.STRANDS.indexOf(strand) === -1) {
     fields.strand = 'Choose a strand from the list.';
   }
@@ -125,6 +119,43 @@ const validateReviewerFields = (body) => {
   if (categories.MATERIAL_TYPES.indexOf(materialType) === -1) {
     fields.materialType = 'Choose a material type from the list.';
   }
+
+  return {
+    strand: strand,
+    grade: grade,
+    quarter: quarter,
+    subject: subject,
+    materialType: materialType,
+  };
+};
+
+// Checks the category alone (an admin fixing where a reviewer is filed).
+// Returns clean values, or throws a 400 error listing every problem.
+const validateCategoryFields = (body) => {
+  const fields = {};
+  const category = checkCategoryFields(body || {}, fields);
+  if (Object.keys(fields).length > 0) {
+    throw createHttpError(400, 'Some details need fixing. Check the highlighted fields.', fields);
+  }
+  return category;
+};
+
+// Checks the text fields of the upload/edit form.
+// Returns clean values, or throws a 400 error listing every problem.
+const validateReviewerFields = (body) => {
+  const input = body || {};
+  const title = cleanText(input.title);
+  const description = cleanText(input.description);
+  const tags = parseTags(input.tags);
+  const fields = {};
+
+  if (title.length < LIMITS.titleMin || title.length > LIMITS.titleMax) {
+    fields.title = `Title must be between ${LIMITS.titleMin} and ${LIMITS.titleMax} characters.`;
+  }
+  if (description.length < LIMITS.descriptionMin || description.length > LIMITS.descriptionMax) {
+    fields.description = `Description must be between ${LIMITS.descriptionMin} and ${LIMITS.descriptionMax} characters.`;
+  }
+  const category = checkCategoryFields(input, fields);
   if (tags.length > LIMITS.maxTags) {
     fields.tags = `Use at most ${LIMITS.maxTags} tags.`;
   } else if (tags.find((tag) => tag.length > LIMITS.tagMax)) {
@@ -138,14 +169,33 @@ const validateReviewerFields = (body) => {
   return {
     title: title,
     description: description,
-    strand: strand,
-    grade: grade,
-    quarter: quarter,
-    subject: subject,
-    materialType: materialType,
+    strand: category.strand,
+    grade: category.grade,
+    quarter: category.quarter,
+    subject: category.subject,
+    materialType: category.materialType,
     // Stored as one comma-separated string, as the schema describes.
     tags: tags.join(','),
   };
+};
+
+// Checks a report: a reason from the list and optional details. Returns clean values
+// or throws a 400 error.
+const validateReport = (body) => {
+  const input = body || {};
+  const reason = cleanText(input.reason);
+  const details = cleanText(input.details);
+  const fields = {};
+  if (REPORT_REASONS.indexOf(reason) === -1) {
+    fields.reason = 'Choose a reason from the list.';
+  }
+  if (details.length > REPORT_DETAILS_MAX) {
+    fields.details = `Details can be at most ${REPORT_DETAILS_MAX} characters.`;
+  }
+  if (Object.keys(fields).length > 0) {
+    throw createHttpError(400, 'Some details need fixing. Check the highlighted fields.', fields);
+  }
+  return { reason: reason, details: details };
 };
 
 // Checks a display name. Returns the clean name or throws a 400 error.
@@ -243,6 +293,8 @@ module.exports = {
   parseTags: parseTags,
   tagsToArray: tagsToArray,
   validateReviewerFields: validateReviewerFields,
+  validateCategoryFields: validateCategoryFields,
+  validateReport: validateReport,
   validateDisplayName: validateDisplayName,
   validateNotes: validateNotes,
   visibleNotesText: visibleNotesText,

@@ -16,11 +16,13 @@ import {
 } from '../services/format';
 import { describeCategory } from '../services/categories';
 import { clearFeed } from '../services/feedMemory';
+import { openFileInNewTab, reportReviewer } from '../services/reportsService';
 import Alert from '../components/Alert';
 import ConfirmDialog from '../components/ConfirmDialog';
 import FlashMessage from '../components/FlashMessage';
 import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
+import ReportDialog from '../components/ReportDialog';
 import SaveButton from '../components/SaveButton';
 import Spinner from '../components/Spinner';
 import StrandLink from '../components/StrandLink';
@@ -41,6 +43,12 @@ function ReviewerPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState('');
+  // Shown after a report was sent (or had been sent before), in place of the button.
+  const [reportMessage, setReportMessage] = useState('');
+  const [fileError, setFileError] = useState('');
 
   let userId = '';
   if (auth.firebaseUser) {
@@ -113,6 +121,30 @@ function ReviewerPage() {
       setDeleteError(err.message);
       setIsDeleting(false);
     }
+  };
+
+  const handleReport = async (reason, details) => {
+    setIsReporting(true);
+    setReportError('');
+    try {
+      await reportReviewer(reviewer.id, reason, details);
+      setIsReportOpen(false);
+      setReportMessage('Thanks for reporting. An admin will look at this study reviewer.');
+    } catch (err) {
+      if (err.status === 409) {
+        // Reported before: say so where the button was, instead of an error.
+        setIsReportOpen(false);
+        setReportMessage(err.message);
+      } else {
+        setReportError(err.message);
+      }
+    }
+    setIsReporting(false);
+  };
+
+  const handleCloseReport = () => {
+    setIsReportOpen(false);
+    setReportError('');
   };
 
   // Saving makes the "Study" link appear; unsaving hides it again.
@@ -202,6 +234,13 @@ function ReviewerPage() {
         <article className="stack">
           <FlashMessage />
 
+          {reviewer.isHidden && (
+            <Alert type="info">
+              This study reviewer is hidden from everyone else while an admin looks at reports
+              about it.
+            </Alert>
+          )}
+
           <div className="detail-header">
             <p>
               <StrandLink strand={reviewer.strand} />
@@ -252,7 +291,17 @@ function ReviewerPage() {
                   Delete
                 </button>
               )}
+              {auth.firebaseUser && !reviewer.isOwner && reportMessage === '' && (
+                <button type="button" className="button" onClick={() => setIsReportOpen(true)}>
+                  <Icon name="alert" />
+                  Report
+                </button>
+              )}
             </div>
+            {/* Always on the page, so screen readers announce the text when it appears. */}
+            <p className="text-small" role="status">
+              {reportMessage}
+            </p>
           </div>
 
           <section className="stack" aria-labelledby="about-heading">
@@ -270,18 +319,41 @@ function ReviewerPage() {
                   {describeFileType(reviewer.fileName)}, {formatFileSize(reviewer.fileSize)}
                 </p>
               </div>
-              <a
-                className="button button--primary"
-                href={getFileUrl(reviewer.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Icon name={fileActionIcon} />
-                {fileActionText}
-                <span className="visually-hidden"> (opens in a new tab)</span>
-              </a>
+              {/* A hidden reviewer's file is only sent with the login, which a plain link cannot carry. */}
+              {reviewer.isHidden ? (
+                <button
+                  type="button"
+                  className="button button--primary"
+                  onClick={() => openFileInNewTab(reviewer.id).catch((err) => setFileError(err.message))}
+                >
+                  <Icon name="external" />
+                  Open file
+                  <span className="visually-hidden"> (opens in a new tab)</span>
+                </button>
+              ) : (
+                <a
+                  className="button button--primary"
+                  href={getFileUrl(reviewer.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name={fileActionIcon} />
+                  {fileActionText}
+                  <span className="visually-hidden"> (opens in a new tab)</span>
+                </a>
+              )}
             </div>
+            {fileError !== '' && <Alert type="error">{fileError}</Alert>}
           </section>
+
+          <ReportDialog
+            isOpen={isReportOpen}
+            title={reviewer.title}
+            isBusy={isReporting}
+            error={reportError}
+            onSubmit={handleReport}
+            onCancel={handleCloseReport}
+          />
 
           <ConfirmDialog
             id="delete-reviewer-dialog"

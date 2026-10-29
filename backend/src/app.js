@@ -8,6 +8,7 @@ const errorHandler = require('./middleware/errorHandler');
 const reviewersRoutes = require('./routes/reviewersRoutes');
 const meRoutes = require('./routes/meRoutes');
 const savedRoutes = require('./routes/savedRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/reviewers', reviewersRoutes);
 app.use('/api/me', meRoutes);
 app.use('/api/saved', savedRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler.notFoundHandler);
 app.use(errorHandler.errorHandler);
