@@ -141,6 +141,14 @@ function Header() {
                 </NavLink>
               </li>
             )}
+            {auth.profile && auth.profile.role === 'admin' && (
+              <li>
+                <NavLink className="site-nav__link" to="/admin">
+                  <Icon name="alert" />
+                  Reports
+                </NavLink>
+              </li>
+            )}
           </ul>
 
           <div className="site-nav__actions">

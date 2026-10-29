@@ -31,7 +31,7 @@ const listRecentlyViewedReviewers = async (userId, limit) => {
   const result = await pool.query(
     `SELECT r.id, r.author_id, r.title, r.description,
             r.strand, r.grade, r.quarter, r.subject, r.material_type, r.tags,
-            r.file_name, r.stored_name, r.file_mime, r.file_size,
+            r.file_name, r.stored_name, r.file_mime, r.file_size, r.is_hidden,
             r.created_at, r.updated_at,
             u.display_name AS author_name,
             rv.viewed_at,
@@ -40,7 +40,7 @@ const listRecentlyViewedReviewers = async (userId, limit) => {
      INNER JOIN reviewers r ON r.id = rv.reviewer_id
      INNER JOIN users u ON u.id = r.author_id
      LEFT JOIN upvotes up ON up.reviewer_id = r.id
-     WHERE rv.user_id = $1
+     WHERE rv.user_id = $1 AND r.is_hidden = false
      GROUP BY r.id, u.id, rv.viewed_at
      ORDER BY rv.viewed_at DESC
      LIMIT $2`,

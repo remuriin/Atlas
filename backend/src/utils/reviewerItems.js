@@ -34,6 +34,8 @@ const toReviewerJson = (row, hasUpvoted, saved, user) => {
     upvoteCount: Number(row.upvote_count),
     hasUpvoted: hasUpvoted,
     isOwner: isOwner,
+    // Only the uploader and admins can open a hidden reviewer, so only they see this as true.
+    isHidden: row.is_hidden,
     isSaved: savedId !== null,
     savedId: savedId,
     createdAt: row.created_at,

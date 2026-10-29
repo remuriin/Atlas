@@ -5,6 +5,7 @@ const reviewersModel = require('../models/reviewersModel');
 const upvotesModel = require('../models/upvotesModel');
 const recentlyViewedModel = require('../models/recentlyViewedModel');
 const savedItemsModel = require('../models/savedItemsModel');
+const reportsModel = require('../models/reportsModel');
 const upload = require('../middleware/upload');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
@@ -14,6 +15,9 @@ const createHttpError = require('../utils/httpError');
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
 const UNIQUE_VIOLATION = '23505';
+
+// This many open reports from different people hide a reviewer until an admin looks.
+const HIDE_AFTER_REPORTS = 3;
 
 // These file types are safe and useful to show inside the browser tab.
 // Everything else is offered as a download.
@@ -329,7 +333,37 @@ const unsaveReviewer = async (req, res, next) => {
   }
 };
 
+// POST /api/reviewers/:id/report
+const reportReviewer = async (req, res, next) => {
+  try {
+    const reviewer = req.reviewer;
+    if (reviewer.author_id === req.user.id) {
+      throw createHttpError(403, 'You cannot report your own study reviewer. Edit or delete it instead.');
+    }
+    const input = validate.validateReport(req.body);
+
+    try {
+      await reportsModel.createReport(reviewer.id, req.user.id, input.reason, input.details);
+    } catch (err) {
+      if (err.code === UNIQUE_VIOLATION) {
+        throw createHttpError(409, 'You already reported this study reviewer. An admin will look at it.');
+      }
+      throw err;
+    }
+
+    const openReports = await reportsModel.countOpenReports(reviewer.id);
+    if (openReports >= HIDE_AFTER_REPORTS && !reviewer.is_hidden) {
+      await reviewersModel.setHidden(reviewer.id, true);
+    }
+
+    res.status(201).json({ reported: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
+  reportReviewer: reportReviewer,
   saveReviewer: saveReviewer,
   unsaveReviewer: unsaveReviewer,
   listReviewers: listReviewers,

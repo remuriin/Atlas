@@ -14,6 +14,7 @@ const toProfileJson = (user) => {
     id: user.id,
     displayName: user.display_name,
     email: user.email,
+    role: user.role,
     createdAt: user.created_at,
   };
 };

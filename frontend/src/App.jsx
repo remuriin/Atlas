@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import SkipLink from './components/SkipLink';
+import AdminPage from './pages/AdminPage';
 import EditReviewerPage from './pages/EditReviewerPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -76,6 +77,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <StudyPage key={userKey} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage key={userKey} />
               </ProtectedRoute>
             }
           />

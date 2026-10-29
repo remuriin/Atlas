@@ -35,7 +35,20 @@ const requireOwner = (req, res, next) => {
   next();
 };
 
+// Runs after loadReviewer (and requireAuth or optionalAuth). A reviewer hidden by
+// reports answers 404, as if it were gone, to everyone but its uploader and the admins.
+const hideIfHidden = (req, res, next) => {
+  const user = req.user;
+  const canSee = user && (user.id === req.reviewer.author_id || user.role === 'admin');
+  if (req.reviewer.is_hidden && !canSee) {
+    next(createHttpError(404, 'That study reviewer could not be found.'));
+    return;
+  }
+  next();
+};
+
 module.exports = {
   loadReviewer: loadReviewer,
   requireOwner: requireOwner,
+  hideIfHidden: hideIfHidden,
 };

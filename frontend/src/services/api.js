@@ -83,9 +83,16 @@ export const apiRequest = async (path, options) => {
 // Fetches a file (for example a PDF) and returns it as a Blob, so the page can
 // show it with URL.createObjectURL. Errors are turned into the usual Error objects.
 export const apiRequestBlob = async (path) => {
+  // The login lets an uploader or admin open a reviewer that reports have hidden.
+  const headers = {};
+  const token = await getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   let response;
   try {
-    response = await fetch(`${API_URL}${path}`);
+    response = await fetch(`${API_URL}${path}`, { headers: headers });
   } catch (err) {
     throw buildApiError(0, { error: { message: NETWORK_MESSAGE } });
   }

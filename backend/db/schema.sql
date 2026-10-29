@@ -123,6 +123,33 @@ ALTER TABLE reviewers ALTER COLUMN quarter SET NOT NULL;
 ALTER TABLE reviewers ALTER COLUMN material_type SET NOT NULL;
 ALTER TABLE saved_items ALTER COLUMN strand SET NOT NULL;
 
+-- Reports and admins. 'member' is everyone; 'admin' can review reported study reviewers.
+-- The first admin is set by hand: UPDATE users SET role = 'admin' WHERE email = '...';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'member';
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_role_check') THEN
+    ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('member', 'admin'));
+  END IF;
+END $$;
+
+-- A reviewer reported by enough people is hidden from everyone but its uploader and
+-- the admins, until an admin restores, fixes, or deletes it.
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false;
+
+-- One row per report. resolved_at is set when an admin deals with the reviewer;
+-- resolved reports are kept as a record. The allowed reasons live in backend/src/utils/validate.js.
+CREATE TABLE IF NOT EXISTS reports (
+  id SERIAL PRIMARY KEY,
+  reviewer_id INTEGER NOT NULL REFERENCES reviewers(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  details TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT NOW(),
+  resolved_at TIMESTAMP,
+  CHECK (char_length(details) <= 500)
+);
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);
@@ -133,3 +160,8 @@ CREATE INDEX IF NOT EXISTS idx_upvotes_reviewer_id ON upvotes (reviewer_id);
 CREATE INDEX IF NOT EXISTS idx_recently_viewed_user_id ON recently_viewed (user_id);
 CREATE INDEX IF NOT EXISTS idx_saved_items_user_id ON saved_items (user_id);
 CREATE INDEX IF NOT EXISTS idx_flashcards_saved_item_id ON flashcards (saved_item_id);
+CREATE INDEX IF NOT EXISTS idx_reports_reviewer_id ON reports (reviewer_id);
+-- A person can have only one open report per reviewer (they may report again after
+-- an admin has dealt with the first one).
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reports_one_open_per_user
+  ON reports (reviewer_id, user_id) WHERE resolved_at IS NULL;

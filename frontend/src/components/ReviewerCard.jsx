@@ -46,6 +46,14 @@ function ReviewerCard(props) {
 
         <p className="reviewer-card__category">{describeCategory(reviewer)}</p>
 
+        {/* Only the uploader (on the profile page) and admins ever get a hidden one. */}
+        {reviewer.isHidden && (
+          <p className="status-note">
+            <Icon name="eye-off" />
+            Hidden while an admin looks at reports about it.
+          </p>
+        )}
+
         <p className="reviewer-card__description">{reviewer.description}</p>
 
         <TagList tags={reviewer.tags} />

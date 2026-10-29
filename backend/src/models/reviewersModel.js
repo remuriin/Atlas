@@ -8,7 +8,7 @@ const pool = require('../config/db');
 const SELECT_REVIEWERS = `
   SELECT r.id, r.author_id, r.title, r.description,
          r.strand, r.grade, r.quarter, r.subject, r.material_type, r.tags,
-         r.file_name, r.stored_name, r.file_mime, r.file_size,
+         r.file_name, r.stored_name, r.file_mime, r.file_size, r.is_hidden,
          r.created_at, r.updated_at,
          u.display_name AS author_name,
          COUNT(up.user_id) AS upvote_count
@@ -19,8 +19,10 @@ const SELECT_REVIEWERS = `
 // An empty string for any of $1 to $5 means "do not filter by this".
 // "filters" is { strand, grade, quarter, subject, searchPattern }.
 // A strand also shows the "All strands" reviewers, since every strand takes those subjects.
+// Reviewers hidden by reports never appear in the feed.
 const FILTER_BY_CATEGORY_AND_SEARCH = `
-  ($1 = '' OR r.strand = $1 OR r.strand = 'All strands')
+  r.is_hidden = false
+  AND ($1 = '' OR r.strand = $1 OR r.strand = 'All strands')
   AND ($2 = '' OR r.grade = $2)
   AND ($3 = '' OR r.quarter = $3)
   AND ($4 = '' OR r.subject = $4)
@@ -158,6 +160,28 @@ const updateReviewerWithFile = async (reviewerId, reviewer) => {
   return result.rows[0] || null;
 };
 
+const setHidden = async (reviewerId, isHidden) => {
+  // Hide a reported reviewer from the feed, or show it again.
+  await pool.query('UPDATE reviewers SET is_hidden = $1 WHERE id = $2', [isHidden, reviewerId]);
+};
+
+const updateCategory = async (reviewerId, category) => {
+  // An admin moving a reviewer to the right category. updated_at stays: the uploader did not edit it.
+  await pool.query(
+    `UPDATE reviewers
+     SET strand = $1, grade = $2, quarter = $3, subject = $4, material_type = $5
+     WHERE id = $6`,
+    [
+      category.strand,
+      category.grade,
+      category.quarter,
+      category.subject,
+      category.materialType,
+      reviewerId,
+    ]
+  );
+};
+
 const deleteReviewer = async (reviewerId) => {
   // Remove a reviewer (its upvotes and view history are removed by ON DELETE CASCADE).
   const result = await pool.query('DELETE FROM reviewers WHERE id = $1 RETURNING id', [reviewerId]);
@@ -172,5 +196,7 @@ module.exports = {
   createReviewer: createReviewer,
   updateReviewer: updateReviewer,
   updateReviewerWithFile: updateReviewerWithFile,
+  setHidden: setHidden,
+  updateCategory: updateCategory,
   deleteReviewer: deleteReviewer,
 };
