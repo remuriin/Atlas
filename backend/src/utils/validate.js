@@ -179,6 +179,16 @@ const validateReviewerFields = (body) => {
   };
 };
 
+// Every new file needs the uploader's "I made this, or I have the right to share it".
+// The form sends the ticked box as the text "true". Throws a 400 error when it is missing.
+const validateRightsConfirmed = (body) => {
+  const input = body || {};
+  if (input.rightsConfirmed !== 'true') {
+    const message = 'Confirm that you made this file or have the right to share it.';
+    throw createHttpError(400, message, { rightsConfirmed: message });
+  }
+};
+
 // Checks a report: a reason from the list and optional details. Returns clean values
 // or throws a 400 error.
 const validateReport = (body) => {
@@ -294,6 +304,7 @@ module.exports = {
   tagsToArray: tagsToArray,
   validateReviewerFields: validateReviewerFields,
   validateCategoryFields: validateCategoryFields,
+  validateRightsConfirmed: validateRightsConfirmed,
   validateReport: validateReport,
   validateDisplayName: validateDisplayName,
   validateNotes: validateNotes,

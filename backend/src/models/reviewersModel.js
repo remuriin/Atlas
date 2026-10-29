@@ -86,8 +86,8 @@ const createReviewer = async (reviewer) => {
   const result = await pool.query(
     `INSERT INTO reviewers
        (author_id, title, description, strand, grade, quarter, subject, material_type, tags,
-        file_name, stored_name, file_mime, file_size)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        file_name, stored_name, file_mime, file_size, rights_confirmed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
      RETURNING id`,
     [
       reviewer.authorId,
@@ -138,7 +138,7 @@ const updateReviewerWithFile = async (reviewerId, reviewer) => {
      SET title = $1, description = $2, strand = $3, grade = $4, quarter = $5, subject = $6,
          material_type = $7, tags = $8,
          file_name = $9, stored_name = $10, file_mime = $11, file_size = $12,
-         updated_at = NOW()
+         rights_confirmed_at = NOW(), updated_at = NOW()
      WHERE id = $13
      RETURNING id`,
     [

@@ -32,6 +32,7 @@ const FIELD_ORDER = [
   'materialType',
   'tags',
   'file',
+  'rightsConfirmed',
 ];
 
 // These limits match the server's (backend/src/utils/validate.js).
@@ -75,6 +76,7 @@ function ReviewerForm(props) {
   const [materialType, setMaterialType] = useState(startMaterialType);
   const [tags, setTags] = useState(startTags);
   const [file, setFile] = useState(null);
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
   // errors looks like { title: 'message', file: 'message' }
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
@@ -124,6 +126,10 @@ function ReviewerForm(props) {
       }
     } else if (!isEdit) {
       found.file = 'Choose a file to upload.';
+    }
+    // Asked for every new file: a first upload, or a replacement when editing.
+    if ((file || !isEdit) && !rightsConfirmed) {
+      found.rightsConfirmed = 'Confirm that you made this file or have the right to share it.';
     }
 
     return found;
@@ -208,6 +214,7 @@ function ReviewerForm(props) {
     formData.append('materialType', materialType);
     formData.append('tags', tags);
     if (file) {
+      formData.append('rightsConfirmed', String(rightsConfirmed));
       formData.append('file', file);
     }
 
@@ -401,6 +408,37 @@ function ReviewerForm(props) {
           <Alert type="info">{describeOfficeLimits(file.name)}</Alert>
         )}
       </div>
+
+      {/* A first upload always asks; an edit asks only once a replacement file is chosen. */}
+      {(file || !isEdit) && (
+        <div className="field">
+          <div className="choice">
+            <input
+              type="checkbox"
+              id="reviewer-rightsConfirmed"
+              checked={rightsConfirmed}
+              onChange={(event) => setRightsConfirmed(event.target.checked)}
+              required
+              aria-invalid={Boolean(errors.rightsConfirmed)}
+              aria-describedby={errors.rightsConfirmed ? 'reviewer-rightsConfirmed-error' : undefined}
+            />
+            <label htmlFor="reviewer-rightsConfirmed">
+              <span className="choice__name">
+                I made this file, or I have the right to share it (required)
+              </span>
+              <span className="choice__hint">
+                Textbooks, paid review-center files, and other people’s work are not allowed. See
+                the <Link to="/terms">terms of use</Link>.
+              </span>
+            </label>
+          </div>
+          {errors.rightsConfirmed && (
+            <p className="field__error" id="reviewer-rightsConfirmed-error">
+              {errors.rightsConfirmed}
+            </p>
+          )}
+        </div>
+      )}
 
       {isSubmitting && (
         <div className="upload-progress">

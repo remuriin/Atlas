@@ -16,6 +16,7 @@ import RegisterPage from './pages/RegisterPage';
 import ReviewerPage from './pages/ReviewerPage';
 import SavedPage from './pages/SavedPage';
 import StudyPage from './pages/StudyPage';
+import TermsPage from './pages/TermsPage';
 import UploadPage from './pages/UploadPage';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="/reviewers/:id" element={<ReviewerPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route
             path="/upload"
             element={
