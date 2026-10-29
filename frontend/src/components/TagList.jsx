@@ -11,7 +11,7 @@ function TagList(props) {
     <ul className="tag-list" aria-label="Tags">
       {props.tags.map((tag) => (
         <li key={tag}>
-          <Link className="chip-link" to={`/?q=${encodeURIComponent(tag)}`}>
+          <Link className="chip-link" to={`/browse?q=${encodeURIComponent(tag)}`}>
             <span className="tag">
               <span className="visually-hidden">Tag: </span>
               {tag}

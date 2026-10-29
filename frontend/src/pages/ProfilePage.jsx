@@ -360,7 +360,7 @@ function ProfilePage() {
             title="Nothing viewed yet"
             message="Study reviewers you open will be listed here, so they are easy to find again."
           >
-            <Link className="button" to="/">
+            <Link className="button" to="/browse">
               Browse study reviewers
             </Link>
           </EmptyState>

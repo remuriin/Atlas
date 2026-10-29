@@ -252,7 +252,7 @@ function ReviewerForm(props) {
   let fileLabel = 'File';
   let fileHint = `${ALLOWED_TYPES_TEXT}. Up to ${MAX_FILE_SIZE_MB} MB. PDF, image, or text files work best: they open right inside Atlas.`;
   let submitText = 'Share study reviewer';
-  let cancelPath = '/';
+  let cancelPath = '/browse';
   if (isEdit) {
     fileLabel = 'Replace file';
     fileHint = `Current file: ${props.reviewer.fileName}. Leave this empty to keep it. ${fileHint}`;
