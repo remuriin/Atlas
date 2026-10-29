@@ -75,6 +75,12 @@ if (!maxFileSizeMb || maxFileSizeMb <= 0) {
   maxFileSizeMb = 10;
 }
 
+// How many study reviewers one person may have at a time.
+let maxUploadsPerUser = Number(process.env.MAX_UPLOADS_PER_USER);
+if (!Number.isInteger(maxUploadsPerUser) || maxUploadsPerUser <= 0) {
+  maxUploadsPerUser = 50;
+}
+
 // The Gemini key is optional: without it the app still runs, and only the
 // "Make flashcards" feature answers that it is not set up yet.
 let geminiModel = (process.env.GEMINI_MODEL || '').trim();
@@ -109,6 +115,7 @@ module.exports = {
   // which folder the server was started from.
   uploadDir: path.resolve(backendRoot, process.env.UPLOAD_DIR || './uploads'),
   maxFileSizeMb: maxFileSizeMb,
+  maxUploadsPerUser: maxUploadsPerUser,
   trustProxy: process.env.TRUST_PROXY === 'true',
   geminiApiKey: (process.env.GEMINI_API_KEY || '').trim(),
   geminiModel: geminiModel,

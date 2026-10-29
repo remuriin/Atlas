@@ -1,6 +1,7 @@
 // Runs right after a file is uploaded and before anything is saved about it:
 // the file's contents must match its type, and the virus scan must pass.
 // A rejected file is deleted at once, so nothing unsafe stays on the disk.
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const upload = require('./upload');
@@ -59,6 +60,8 @@ const checkUpload = async (req, res, next) => {
       return;
     }
 
+    // The file's fingerprint, used by the controller to refuse the same file twice.
+    req.fileHash = crypto.createHash('sha256').update(buffer).digest('hex');
     next();
   } catch (err) {
     await upload.removeStoredFile(req.file.filename);

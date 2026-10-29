@@ -1,5 +1,6 @@
 // Small checks shared by every route that has ":id" in its address.
 const reviewersModel = require('../models/reviewersModel');
+const env = require('../config/env');
 const validate = require('../utils/validate');
 const createHttpError = require('../utils/httpError');
 
@@ -47,7 +48,28 @@ const hideIfHidden = (req, res, next) => {
   next();
 };
 
+// Runs after requireAuth and BEFORE the file upload step, so someone at the limit is
+// turned away before their file is sent and stored. Replacing a file does not count.
+const checkUploadQuota = async (req, res, next) => {
+  try {
+    const count = await reviewersModel.countReviewersByAuthor(req.user.id);
+    if (count >= env.maxUploadsPerUser) {
+      next(
+        createHttpError(
+          403,
+          `You have ${env.maxUploadsPerUser} study reviewers, the most one person can share. Delete one from your profile to upload another.`
+        )
+      );
+      return;
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
+  checkUploadQuota: checkUploadQuota,
   loadReviewer: loadReviewer,
   requireOwner: requireOwner,
   hideIfHidden: hideIfHidden,

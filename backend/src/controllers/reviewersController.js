@@ -16,6 +16,23 @@ const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
 const UNIQUE_VIOLATION = '23505';
 
+// Refuses a file that another study reviewer already has. "ownId" is the reviewer being
+// edited (its own file may be uploaded again), or null for a new one.
+const refuseDuplicateFile = async (fileHash, ownId) => {
+  const existing = await reviewersModel.findReviewerByFileHash(fileHash);
+  if (existing && existing.id !== ownId) {
+    const message = `This exact file is already on Atlas as “${existing.title}”. Search for it instead of posting it again.`;
+    throw createHttpError(409, message, { file: message });
+  }
+};
+
+// Two uploads of the same file at the same moment: the database's unique index stops the
+// second one. This turns that into the same answer as above.
+const duplicateFileError = () => {
+  const message = 'This exact file is already on Atlas. Search for it instead of posting it again.';
+  return createHttpError(409, message, { file: message });
+};
+
 // This many open reports from different people hide a reviewer until an admin looks.
 const HIDE_AFTER_REPORTS = 3;
 
@@ -134,6 +151,7 @@ const createReviewer = async (req, res, next) => {
     }
     const input = validate.validateReviewerFields(req.body);
     validate.validateRightsConfirmed(req.body);
+    await refuseDuplicateFile(req.fileHash, null);
     const allowedType = upload.findAllowedType(req.file.originalname);
 
     const created = await reviewersModel.createReviewer({
@@ -151,6 +169,7 @@ const createReviewer = async (req, res, next) => {
       // Save the content type from our own allowlist, not the one the browser claimed.
       fileMime: allowedType.mime,
       fileSize: req.file.size,
+      fileHash: req.fileHash,
     });
     isSaved = true;
 
@@ -161,6 +180,10 @@ const createReviewer = async (req, res, next) => {
     // If nothing was saved, the uploaded file would be left behind with no owner.
     if (!isSaved && req.file) {
       await upload.removeStoredFile(req.file.filename);
+    }
+    if (err.code === UNIQUE_VIOLATION) {
+      next(duplicateFileError());
+      return;
     }
     next(err);
   }
@@ -177,6 +200,7 @@ const updateReviewer = async (req, res, next) => {
     if (req.file) {
       // A replacement file needs its own confirmation; editing only the text does not.
       validate.validateRightsConfirmed(req.body);
+      await refuseDuplicateFile(req.fileHash, reviewerId);
       const allowedType = upload.findAllowedType(req.file.originalname);
       await reviewersModel.updateReviewerWithFile(reviewerId, {
         title: input.title,
@@ -191,6 +215,7 @@ const updateReviewer = async (req, res, next) => {
         storedName: req.file.filename,
         fileMime: allowedType.mime,
         fileSize: req.file.size,
+        fileHash: req.fileHash,
       });
       isSaved = true;
       // The database now points at the new file, so the old one can go.
@@ -214,6 +239,10 @@ const updateReviewer = async (req, res, next) => {
     // The update failed, so the old file is still the real one. Remove the new upload.
     if (!isSaved && req.file) {
       await upload.removeStoredFile(req.file.filename);
+    }
+    if (err.code === UNIQUE_VIOLATION) {
+      next(duplicateFileError());
+      return;
     }
     next(err);
   }

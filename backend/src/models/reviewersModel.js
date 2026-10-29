@@ -86,8 +86,8 @@ const createReviewer = async (reviewer) => {
   const result = await pool.query(
     `INSERT INTO reviewers
        (author_id, title, description, strand, grade, quarter, subject, material_type, tags,
-        file_name, stored_name, file_mime, file_size, rights_confirmed_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+        file_name, stored_name, file_mime, file_size, file_hash, rights_confirmed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
      RETURNING id`,
     [
       reviewer.authorId,
@@ -103,6 +103,7 @@ const createReviewer = async (reviewer) => {
       reviewer.storedName,
       reviewer.fileMime,
       reviewer.fileSize,
+      reviewer.fileHash,
     ]
   );
   return result.rows[0];
@@ -137,9 +138,9 @@ const updateReviewerWithFile = async (reviewerId, reviewer) => {
     `UPDATE reviewers
      SET title = $1, description = $2, strand = $3, grade = $4, quarter = $5, subject = $6,
          material_type = $7, tags = $8,
-         file_name = $9, stored_name = $10, file_mime = $11, file_size = $12,
+         file_name = $9, stored_name = $10, file_mime = $11, file_size = $12, file_hash = $13,
          rights_confirmed_at = NOW(), updated_at = NOW()
-     WHERE id = $13
+     WHERE id = $14
      RETURNING id`,
     [
       reviewer.title,
@@ -154,9 +155,26 @@ const updateReviewerWithFile = async (reviewerId, reviewer) => {
       reviewer.storedName,
       reviewer.fileMime,
       reviewer.fileSize,
+      reviewer.fileHash,
       reviewerId,
     ]
   );
+  return result.rows[0] || null;
+};
+
+const countReviewersByAuthor = async (authorId) => {
+  // How many study reviewers one user has now.
+  const result = await pool.query('SELECT COUNT(*) AS count FROM reviewers WHERE author_id = $1', [
+    authorId,
+  ]);
+  return Number(result.rows[0].count);
+};
+
+const findReviewerByFileHash = async (fileHash) => {
+  // Find the study reviewer that already has exactly this file, if any.
+  const result = await pool.query('SELECT id, title FROM reviewers WHERE file_hash = $1', [
+    fileHash,
+  ]);
   return result.rows[0] || null;
 };
 
@@ -196,6 +214,8 @@ module.exports = {
   createReviewer: createReviewer,
   updateReviewer: updateReviewer,
   updateReviewerWithFile: updateReviewerWithFile,
+  countReviewersByAuthor: countReviewersByAuthor,
+  findReviewerByFileHash: findReviewerByFileHash,
   setHidden: setHidden,
   updateCategory: updateCategory,
   deleteReviewer: deleteReviewer,

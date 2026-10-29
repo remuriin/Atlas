@@ -35,6 +35,14 @@ choose one of: **Restore** (show it again), **Fix category** (move it and show i
 **Delete** (remove it and its file). Each choice closes its open reports, which are kept as a
 record. Reporters are never shown to anyone.
 
+**Upload limits.** Each person may have `MAX_UPLOADS_PER_USER` study reviewers (default 50). The
+check runs before the file is sent, so nothing is stored for someone at the limit, and the Upload
+page shows "You have shared 12 of 50" (or, at the limit, a link to the profile instead of the
+form). The same file cannot be posted twice: every upload's SHA-256 fingerprint is stored in
+`reviewers.file_hash`, a unique index refuses a second copy, and the uploader is told which study
+reviewer already has it. Files from before this have no fingerprint, so a copy of one of them is
+not caught.
+
 **Copyright.** Every new file (a first upload, or a replacement when editing) needs the box "I
 made this file, or I have the right to share it" ticked; the server refuses it otherwise and stores
 the time in `reviewers.rights_confirmed_at` (empty for files from before). The **Terms of use and
@@ -201,6 +209,7 @@ placeholder database URL.
 | `FRONTEND_ORIGIN` | Exact address of the website, for example `https://atlas.example.com`. Only this origin may call the API from a browser. |
 | `UPLOAD_DIR` | Folder for uploaded files. Default `./uploads`. |
 | `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. |
+| `MAX_UPLOADS_PER_USER` | How many study reviewers one person may have at a time. Default `50`. Deleting one frees a place; replacing a file does not count. |
 | `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
 | `GEMINI_API_KEY` | Google Gemini key for making flashcards (from https://aistudio.google.com/apikey). **Secret: server only, never in `frontend/.env`.** Leave empty to turn flashcards off; everything else keeps working. |
 | `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
@@ -433,7 +442,7 @@ add `"fields": { "title": "..." }`.
 | `GET /api/reviewers?sort=top\|new&strand=&grade=&quarter=&subject=&q=&page=1&limit=12` | optional | Feed: `{ items, page, hasMore }`. Filter values not in the lists are ignored |
 | `GET /api/reviewers/:id` | optional | One reviewer |
 | `GET /api/reviewers/:id/file` | no | The file (inline for PDF and images, download otherwise) |
-| `POST /api/reviewers` | yes | Create (multipart: title, description, strand, grade, quarter, subject, materialType, tags, file) |
+| `POST /api/reviewers` | yes | 403 at the upload limit, 409 if the same file is already on Atlas. Create (multipart: title, description, strand, grade, quarter, subject, materialType, tags, file) |
 | `PUT /api/reviewers/:id` | owner | Update details, optionally replace the file |
 | `DELETE /api/reviewers/:id` | owner | Delete the reviewer and its file |
 | `PUT` / `DELETE /api/reviewers/:id/upvote` | yes | Add / remove my upvote (both safe to repeat) |
