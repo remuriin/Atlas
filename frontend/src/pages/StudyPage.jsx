@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { getSavedItem } from '../services/savedService';
-import { subjectSlug } from '../services/subjects';
+import { strandSlug } from '../services/categories';
 import Alert from '../components/Alert';
 import FileViewer from '../components/FileViewer';
 import FlashcardsPanel from '../components/FlashcardsPanel';
@@ -120,10 +120,11 @@ function StudyPage() {
       {status === 'ready' && (
         <>
           <div className="row">
-            <span className={`label label--subject subject--${subjectSlug(item.subject)}`}>
-              <span className="visually-hidden">Subject: </span>
-              {item.subject}
+            <span className={`label label--strand strand--${strandSlug(item.strand)}`}>
+              <span className="visually-hidden">Strand: </span>
+              {item.strand}
             </span>
+            <span className="text-small">{item.subject}</span>
             {!item.isRemoved && (
               <Link className="text-small" to={`/reviewers/${item.reviewerId}`}>
                 See it in the feed (upvotes, details)

@@ -6,8 +6,9 @@ const pool = require('../config/db');
 // for those, every r.*, u.*, and upvote column comes back as NULL or 0.
 const SELECT_SAVED_ITEMS = `
   SELECT s.id, s.user_id, s.reviewer_id, s.title AS saved_title, s.subject AS saved_subject,
-         s.notes, s.notes_format, s.notes_updated_at, s.saved_at,
-         r.id AS live_reviewer_id, r.author_id, r.title, r.description, r.subject, r.tags,
+         s.strand AS saved_strand, s.notes, s.notes_format, s.notes_updated_at, s.saved_at,
+         r.id AS live_reviewer_id, r.author_id, r.title, r.description,
+         r.strand, r.grade, r.quarter, r.subject, r.material_type, r.tags,
          r.file_name, r.stored_name, r.file_mime, r.file_size,
          r.created_at, r.updated_at,
          u.display_name AS author_name,
@@ -43,13 +44,13 @@ const listSavedItems = async (userId) => {
   return result.rows;
 };
 
-const createSavedItem = async (userId, reviewerId, title, subject) => {
+const createSavedItem = async (userId, reviewerId, title, subject, strand) => {
   // Save a reviewer for a user and return the new row's id.
   const result = await pool.query(
-    `INSERT INTO saved_items (user_id, reviewer_id, title, subject)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO saved_items (user_id, reviewer_id, title, subject, strand)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING id`,
-    [userId, reviewerId, title, subject]
+    [userId, reviewerId, title, subject, strand]
   );
   return result.rows[0];
 };
@@ -79,14 +80,13 @@ const updateNotes = async (savedItemId, notes) => {
   return result.rows[0] || null;
 };
 
-const refreshSnapshot = async (reviewerId, title, subject) => {
-  // Keep the copied title and subject in step after the uploader edits the reviewer,
-  // so they are up to date if the original is ever deleted.
-  await pool.query('UPDATE saved_items SET title = $1, subject = $2 WHERE reviewer_id = $3', [
-    title,
-    subject,
-    reviewerId,
-  ]);
+const refreshSnapshot = async (reviewerId, title, subject, strand) => {
+  // Keep the copied title, subject, and strand in step after the uploader edits the
+  // reviewer, so they are up to date if the original is ever deleted.
+  await pool.query(
+    'UPDATE saved_items SET title = $1, subject = $2, strand = $3 WHERE reviewer_id = $4',
+    [title, subject, strand, reviewerId]
+  );
 };
 
 module.exports = {

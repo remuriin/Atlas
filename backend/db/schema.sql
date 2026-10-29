@@ -86,9 +86,48 @@ CREATE TABLE IF NOT EXISTS flashcards (
   CHECK (status IN ('new', 'learning', 'learned'))
 );
 
+-- Senior High School categories: strand, grade, quarter, and material type.
+-- The allowed values live in backend/src/utils/categories.js. Each step is safe to repeat.
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS strand TEXT;
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS grade TEXT;
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS quarter TEXT;
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS material_type TEXT;
+ALTER TABLE saved_items ADD COLUMN IF NOT EXISTS strand TEXT;
+
+-- Reviewers made before the categories existed: their old subject (such as "Mathematics")
+-- is not a Senior High School subject, so it moves into the tags and the subject becomes
+-- "Other". Only rows without a strand are touched, so this runs once per row.
+UPDATE reviewers
+SET tags = CASE
+      WHEN tags IS NULL OR tags = '' THEN lower(subject)
+      WHEN (',' || tags || ',') LIKE ('%,' || lower(subject) || ',%') THEN tags
+      ELSE lower(subject) || ',' || tags
+    END,
+    subject = 'Other',
+    strand = 'All strands',
+    grade = '11',
+    quarter = '1st',
+    material_type = 'Reviewer'
+WHERE strand IS NULL;
+
+-- Saved copies follow their reviewer. A copy whose original was deleted keeps its old
+-- subject as plain text and gets the "All strands" color.
+UPDATE saved_items s
+SET strand = COALESCE((SELECT r.strand FROM reviewers r WHERE r.id = s.reviewer_id), 'All strands'),
+    subject = COALESCE((SELECT r.subject FROM reviewers r WHERE r.id = s.reviewer_id), s.subject)
+WHERE s.strand IS NULL;
+
+ALTER TABLE reviewers ALTER COLUMN strand SET NOT NULL;
+ALTER TABLE reviewers ALTER COLUMN grade SET NOT NULL;
+ALTER TABLE reviewers ALTER COLUMN quarter SET NOT NULL;
+ALTER TABLE reviewers ALTER COLUMN material_type SET NOT NULL;
+ALTER TABLE saved_items ALTER COLUMN strand SET NOT NULL;
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);
+CREATE INDEX IF NOT EXISTS idx_reviewers_strand ON reviewers (strand);
+CREATE INDEX IF NOT EXISTS idx_reviewers_grade ON reviewers (grade);
 CREATE INDEX IF NOT EXISTS idx_reviewers_author_id ON reviewers (author_id);
 CREATE INDEX IF NOT EXISTS idx_upvotes_reviewer_id ON upvotes (reviewer_id);
 CREATE INDEX IF NOT EXISTS idx_recently_viewed_user_id ON recently_viewed (user_id);

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { deleteSavedItem, listMySaved } from '../services/savedService';
 import { clearFeed } from '../services/feedMemory';
 import { countLabel, describeFileType, formatDate } from '../services/format';
-import { subjectSlug } from '../services/subjects';
+import { describeCategory, strandSlug } from '../services/categories';
 import Alert from '../components/Alert';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
@@ -13,7 +13,7 @@ import FlashMessage from '../components/FlashMessage';
 import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
 import Spinner from '../components/Spinner';
-import SubjectLink from '../components/SubjectLink';
+import StrandLink from '../components/StrandLink';
 
 const describeNotes = (item) => {
   if (item.hasNotes) {
@@ -145,10 +145,10 @@ function SavedPage() {
         <ul className="reviewer-grid">
           {items.map((item) => (
             <li key={item.id}>
-              <article className={`card reviewer-card subject--${subjectSlug(item.subject)}`}>
+              <article className={`card reviewer-card strand--${strandSlug(item.strand)}`}>
                 <div className="reviewer-card__body">
                   <p>
-                    <SubjectLink subject={item.subject} />
+                    <StrandLink strand={item.strand} />
                   </p>
 
                   <h2 className="reviewer-card__title">
@@ -156,6 +156,11 @@ function SavedPage() {
                       {item.title}
                     </Link>
                   </h2>
+
+                  {/* Grade, quarter, and type are only known while the original exists. */}
+                  <p className="reviewer-card__category">
+                    {describeCategory(Object.assign({ subject: item.subject }, item.reviewer))}
+                  </p>
 
                   {item.isRemoved && (
                     <p className="status-note">

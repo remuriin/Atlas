@@ -1,13 +1,13 @@
-// The feed: browse study reviewers by tab, subject, and search.
+// The feed: browse study reviewers by tab, strand, grade, quarter, subject, and search.
 //
-// The chosen tab, subject, and search words live in the page address
-// (for example /?sort=new&subject=Science). That way the browser's Back button
+// The chosen tab, filters, and search words live in the page address
+// (for example /?sort=new&strand=STEM&grade=11). That way the browser's Back button
 // brings them back, and a filtered list can be bookmarked or shared.
 import { useContext, useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { listReviewers } from '../services/reviewersService';
-import { SUBJECTS } from '../services/subjects';
+import { ALL_SUBJECTS, GRADES, QUARTERS, STRANDS, subjectsForStrand } from '../services/categories';
 import { countLabel } from '../services/format';
 import {
   getOpenedReviewerId,
@@ -24,7 +24,7 @@ import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
 import ReviewerList from '../components/ReviewerList';
 import SkeletonList from '../components/SkeletonList';
-import SubjectLegend from '../components/SubjectLegend';
+import StrandLegend from '../components/StrandLegend';
 import TabBar from '../components/TabBar';
 
 const TABS = [
@@ -33,6 +33,16 @@ const TABS = [
 ];
 
 const SEARCH_MAX = 100;
+
+// The filters that live in the address, each with the values it may take.
+const FILTER_NAMES = ['strand', 'grade', 'quarter', 'subject'];
+const FILTER_VALUES = {
+  strand: STRANDS,
+  grade: GRADES,
+  quarter: QUARTERS,
+  subject: ALL_SUBJECTS,
+};
+const NO_FILTERS = { strand: '', grade: '', quarter: '', subject: '' };
 
 function HomePage() {
   const auth = useContext(AuthContext);
@@ -45,13 +55,22 @@ function HomePage() {
   if (searchParams.get('sort') === 'new') {
     sort = 'new';
   }
-  let subject = searchParams.get('subject') || '';
-  if (SUBJECTS.indexOf(subject) === -1) {
-    subject = '';
+  const filters = {};
+  FILTER_NAMES.forEach((name) => {
+    const value = searchParams.get(name) || '';
+    filters[name] = FILTER_VALUES[name].indexOf(value) === -1 ? '' : value;
+  });
+  // A subject only belongs in the list if the chosen strand takes it.
+  if (filters.strand !== '' && subjectsForStrand(filters.strand).indexOf(filters.subject) === -1) {
+    filters.subject = '';
   }
+  const strand = filters.strand;
+  const grade = filters.grade;
+  const quarter = filters.quarter;
+  const subject = filters.subject;
   const query = (searchParams.get('q') || '').trim().slice(0, SEARCH_MAX);
-  // One piece of text that changes whenever any of the three choices changes.
-  const filterKey = `${sort}|${subject}|${query}`;
+  // One piece of text that changes whenever any of the choices changes.
+  const filterKey = `${sort}|${strand}|${grade}|${quarter}|${subject}|${query}`;
 
   let userId = 'visitor';
   if (auth.firebaseUser) {
@@ -131,7 +150,15 @@ function HomePage() {
       setLoadMoreError('');
 
       try {
-        const data = await listReviewers({ sort: sort, subject: subject, q: query, page: page });
+        const data = await listReviewers({
+          sort: sort,
+          strand: strand,
+          grade: grade,
+          quarter: quarter,
+          subject: subject,
+          q: query,
+          page: page,
+        });
         if (isCancelled) {
           return;
         }
@@ -170,7 +197,7 @@ function HomePage() {
     return () => {
       isCancelled = true;
     };
-  }, [sort, subject, query, page, retryCount, auth.isLoading]);
+  }, [sort, strand, grade, quarter, subject, query, page, retryCount, auth.isLoading]);
 
   // Keep the search box in step with the address, for example after Back
   // or after choosing a tag on a card.
@@ -230,7 +257,7 @@ function HomePage() {
     }
     window.scrollTo(0, 0);
 
-    // If the change was made with the tabs, the subject menu, or the search
+    // If the change was made with the tabs, a filter menu, or the search
     // box, focus is already in the right place and must stay there.
     const controls = document.getElementById('feed-controls');
     if (controls && controls.contains(document.activeElement)) {
@@ -259,14 +286,17 @@ function HomePage() {
   }, []);
 
   // Writes the choices into the address. Default values are left out to keep it short.
-  const applyFilters = (nextSort, nextSubject, nextQuery) => {
+  // nextFilters looks like { strand, grade, quarter, subject }.
+  const applyFilters = (nextSort, nextFilters, nextQuery) => {
     const nextParams = {};
     if (nextSort !== 'top') {
       nextParams.sort = nextSort;
     }
-    if (nextSubject !== '') {
-      nextParams.subject = nextSubject;
-    }
+    FILTER_NAMES.forEach((name) => {
+      if (nextFilters[name] !== '') {
+        nextParams[name] = nextFilters[name];
+      }
+    });
     if (nextQuery !== '') {
       nextParams.q = nextQuery;
     }
@@ -274,21 +304,31 @@ function HomePage() {
   };
 
   const handleTabChange = (tabId) => {
-    applyFilters(tabId, subject, query);
+    applyFilters(tabId, filters, query);
   };
 
-  const handleSubjectChange = (event) => {
-    applyFilters(sort, event.target.value, query);
+  // Returns the change handler for one filter menu. A new strand also clears a
+  // subject that strand does not take.
+  const handleFilterChange = (name) => (event) => {
+    const nextFilters = Object.assign({}, filters, { [name]: event.target.value });
+    if (
+      name === 'strand' &&
+      nextFilters.strand !== '' &&
+      subjectsForStrand(nextFilters.strand).indexOf(nextFilters.subject) === -1
+    ) {
+      nextFilters.subject = '';
+    }
+    applyFilters(sort, nextFilters, query);
   };
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    applyFilters(sort, subject, searchInput.trim().slice(0, SEARCH_MAX));
+    applyFilters(sort, filters, searchInput.trim().slice(0, SEARCH_MAX));
   };
 
   const handleClearFilters = () => {
     setSearchInput('');
-    applyFilters(sort, '', '');
+    applyFilters(sort, NO_FILTERS, '');
     // The Clear button disappears once the filters are gone, so park focus
     // on the search box instead of letting it get lost.
     const searchBox = document.getElementById('feed-search');
@@ -309,7 +349,7 @@ function HomePage() {
     }
   };
 
-  const hasFilters = subject !== '' || query !== '';
+  const hasFilters = FILTER_NAMES.some((name) => filters[name] !== '') || query !== '';
 
   // One sentence that describes the list. It sits in a live region, so screen
   // readers hear it whenever the results change.
@@ -321,8 +361,22 @@ function HomePage() {
     if (query !== '') {
       resultsText = `${resultsText} for “${query}”`;
     }
+    // For example "in STEM, Grade 11, Q1, General Chemistry 1".
+    const chosen = [];
+    if (strand !== '') {
+      chosen.push(strand);
+    }
+    if (grade !== '') {
+      chosen.push(`Grade ${grade}`);
+    }
+    if (quarter !== '') {
+      chosen.push(`Q${quarter.charAt(0)}`);
+    }
     if (subject !== '') {
-      resultsText = `${resultsText} in ${subject}`;
+      chosen.push(subject);
+    }
+    if (chosen.length > 0) {
+      resultsText = `${resultsText} in ${chosen.join(', ')}`;
     }
     resultsText = `${resultsText}.`;
     if (!hasMore && items.length > 0 && page > 1) {
@@ -371,20 +425,50 @@ function HomePage() {
             </div>
           </form>
 
-          <div className="feed-toolbar__filter">
+        </div>
+
+        <div className="feed-filters">
+          <FormField
+            id="feed-strand"
+            label="Strand"
+            type="select"
+            value={strand}
+            onChange={handleFilterChange('strand')}
+            options={STRANDS}
+            placeholderOption="Any strand"
+          />
+          <FormField
+            id="feed-grade"
+            label="Grade"
+            type="select"
+            value={grade}
+            onChange={handleFilterChange('grade')}
+            options={GRADES}
+            placeholderOption="Any grade"
+          />
+          <FormField
+            id="feed-quarter"
+            label="Quarter"
+            type="select"
+            value={quarter}
+            onChange={handleFilterChange('quarter')}
+            options={QUARTERS}
+            placeholderOption="Any quarter"
+          />
+          <div className="feed-filters__subject">
             <FormField
               id="feed-subject"
               label="Subject"
               type="select"
               value={subject}
-              onChange={handleSubjectChange}
-              options={SUBJECTS}
-              placeholderOption="All subjects"
+              onChange={handleFilterChange('subject')}
+              options={strand === '' ? ALL_SUBJECTS : subjectsForStrand(strand)}
+              placeholderOption="Any subject"
             />
           </div>
         </div>
 
-        <SubjectLegend activeSubject={subject} />
+        <StrandLegend activeStrand={strand} />
 
         <TabBar
           label="Sort study reviewers"
@@ -424,7 +508,7 @@ function HomePage() {
           <EmptyState
             icon="search"
             title="No study reviewers match"
-            message="Try a different word, another subject, or another tab."
+            message="Try a different word, fewer filters, or another tab."
           >
             <button type="button" className="button" onClick={handleClearFilters}>
               Clear search and filters

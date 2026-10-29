@@ -1,14 +1,16 @@
 // API calls about study reviewers.
 import { API_URL, apiRequest, uploadWithProgress } from './api';
 
-// filters: { sort, subject, q, page }
+// filters: { sort, strand, grade, quarter, subject, q, page }
 export const listReviewers = (filters) => {
   const params = new URLSearchParams();
   params.set('sort', filters.sort);
   params.set('page', String(filters.page));
-  if (filters.subject) {
-    params.set('subject', filters.subject);
-  }
+  ['strand', 'grade', 'quarter', 'subject'].forEach((name) => {
+    if (filters[name]) {
+      params.set(name, filters[name]);
+    }
+  });
   if (filters.q) {
     params.set('q', filters.q);
   }

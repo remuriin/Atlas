@@ -1,8 +1,26 @@
 # Atlas
 
-A hub where anyone can share and discover **study reviewers**: notes, study guides, and review
-files that people made themselves. The community curates quality with upvotes. That is the only
-social feature: there are no comments, threads, chat, ratings, or written reviews.
+A hub where **Philippine Senior High School students (Grades 11 and 12)** share and discover
+**study reviewers**: notes, study guides, and review files that people made themselves. The
+community curates quality with upvotes. That is the only social feature: there are no comments,
+threads, chat, ratings, or written reviews.
+
+Every study reviewer is filed under the K to 12 SHS curriculum that Grade 12 follows in
+SY 2026-2027:
+
+| Field | Values |
+| --- | --- |
+| Strand | All strands, STEM, ABM, HUMSS, GAS, TVL, Arts and Design, Sports |
+| Grade | 11, 12 |
+| Quarter | 1st, 2nd (first semester), 3rd, 4th (second semester) |
+| Subject | The core and applied subjects, plus the chosen strand's specialized subjects |
+| Material type | Reviewer, Summary notes, Practice test, Formula sheet, Other |
+
+"All strands" is for core and applied subjects every strand takes; filtering the feed by a strand
+shows those too. The lists live in `backend/src/utils/categories.js` and
+`frontend/src/services/categories.js`, which must stay the same. Grade 11 moved to the
+Strengthened SHS curriculum (tracks and elective clusters) in SY 2026-2027, so these lists will
+need replacing once this year's Grade 12 finishes.
 
 In the code a study reviewer is called a `reviewer` (table, routes, components). In the UI it is
 always written "study reviewer".
@@ -14,8 +32,8 @@ initials. A Google sign-in with the same email as an existing account opens that
 
 Logged-in users also get private study tools:
 
-- **Subject colors.** Every subject has its own color, shown as a stripe on each card and on its
-  subject pill. "Subject colors" above the feed opens the key, and each entry filters the feed.
+- **Strand colors.** Every strand has its own color, shown as a stripe on each card and on its
+  strand pill. "Strand colors" above the feed opens the key, and each entry filters the feed.
 - **Saved.** "Save" on any study reviewer keeps it on the Saved page (only you see it). Opening
   one shows the file inside the app (PDF, images, and text; Word and PowerPoint are download
   only) next to **your notes**, which save to your account a moment after you stop typing.
@@ -365,10 +383,10 @@ add `"fields": { "title": "..." }`.
 | Method and path | Login | What it does |
 | --- | --- | --- |
 | `GET /api/health` | no | Health check |
-| `GET /api/reviewers?sort=top\|new&subject=&q=&page=1&limit=12` | optional | Feed: `{ items, page, hasMore }` |
+| `GET /api/reviewers?sort=top\|new&strand=&grade=&quarter=&subject=&q=&page=1&limit=12` | optional | Feed: `{ items, page, hasMore }`. Filter values not in the lists are ignored |
 | `GET /api/reviewers/:id` | optional | One reviewer |
 | `GET /api/reviewers/:id/file` | no | The file (inline for PDF and images, download otherwise) |
-| `POST /api/reviewers` | yes | Create (multipart: title, description, subject, tags, file) |
+| `POST /api/reviewers` | yes | Create (multipart: title, description, strand, grade, quarter, subject, materialType, tags, file) |
 | `PUT /api/reviewers/:id` | owner | Update details, optionally replace the file |
 | `DELETE /api/reviewers/:id` | owner | Delete the reviewer and its file |
 | `PUT` / `DELETE /api/reviewers/:id/upvote` | yes | Add / remove my upvote (both safe to repeat) |
@@ -408,15 +426,15 @@ missing one.
 - **The header stays at the top** while you scroll (it is `position: sticky`). On very short
   screens, such as a phone on its side or a page zoomed to 400%, it scrolls away instead so it
   does not cover the content.
-- **Filters are in the address.** The tab, subject, and search words are stored as
-  `/?sort=new&subject=Science&q=cells`, so a filtered list can be bookmarked or shared and the
+- **Filters are in the address.** The tab, strand, grade, quarter, subject, and search words are
+  stored as `/?sort=new&strand=STEM&grade=11&q=cells`, so a filtered list can be bookmarked or shared and the
   browser's Back button steps through filter changes.
 - **Back returns you to the same place.** Opening a study reviewer and coming back (with the
   page's "Back" link or the browser's Back button) shows the same loaded cards at the same scroll
   position, with focus on the card you opened, and without asking the server again. This is kept
   in memory (`frontend/src/services/feedMemory.js`) for up to 10 minutes; a page reload, or
   opening the feed fresh from the menu, loads a new list from the top.
-- **The whole upper part of a card opens it**, not only the title. Subject and tag pills are
+- **The whole upper part of a card opens it**, not only the title. Strand and tag pills are
   links that filter the feed.
 - **Grey placeholder cards** hold the space while the feed loads, so the page does not jump.
 
@@ -437,10 +455,10 @@ Target: WCAG 2.2 AA. What was checked, and how:
   The dark theme's header and footer use GitHub's darkest shade (`--color-inset`, `#010409`);
   on it, body text is 17.4:1, muted text 7.1:1, links 6.6:1, and control outlines 3.9:1.
 
-  Subject colors (`--subject-*` tokens): every card stripe and legend swatch is at least 4.6:1
-  on the page (light) and 5.6:1 (dark); every subject pill's text is at least 6.1:1 (light) and
-  9.4:1 (dark) on its own background. The subject name is always written out, so the color is
-  never the only clue.
+  Strand colors (eight of the `--subject-*` tokens, mapped in `components.css`): every card stripe
+  and legend swatch is at least 4.6:1 on the page (light) and 5.6:1 (dark); every strand pill's
+  text is at least 6.1:1 (light) and 9.4:1 (dark) on its own background. The strand name is always
+  written out, so the color is never the only clue.
 
   Adjustments made to the starting palette so every pair passes: a darker control-outline color was
   added for inputs and buttons (the card border color is only 1.4:1 and is used just for decorative
@@ -452,7 +470,7 @@ Target: WCAG 2.2 AA. What was checked, and how:
 
 - "Skip to main content" is the first Tab stop on every page and moves focus into `<main>`.
 - Tab order follows the visual order: skip link, logo, menu links, theme switch, account buttons,
-  search, subject filter, tabs, then each card. Every stop shows a 2px focus ring.
+  search, strand, grade, quarter, and subject filters, tabs, then each card. Every stop shows a 2px focus ring.
 - The sticky header never covers the focused control: the page keeps a strip clear beneath it
   (`scroll-padding-top`). Checked by pressing Shift+Tab 60 times upwards from the bottom of a long
   feed.
@@ -468,7 +486,7 @@ Target: WCAG 2.2 AA. What was checked, and how:
   to the button; it closes after choosing a link.
 - "Load more": focus moves to the first newly loaded card.
 - Page changes: the tab title updates, the new page starts at the top, and focus moves to the
-  page's `<h1>`. Choosing a tab, a subject, or searching is not a page change, so focus stays on
+  page's `<h1>`. Choosing a tab, a filter, or searching is not a page change, so focus stays on
   the control that was used.
 - Back to the feed: focus returns to the card that had been opened.
 - Messages with a close button (and the "Remove" button for a chosen file) send focus to a
@@ -485,7 +503,7 @@ results, the chosen file, save success, and delete success are announced politel
 - Meaning never depends on color alone: errors have an icon and the word "Error", the selected tab
   has a bar and bold text, an upvoted button changes its word ("Upvoted") and its icon from outline
   to solid.
-- Touch targets are at least 44×44 px, measured at every test width. Subject and tag pills look
+- Touch targets are at least 44×44 px, measured at every test width. Strand and tag pills look
   small but sit inside 44 px tall links.
 - No horizontal scrolling at 320, 360, 768, 1024, and 1440 px, or with text at 200%. A 320 px
   viewport is what 400% zoom on a 1280 px screen produces.
@@ -497,6 +515,10 @@ results, the chosen file, save success, and delete success are announced politel
 
 ## Known limitations
 
+- Study reviewers made before the SHS categories existed are moved by `npm run db:migrate` to
+  "All strands", Grade 11, 1st quarter, "Reviewer", and subject "Other"; their old subject (for
+  example "Mathematics") is added to their tags. Uploaders should edit them to the right category.
+  One that already had 8 tags then has 9, and must drop one before it can be saved again.
 - Word and PowerPoint files cannot be shown inside the app, only downloaded. The upload form
   recommends PDF, image, or text files for that reason. Old `.doc` and `.ppt` files also cannot
   be turned into flashcards.

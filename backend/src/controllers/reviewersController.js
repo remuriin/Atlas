@@ -8,6 +8,7 @@ const savedItemsModel = require('../models/savedItemsModel');
 const upload = require('../middleware/upload');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
+const categories = require('../utils/categories');
 const createHttpError = require('../utils/httpError');
 
 const DEFAULT_PAGE_SIZE = 12;
@@ -19,11 +20,11 @@ const UNIQUE_VIOLATION = '23505';
 const INLINE_MIME_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
 
 // Picks the model function that matches the chosen tab.
-const fetchReviewerRows = async (sort, subject, searchPattern, limit, offset) => {
+const fetchReviewerRows = async (sort, filters, limit, offset) => {
   if (sort === 'new') {
-    return reviewersModel.listNewReviewers(subject, searchPattern, limit, offset);
+    return reviewersModel.listNewReviewers(filters, limit, offset);
   }
-  return reviewersModel.listTopReviewers(subject, searchPattern, limit, offset);
+  return reviewersModel.listTopReviewers(filters, limit, offset);
 };
 
 // GET /api/reviewers
@@ -34,7 +35,6 @@ const listReviewers = async (req, res, next) => {
       throw createHttpError(400, '"sort" must be top or new.');
     }
 
-    const subject = validate.cleanText(req.query.subject);
     const searchText = validate.cleanText(req.query.q).slice(0, validate.LIMITS.searchMax);
     const page = validate.parsePositiveNumber(req.query.page, 1, 'page');
     let limit = validate.parsePositiveNumber(req.query.limit, DEFAULT_PAGE_SIZE, 'limit');
@@ -42,14 +42,17 @@ const listReviewers = async (req, res, next) => {
       limit = MAX_PAGE_SIZE;
     }
 
+    // A filter value that is not in its list is ignored, so an old bookmark still loads.
+    const filters = {
+      strand: validate.parseFilter(req.query.strand, categories.STRANDS),
+      grade: validate.parseFilter(req.query.grade, categories.GRADES),
+      quarter: validate.parseFilter(req.query.quarter, categories.QUARTERS),
+      subject: validate.parseFilter(req.query.subject, categories.ALL_SUBJECTS),
+      searchPattern: validate.buildSearchPattern(searchText),
+    };
+
     // Ask for one extra row. If it comes back, there is at least one more page.
-    const rows = await fetchReviewerRows(
-      sort,
-      subject,
-      validate.buildSearchPattern(searchText),
-      limit + 1,
-      (page - 1) * limit
-    );
+    const rows = await fetchReviewerRows(sort, filters, limit + 1, (page - 1) * limit);
     const hasMore = rows.length > limit;
     const pageRows = rows.filter((row, index) => index < limit);
     const items = await reviewerItems.buildReviewerItems(pageRows, req.user);
@@ -132,7 +135,11 @@ const createReviewer = async (req, res, next) => {
       authorId: req.user.id,
       title: input.title,
       description: input.description,
+      strand: input.strand,
+      grade: input.grade,
+      quarter: input.quarter,
       subject: input.subject,
+      materialType: input.materialType,
       tags: input.tags,
       fileName: upload.cleanOriginalName(req.file.originalname),
       storedName: req.file.filename,
@@ -167,7 +174,11 @@ const updateReviewer = async (req, res, next) => {
       await reviewersModel.updateReviewerWithFile(reviewerId, {
         title: input.title,
         description: input.description,
+        strand: input.strand,
+        grade: input.grade,
+        quarter: input.quarter,
         subject: input.subject,
+        materialType: input.materialType,
         tags: input.tags,
         fileName: upload.cleanOriginalName(req.file.originalname),
         storedName: req.file.filename,
@@ -182,9 +193,9 @@ const updateReviewer = async (req, res, next) => {
       isSaved = true;
     }
 
-    // Saved copies keep their own title and subject for the day the original is
-    // deleted, so bring those up to date as well.
-    await savedItemsModel.refreshSnapshot(reviewerId, input.title, input.subject);
+    // Saved copies keep their own title, subject, and strand for the day the original
+    // is deleted, so bring those up to date as well.
+    await savedItemsModel.refreshSnapshot(reviewerId, input.title, input.subject, input.strand);
 
     const row = await reviewersModel.findReviewerById(reviewerId);
     if (!row) {
@@ -290,7 +301,8 @@ const saveReviewer = async (req, res, next) => {
           req.user.id,
           reviewer.id,
           reviewer.title,
-          reviewer.subject
+          reviewer.subject,
+          reviewer.strand
         );
       } catch (err) {
         // Same idea as upvotes: two quick clicks can both try to INSERT.
