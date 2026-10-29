@@ -32,6 +32,7 @@ router.post(
   '/',
   rateLimit.writeLimiter,
   auth.requireAuth,
+  reviewerAccess.checkUploadQuota,
   upload.single,
   checkUpload,
   reviewersController.createReviewer

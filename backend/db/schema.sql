@@ -154,12 +154,20 @@ CREATE TABLE IF NOT EXISTS reports (
 -- current file. Empty for files uploaded before the confirmation was asked for.
 ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS rights_confirmed_at TIMESTAMP;
 
+-- The SHA-256 fingerprint of the current file. Two identical files have the same one,
+-- so the same file cannot be posted twice. Empty for files uploaded before this existed.
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS file_hash TEXT;
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);
 CREATE INDEX IF NOT EXISTS idx_reviewers_strand ON reviewers (strand);
 CREATE INDEX IF NOT EXISTS idx_reviewers_grade ON reviewers (grade);
 CREATE INDEX IF NOT EXISTS idx_reviewers_author_id ON reviewers (author_id);
+-- The database itself refuses a second reviewer with the same file, even when two
+-- uploads of it arrive at the same moment.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reviewers_file_hash
+  ON reviewers (file_hash) WHERE file_hash IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_upvotes_reviewer_id ON upvotes (reviewer_id);
 CREATE INDEX IF NOT EXISTS idx_recently_viewed_user_id ON recently_viewed (user_id);
 CREATE INDEX IF NOT EXISTS idx_saved_items_user_id ON saved_items (user_id);

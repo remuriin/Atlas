@@ -5,6 +5,7 @@ const recentlyViewedModel = require('../models/recentlyViewedModel');
 const savedItemsModel = require('../models/savedItemsModel');
 const validate = require('../utils/validate');
 const reviewerItems = require('../utils/reviewerItems');
+const env = require('../config/env');
 
 const RECENTLY_VIEWED_LIMIT = 20;
 
@@ -20,8 +21,16 @@ const toProfileJson = (user) => {
 };
 
 // GET /api/me   (requireAuth already found or created the row)
-const getMe = (req, res) => {
-  res.json(toProfileJson(req.user));
+// Also says how many study reviewers the user has and how many they may have.
+const getMe = async (req, res, next) => {
+  try {
+    const profile = toProfileJson(req.user);
+    profile.uploadCount = await reviewersModel.countReviewersByAuthor(req.user.id);
+    profile.uploadLimit = env.maxUploadsPerUser;
+    res.json(profile);
+  } catch (err) {
+    next(err);
+  }
 };
 
 // PUT /api/me
