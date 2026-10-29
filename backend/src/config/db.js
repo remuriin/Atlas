@@ -1,25 +1,6 @@
-// One shared connection pool for the whole app.
-// A pool reuses a few open connections instead of opening a new one per request.
-const { Pool } = require('pg');
+// One shared connection pool for the whole app, connected as DATABASE_URL's user.
+// In production that user may only read and change rows (see db/api-user.sql).
 const env = require('./env');
+const createPool = require('./createPool');
 
-let sslSetting = false;
-if (env.databaseSsl) {
-  // Many self-hosted Postgres servers use a self-signed certificate.
-  // This still encrypts the connection; it just does not check who signed the certificate.
-  sslSetting = { rejectUnauthorized: false };
-}
-
-const pool = new Pool({
-  connectionString: env.databaseUrl,
-  ssl: sslSetting,
-  max: 10,
-  connectionTimeoutMillis: 10000,
-});
-
-// Without this listener, an error on an idle connection would crash the process.
-pool.on('error', (err) => {
-  console.error('Unexpected database connection error:', err.message);
-});
-
-module.exports = pool;
+module.exports = createPool(env.databaseUrl);

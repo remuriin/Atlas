@@ -107,6 +107,9 @@ module.exports = {
   backendRoot: backendRoot,
   port: Number(process.env.PORT) || 4000,
   databaseUrl: databaseUrl,
+  // Migrations connect as the owner of the tables. Without a separate URL they use
+  // DATABASE_URL (fine in development, where one user does everything).
+  migrationDatabaseUrl: (process.env.MIGRATION_DATABASE_URL || '').trim() || databaseUrl,
   databaseSsl: process.env.DATABASE_SSL === 'true',
   firebaseProjectId: firebaseProjectId,
   isUsingAuthEmulator: emulatorHost !== '',

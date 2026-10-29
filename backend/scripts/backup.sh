@@ -20,7 +20,9 @@ BACKEND_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 read_setting() {
   grep -E "^$1=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d '=' -f 2- | sed -e 's/^"//' -e 's/"$//'
 }
-DATABASE_URL="$(read_setting DATABASE_URL)"
+# The owner's URL if there is one: it can read every table for sure.
+DATABASE_URL="$(read_setting MIGRATION_DATABASE_URL)"
+DATABASE_URL="${DATABASE_URL:-$(read_setting DATABASE_URL)}"
 UPLOAD_DIR="$(read_setting UPLOAD_DIR)"
 UPLOAD_DIR="${UPLOAD_DIR:-./uploads}"
 # A relative upload folder is relative to backend/, as in the API.
