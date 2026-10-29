@@ -150,6 +150,10 @@ CREATE TABLE IF NOT EXISTS reports (
   CHECK (char_length(details) <= 500)
 );
 
+-- When the uploader last confirmed "I made this, or I have the right to share it" for the
+-- current file. Empty for files uploaded before the confirmation was asked for.
+ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS rights_confirmed_at TIMESTAMP;
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);

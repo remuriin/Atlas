@@ -35,6 +35,13 @@ choose one of: **Restore** (show it again), **Fix category** (move it and show i
 **Delete** (remove it and its file). Each choice closes its open reports, which are kept as a
 record. Reporters are never shown to anyone.
 
+**Copyright.** Every new file (a first upload, or a replacement when editing) needs the box "I
+made this file, or I have the right to share it" ticked; the server refuses it otherwise and stores
+the time in `reviewers.rights_confirmed_at` (empty for files from before). The **Terms of use and
+copyright** page (`/terms`, linked from the footer and the upload form) lists what may and may not
+be shared and how a copyright owner asks for removal: by email (`VITE_TAKEDOWN_EMAIL`) or with
+Report, then Copyright, with removal within 7 days if the claim holds.
+
 **Making an admin.** There is no admin sign-up. Log in once with the account, then on the server:
 
 ```sql
@@ -210,6 +217,7 @@ values are public identifiers, not passwords.
 | `VITE_API_URL` | Address of the API, no trailing slash. `http://localhost:4000` locally. |
 | `VITE_USE_AUTH_EMULATOR` | `true` for local development, `false` for real Firebase. |
 | `VITE_MAX_FILE_SIZE_MB` | Keep equal to the backend's `MAX_FILE_SIZE_MB`. |
+| `VITE_TAKEDOWN_EMAIL` | Inbox shown on the Terms page for copyright owners asking for a file to be removed. Empty: the page tells them to use Report, then Copyright. **Set it before going live.** |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | From `firebase apps:sdkconfig WEB <appId> --project <id>`. |
 
 After changing `frontend/.env`, restart `npm run dev` (or rebuild) so Vite picks the values up.

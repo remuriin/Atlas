@@ -133,6 +133,7 @@ const createReviewer = async (req, res, next) => {
       throw createHttpError(400, 'Choose a file to upload.', { file: 'Choose a file to upload.' });
     }
     const input = validate.validateReviewerFields(req.body);
+    validate.validateRightsConfirmed(req.body);
     const allowedType = upload.findAllowedType(req.file.originalname);
 
     const created = await reviewersModel.createReviewer({
@@ -174,6 +175,8 @@ const updateReviewer = async (req, res, next) => {
     const input = validate.validateReviewerFields(req.body);
 
     if (req.file) {
+      // A replacement file needs its own confirmation; editing only the text does not.
+      validate.validateRightsConfirmed(req.body);
       const allowedType = upload.findAllowedType(req.file.originalname);
       await reviewersModel.updateReviewerWithFile(reviewerId, {
         title: input.title,
