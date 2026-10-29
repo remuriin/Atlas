@@ -3,6 +3,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const checkUpload = require('../middleware/checkUpload');
 const rateLimit = require('../middleware/rateLimit');
 const reviewerAccess = require('../middleware/reviewerAccess');
 const reviewersController = require('../controllers/reviewersController');
@@ -20,6 +21,7 @@ router.post(
   rateLimit.writeLimiter,
   auth.requireAuth,
   upload.single,
+  checkUpload,
   reviewersController.createReviewer
 );
 
@@ -30,6 +32,7 @@ router.put(
   reviewerAccess.loadReviewer,
   reviewerAccess.requireOwner,
   upload.single,
+  checkUpload,
   reviewersController.updateReviewer
 );
 

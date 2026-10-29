@@ -1,10 +1,11 @@
 // Which files can be uploaded. The server checks the same rules again,
 // because checks in the browser are only there to give fast feedback.
 
-export const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg'];
+// Old .doc and .ppt files are not accepted: they can carry macros.
+export const ALLOWED_EXTENSIONS = ['pdf', 'docx', 'pptx', 'txt', 'png', 'jpg', 'jpeg'];
 
 // Used for the file picker's "accept" setting.
-export const ACCEPT_ATTRIBUTE = '.pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg';
+export const ACCEPT_ATTRIBUTE = '.pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg';
 
 export const ALLOWED_TYPES_TEXT = 'PDF, Word, PowerPoint, text, PNG, or JPG';
 
@@ -27,9 +28,6 @@ export const getExtension = (fileName) => {
 // opened inside Atlas. Returns a friendly note for those, or '' for other files.
 export const describeOfficeLimits = (fileName) => {
   const extension = getExtension(fileName);
-  if (extension === 'doc' || extension === 'ppt') {
-    return 'Old Word and PowerPoint files (.doc, .ppt) can only be downloaded: they cannot be opened inside Atlas or turned into flashcards. Saving it as a PDF first works best.';
-  }
   if (extension === 'docx' || extension === 'pptx') {
     return 'Word and PowerPoint files can only be downloaded, not opened inside Atlas. Saving it as a PDF first lets people read it right here.';
   }
@@ -38,7 +36,11 @@ export const describeOfficeLimits = (fileName) => {
 
 // Returns a message describing the problem, or '' when the file is fine.
 export const validateFile = (file) => {
-  if (ALLOWED_EXTENSIONS.indexOf(getExtension(file.name)) === -1) {
+  const extension = getExtension(file.name);
+  if (extension === 'doc' || extension === 'ppt') {
+    return 'Old Word and PowerPoint files (.doc, .ppt) are not allowed. Save it as .docx, .pptx, or PDF first.';
+  }
+  if (ALLOWED_EXTENSIONS.indexOf(extension) === -1) {
     return `That file type is not allowed. Choose a ${ALLOWED_TYPES_TEXT} file.`;
   }
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {

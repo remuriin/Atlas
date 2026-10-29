@@ -8,15 +8,16 @@ const env = require('../config/env');
 const createHttpError = require('../utils/httpError');
 
 // The allowlist. A file is accepted only when BOTH its extension and the
-// content type sent by the browser match one of these pairs.
+// content type sent by the browser match one of these pairs. After the upload,
+// middleware/checkUpload.js also checks what is really inside the file.
+// Old .doc and .ppt files are not accepted: they can carry macros, the most
+// common way Office files spread malware. Files uploaded before still download.
 const ALLOWED_FILE_TYPES = [
   { extension: '.pdf', mime: 'application/pdf' },
-  { extension: '.doc', mime: 'application/msword' },
   {
     extension: '.docx',
     mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   },
-  { extension: '.ppt', mime: 'application/vnd.ms-powerpoint' },
   {
     extension: '.pptx',
     mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
@@ -57,7 +58,7 @@ const fileFilter = (req, file, callback) => {
       createHttpError(
         415,
         'That file type is not allowed. Upload a PDF, Word, PowerPoint, text, PNG, or JPG file.',
-        { file: 'That file type is not allowed. Use PDF, DOC, DOCX, PPT, PPTX, TXT, PNG, or JPG.' }
+        { file: 'That file type is not allowed. Use PDF, DOCX, PPTX, TXT, PNG, or JPG.' }
       )
     );
     return;
