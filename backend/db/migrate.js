@@ -3,7 +3,11 @@
 // pulling changes: new tables are added and existing ones are left alone)
 const fs = require('fs');
 const path = require('path');
-const pool = require('../src/config/db');
+const env = require('../src/config/env');
+const createPool = require('../src/config/createPool');
+
+// Creating and changing tables needs their owner, not the API's limited user.
+const pool = createPool(env.migrationDatabaseUrl);
 
 // Turns the most common connection problems into a plain next step.
 const explainError = (err) => {
@@ -27,7 +31,7 @@ const explainError = (err) => {
     return 'That database does not exist yet. Create it on the server, or fix the name at the end of DATABASE_URL.';
   }
   if (code === '42501') {
-    return 'This user is not allowed to create tables in the database. Make the user the owner of the database, or grant it rights on the "public" schema.';
+    return 'This user is not allowed to create or change tables. Set MIGRATION_DATABASE_URL in backend/.env to the user that owns the tables (in production, not the limited user the API uses).';
   }
   return 'Check that DATABASE_URL in backend/.env is correct and that Postgres is running.';
 };

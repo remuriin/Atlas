@@ -203,6 +203,7 @@ placeholder database URL.
 | --- | --- |
 | `PORT` | Port the API listens on. Default `4000`. |
 | `DATABASE_URL` | **Replace with your VPS Postgres URL.** `postgres://USER:PASSWORD@HOST:5432/DBNAME` |
+| `MIGRATION_DATABASE_URL` | Production: the URL of the user that **owns** the tables, used only by `npm run db:migrate` and the backup script. `DATABASE_URL` is then the limited API user (see "A limited database user for the API"). Empty in development: migrations use `DATABASE_URL`. |
 | `DATABASE_SSL` | `true` only when Postgres is on another machine and requires SSL. Default `false`. |
 | `FIREBASE_PROJECT_ID` | Your Firebase project id. Tokens from any other project are rejected. `demo-atlas` works only with the emulator. |
 | `FIREBASE_AUTH_EMULATOR_HOST` | `127.0.0.1:9099` in development. **Delete this line in production.** The server refuses to start if it is set while `NODE_ENV=production`. |
@@ -285,6 +286,38 @@ backup on the same disk is lost with the disk, so also copy the folder somewhere
 To restore: `gunzip -c atlas-db-2026-10-29.sql.gz | psql "$DATABASE_URL"` into an empty database,
 and `tar -xzf atlas-uploads-2026-10-29.tar.gz -C /var/www/learnhub/backend`.
 
+## A limited database user for the API
+
+The database is only reachable through the VPS's private VPN. The API runs on that same VPS,
+though, so if it were ever broken into, an attacker would act with whatever rights the API's
+database user has. That user should only read and change rows. It should not be able to drop or
+alter tables or create users.
+
+| User | Rights | Used by |
+| --- | --- | --- |
+| `learnhub_app` | Owns the database and its tables | `npm run db:migrate`, the backup script (`MIGRATION_DATABASE_URL`) |
+| `learnhub_api` | `SELECT`, `INSERT`, `UPDATE`, `DELETE` on the tables, and the id counters | The API (`DATABASE_URL`) |
+
+Set it up once on the VPS (creating a user needs the `postgres` superuser):
+
+```bash
+cd /var/www/learnhub/backend/db
+sudo -u postgres psql -d learnhub -v api_password='choose-a-long-random-password' -f api-user.sql
+```
+
+`db/api-user.sql` creates `learnhub_api` and grants it those rights, including on tables that
+later migrations add. It also takes away the right Postgres 14 gives every user to create tables
+in `public`. It is safe to run again, which also changes the password. Then, in
+`backend/.env`:
+
+```
+DATABASE_URL=postgres://learnhub_api:<that password>@localhost:5432/learnhub
+MIGRATION_DATABASE_URL=postgres://learnhub_app:<its password>@localhost:5432/learnhub
+```
+
+and `pm2 restart learnhub-api`. To check it, this must fail with "must be owner of table":
+`psql "postgres://learnhub_api:...@localhost:5432/learnhub" -c "DROP TABLE reports;"`.
+
 ## Migrations
 
 ```bash
@@ -364,7 +397,8 @@ database port then never needs to be open to the internet.
 
 1. **Copy the project** to the server and install: `cd backend && npm ci --omit=dev`.
 2. **Backend settings** in `backend/.env`:
-   - `DATABASE_URL=postgres://atlas:...@localhost:5432/atlas`
+   - `DATABASE_URL=postgres://atlas:...@localhost:5432/atlas` (then switch to a limited user,
+     see "A limited database user for the API")
    - `FIREBASE_PROJECT_ID=<your real project id>`
    - delete the `FIREBASE_AUTH_EMULATOR_HOST` line
    - `FRONTEND_ORIGIN=https://atlas.example.com` (your real domain, no trailing slash)
