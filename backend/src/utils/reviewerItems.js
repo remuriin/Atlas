@@ -21,7 +21,11 @@ const toReviewerJson = (row, hasUpvoted, saved, user) => {
     id: row.id,
     title: row.title,
     description: row.description,
+    strand: row.strand,
+    grade: row.grade,
+    quarter: row.quarter,
     subject: row.subject,
+    materialType: row.material_type,
     tags: validate.tagsToArray(row.tags),
     authorName: row.author_name,
     fileName: row.file_name,
@@ -61,7 +65,7 @@ const buildReviewerItems = async (rows, user) => {
 
 // Turns a saved_items row (joined with its reviewer, see savedItemsModel) into the
 // shape the Saved page expects. When the original was deleted, isRemoved is true and
-// only the copied title and subject are left.
+// only the copied title, subject, and strand are left.
 const toSavedJson = (row) => {
   const isRemoved = row.live_reviewer_id === null;
 
@@ -71,6 +75,7 @@ const toSavedJson = (row) => {
     isRemoved: isRemoved,
     title: row.saved_title,
     subject: row.saved_subject,
+    strand: row.saved_strand,
     // Formatted notes can hold only empty tags, so check the text a person would see.
     hasNotes: validate.visibleNotesText(row.notes).trim() !== '',
     notesUpdatedAt: row.notes_updated_at,
@@ -82,9 +87,13 @@ const toSavedJson = (row) => {
   if (!isRemoved) {
     item.title = row.title;
     item.subject = row.subject;
+    item.strand = row.strand;
     item.reviewer = {
       id: row.live_reviewer_id,
       description: row.description,
+      grade: row.grade,
+      quarter: row.quarter,
+      materialType: row.material_type,
       tags: validate.tagsToArray(row.tags),
       authorName: row.author_name,
       fileName: row.file_name,

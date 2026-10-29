@@ -29,7 +29,8 @@ const updateViewTime = async (userId, reviewerId) => {
 const listRecentlyViewedReviewers = async (userId, limit) => {
   // List the reviewers a user opened most recently, newest view first.
   const result = await pool.query(
-    `SELECT r.id, r.author_id, r.title, r.description, r.subject, r.tags,
+    `SELECT r.id, r.author_id, r.title, r.description,
+            r.strand, r.grade, r.quarter, r.subject, r.material_type, r.tags,
             r.file_name, r.stored_name, r.file_mime, r.file_size,
             r.created_at, r.updated_at,
             u.display_name AS author_name,

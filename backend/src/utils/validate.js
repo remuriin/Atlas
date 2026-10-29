@@ -1,22 +1,7 @@
 // Server-side checks for everything a visitor can send us.
 // The frontend runs similar checks for fast feedback, but only these ones can be trusted.
 const createHttpError = require('./httpError');
-
-// Keep this list the same as frontend/src/services/subjects.js.
-const SUBJECTS = [
-  'Mathematics',
-  'Science',
-  'English',
-  'History',
-  'Social Studies',
-  'Computer Science',
-  'Engineering',
-  'Business',
-  'Health and Medicine',
-  'Languages',
-  'Arts',
-  'Other',
-];
+const categories = require('./categories');
 
 const LIMITS = {
   titleMin: 3,
@@ -110,7 +95,11 @@ const validateReviewerFields = (body) => {
   const input = body || {};
   const title = cleanText(input.title);
   const description = cleanText(input.description);
+  const strand = cleanText(input.strand);
+  const grade = cleanText(input.grade);
+  const quarter = cleanText(input.quarter);
   const subject = cleanText(input.subject);
+  const materialType = cleanText(input.materialType);
   const tags = parseTags(input.tags);
   const fields = {};
 
@@ -120,8 +109,21 @@ const validateReviewerFields = (body) => {
   if (description.length < LIMITS.descriptionMin || description.length > LIMITS.descriptionMax) {
     fields.description = `Description must be between ${LIMITS.descriptionMin} and ${LIMITS.descriptionMax} characters.`;
   }
-  if (SUBJECTS.indexOf(subject) === -1) {
-    fields.subject = 'Choose a subject from the list.';
+  if (categories.STRANDS.indexOf(strand) === -1) {
+    fields.strand = 'Choose a strand from the list.';
+  }
+  if (categories.GRADES.indexOf(grade) === -1) {
+    fields.grade = 'Choose Grade 11 or 12.';
+  }
+  if (categories.QUARTERS.indexOf(quarter) === -1) {
+    fields.quarter = 'Choose a quarter from the list.';
+  }
+  // Only the strand's own subjects are allowed (skipped while the strand itself is wrong).
+  if (!fields.strand && categories.subjectsForStrand(strand).indexOf(subject) === -1) {
+    fields.subject = 'Choose a subject from the list for this strand.';
+  }
+  if (categories.MATERIAL_TYPES.indexOf(materialType) === -1) {
+    fields.materialType = 'Choose a material type from the list.';
   }
   if (tags.length > LIMITS.maxTags) {
     fields.tags = `Use at most ${LIMITS.maxTags} tags.`;
@@ -136,7 +138,11 @@ const validateReviewerFields = (body) => {
   return {
     title: title,
     description: description,
+    strand: strand,
+    grade: grade,
+    quarter: quarter,
     subject: subject,
+    materialType: materialType,
     // Stored as one comma-separated string, as the schema describes.
     tags: tags.join(','),
   };
@@ -200,6 +206,15 @@ const validateFlashcardStatus = (value) => {
   return value;
 };
 
+// Reads a feed filter such as ?strand=. Anything not in the list means "do not filter".
+const parseFilter = (value, allowedValues) => {
+  const text = cleanText(value);
+  if (allowedValues.indexOf(text) === -1) {
+    return '';
+  }
+  return text;
+};
+
 // Reads ?page= or ?limit=. Missing values use the fallback; bad values throw a 400 error.
 const parsePositiveNumber = (value, fallback, name) => {
   if (value === undefined || value === '') {
@@ -222,7 +237,6 @@ const buildSearchPattern = (searchText) => {
 };
 
 module.exports = {
-  SUBJECTS: SUBJECTS,
   LIMITS: LIMITS,
   cleanText: cleanText,
   parseId: parseId,
@@ -234,6 +248,7 @@ module.exports = {
   visibleNotesText: visibleNotesText,
   validateFlashcardCount: validateFlashcardCount,
   validateFlashcardStatus: validateFlashcardStatus,
+  parseFilter: parseFilter,
   parsePositiveNumber: parsePositiveNumber,
   buildSearchPattern: buildSearchPattern,
 };

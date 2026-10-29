@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createReviewer, updateReviewer } from '../services/reviewersService';
-import { SUBJECTS } from '../services/subjects';
+import { GRADES, MATERIAL_TYPES, QUARTERS, STRANDS, subjectsForStrand } from '../services/categories';
 import { clearFeed } from '../services/feedMemory';
 import { describeFileType, formatFileSize } from '../services/format';
 import {
@@ -22,7 +22,17 @@ import FormField from './FormField';
 import Icon from './Icon';
 
 // The order the fields appear in, used to find the first one with a problem.
-const FIELD_ORDER = ['title', 'description', 'subject', 'tags', 'file'];
+const FIELD_ORDER = [
+  'title',
+  'description',
+  'strand',
+  'grade',
+  'quarter',
+  'subject',
+  'materialType',
+  'tags',
+  'file',
+];
 
 // These limits match the server's (backend/src/utils/validate.js).
 const TITLE_MIN = 3;
@@ -39,18 +49,30 @@ function ReviewerForm(props) {
   // When editing, start with the saved values. When creating, start empty.
   let startTitle = '';
   let startDescription = '';
+  let startStrand = '';
+  let startGrade = '';
+  let startQuarter = '';
   let startSubject = '';
+  let startMaterialType = '';
   let startTags = '';
   if (isEdit) {
     startTitle = props.reviewer.title;
     startDescription = props.reviewer.description;
+    startStrand = props.reviewer.strand;
+    startGrade = props.reviewer.grade;
+    startQuarter = props.reviewer.quarter;
     startSubject = props.reviewer.subject;
+    startMaterialType = props.reviewer.materialType;
     startTags = props.reviewer.tags.join(', ');
   }
 
   const [title, setTitle] = useState(startTitle);
   const [description, setDescription] = useState(startDescription);
+  const [strand, setStrand] = useState(startStrand);
+  const [grade, setGrade] = useState(startGrade);
+  const [quarter, setQuarter] = useState(startQuarter);
   const [subject, setSubject] = useState(startSubject);
+  const [materialType, setMaterialType] = useState(startMaterialType);
   const [tags, setTags] = useState(startTags);
   const [file, setFile] = useState(null);
   // errors looks like { title: 'message', file: 'message' }
@@ -75,8 +97,20 @@ function ReviewerForm(props) {
     if (cleanDescription.length < DESCRIPTION_MIN || cleanDescription.length > DESCRIPTION_MAX) {
       found.description = `Enter a description between ${DESCRIPTION_MIN} and ${DESCRIPTION_MAX} characters.`;
     }
+    if (strand === '') {
+      found.strand = 'Choose a strand.';
+    }
+    if (grade === '') {
+      found.grade = 'Choose a grade.';
+    }
+    if (quarter === '') {
+      found.quarter = 'Choose a quarter.';
+    }
     if (subject === '') {
       found.subject = 'Choose a subject.';
+    }
+    if (materialType === '') {
+      found.materialType = 'Choose a material type.';
     }
     if (tagList.length > MAX_TAGS) {
       found.tags = `Use ${MAX_TAGS} tags or fewer. You have ${tagList.length}.`;
@@ -104,6 +138,16 @@ function ReviewerForm(props) {
       if (input) {
         input.focus();
       }
+    }
+  };
+
+  // Each strand takes different subjects, so a subject the new strand does not
+  // take is cleared and has to be chosen again.
+  const handleStrandChange = (event) => {
+    const nextStrand = event.target.value;
+    setStrand(nextStrand);
+    if (subjectsForStrand(nextStrand).indexOf(subject) === -1) {
+      setSubject('');
     }
   };
 
@@ -157,7 +201,11 @@ function ReviewerForm(props) {
     const formData = new FormData();
     formData.append('title', title.trim());
     formData.append('description', description.trim());
+    formData.append('strand', strand);
+    formData.append('grade', grade);
+    formData.append('quarter', quarter);
     formData.append('subject', subject);
+    formData.append('materialType', materialType);
     formData.append('tags', tags);
     if (file) {
       formData.append('file', file);
@@ -230,7 +278,7 @@ function ReviewerForm(props) {
         onChange={(event) => setTitle(event.target.value)}
         required
         maxLength={TITLE_MAX}
-        hint="For example: Intro to Calculus midterm notes"
+        hint="For example: General Chemistry 1 quarterly exam reviewer"
         error={errors.title}
       />
 
@@ -247,15 +295,66 @@ function ReviewerForm(props) {
       />
 
       <FormField
+        id="reviewer-strand"
+        label="Strand"
+        type="select"
+        value={strand}
+        onChange={handleStrandChange}
+        required
+        options={STRANDS}
+        placeholderOption="Choose a strand"
+        hint="Choose All strands for core and applied subjects that every strand takes."
+        error={errors.strand}
+      />
+
+      <FormField
+        id="reviewer-grade"
+        label="Grade"
+        type="select"
+        value={grade}
+        onChange={(event) => setGrade(event.target.value)}
+        required
+        options={GRADES}
+        placeholderOption="Choose a grade"
+        error={errors.grade}
+      />
+
+      <FormField
+        id="reviewer-quarter"
+        label="Quarter"
+        type="select"
+        value={quarter}
+        onChange={(event) => setQuarter(event.target.value)}
+        required
+        options={QUARTERS}
+        placeholderOption="Choose a quarter"
+        hint="1st and 2nd quarter are the first semester; 3rd and 4th are the second."
+        error={errors.quarter}
+      />
+
+      {/* Until a strand is chosen, the core and applied subjects are listed. */}
+      <FormField
         id="reviewer-subject"
         label="Subject"
         type="select"
         value={subject}
         onChange={(event) => setSubject(event.target.value)}
         required
-        options={SUBJECTS}
+        options={subjectsForStrand(strand)}
         placeholderOption="Choose a subject"
         error={errors.subject}
+      />
+
+      <FormField
+        id="reviewer-materialType"
+        label="Material type"
+        type="select"
+        value={materialType}
+        onChange={(event) => setMaterialType(event.target.value)}
+        required
+        options={MATERIAL_TYPES}
+        placeholderOption="Choose a material type"
+        error={errors.materialType}
       />
 
       <FormField
@@ -263,7 +362,7 @@ function ReviewerForm(props) {
         label="Tags"
         value={tags}
         onChange={(event) => setTags(event.target.value)}
-        hint={`Optional. Separate tags with commas, for example: calculus, midterm. Up to ${MAX_TAGS} tags.`}
+        hint={`Optional. Separate tags with commas, for example: limits, quarterly exam. Up to ${MAX_TAGS} tags.`}
         error={errors.tags}
       />
 

@@ -12,10 +12,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { describeFileType, formatDate, formatFileSize } from '../services/format';
 import { rememberOpenedReviewer } from '../services/feedMemory';
-import { subjectSlug } from '../services/subjects';
+import { describeCategory, strandSlug } from '../services/categories';
 import Icon from './Icon';
 import SaveButton from './SaveButton';
-import SubjectLink from './SubjectLink';
+import StrandLink from './StrandLink';
 import TagList from './TagList';
 import UpvoteButton from './UpvoteButton';
 
@@ -25,11 +25,11 @@ function ReviewerCard(props) {
   const location = useLocation();
 
   return (
-    // The colored stripe down the left edge shows the subject at a glance.
-    <article className={`card reviewer-card subject--${subjectSlug(reviewer.subject)}`}>
+    // The colored stripe down the left edge shows the strand at a glance.
+    <article className={`card reviewer-card strand--${strandSlug(reviewer.strand)}`}>
       <div className="reviewer-card__body">
         <p>
-          <SubjectLink subject={reviewer.subject} />
+          <StrandLink strand={reviewer.strand} />
         </p>
 
         <Heading className="reviewer-card__title">
@@ -43,6 +43,8 @@ function ReviewerCard(props) {
             {reviewer.title}
           </Link>
         </Heading>
+
+        <p className="reviewer-card__category">{describeCategory(reviewer)}</p>
 
         <p className="reviewer-card__description">{reviewer.description}</p>
 

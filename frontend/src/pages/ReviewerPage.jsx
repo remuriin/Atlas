@@ -14,6 +14,7 @@ import {
   formatFileSize,
   opensInBrowser,
 } from '../services/format';
+import { describeCategory } from '../services/categories';
 import { clearFeed } from '../services/feedMemory';
 import Alert from '../components/Alert';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -22,7 +23,7 @@ import Icon from '../components/Icon';
 import PageHeading from '../components/PageHeading';
 import SaveButton from '../components/SaveButton';
 import Spinner from '../components/Spinner';
-import SubjectLink from '../components/SubjectLink';
+import StrandLink from '../components/StrandLink';
 import TagList from '../components/TagList';
 import UpvoteButton from '../components/UpvoteButton';
 
@@ -203,8 +204,9 @@ function ReviewerPage() {
 
           <div className="detail-header">
             <p>
-              <SubjectLink subject={reviewer.subject} />
+              <StrandLink strand={reviewer.strand} />
             </p>
+            <p className="reviewer-card__category">{describeCategory(reviewer)}</p>
             <p className="meta">
               <span className="meta__item">
                 <Icon name="user" />
