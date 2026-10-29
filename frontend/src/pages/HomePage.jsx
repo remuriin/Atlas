@@ -21,6 +21,7 @@ import EmptyState from '../components/EmptyState';
 import FlashMessage from '../components/FlashMessage';
 import FormField from '../components/FormField';
 import Icon from '../components/Icon';
+import LandingIntro from '../components/LandingIntro';
 import PageHeading from '../components/PageHeading';
 import ReviewerList from '../components/ReviewerList';
 import SkeletonList from '../components/SkeletonList';
@@ -394,9 +395,15 @@ function HomePage() {
   return (
     <div className="feed-page">
       <PageHeading title="Study reviewers" />
-      <p className="page-intro">
-        Notes, study guides, and review files made by learners. Upvote the ones that help you.
-      </p>
+      {/* Visitors get the pitch; logged-in users the short line. Neither shows until
+          Firebase knows which one this is, so a logged-in user never sees the pitch flash by. */}
+      {!auth.isLoading && !auth.firebaseUser && <LandingIntro />}
+      {!auth.isLoading && auth.firebaseUser && (
+        <p className="page-intro">
+          Reviewers, notes, and practice tests made by Senior High students. Upvote the ones that
+          help you.
+        </p>
+      )}
 
       <div className="flash-slot">
         <FlashMessage />

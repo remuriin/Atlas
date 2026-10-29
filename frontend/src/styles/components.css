@@ -612,6 +612,63 @@
   margin-bottom: var(--space-3);
 }
 
+/* ---------- Landing intro (visitors only, above the feed) ---------- */
+
+.landing-intro {
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.landing-intro__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.landing-intro__lead {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+/* One column on phones, two side by side from tablet width. */
+.landing-intro__list {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.landing-intro__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.landing-intro__item .icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-accent);
+}
+
+.landing-intro__item-title {
+  display: block;
+}
+
+.landing-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .landing-intro__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .feed-toolbar {
   display: flex;
   flex-direction: column;
