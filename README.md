@@ -253,6 +253,38 @@ After changing `frontend/.env`, restart `npm run dev` (or rebuild) so Vite picks
 
 `backend/.env` is listed in `.gitignore`. Never commit it and never paste it anywhere public.
 
+## Deleting an account
+
+"Delete my account" on the Profile page removes the `users` row, which takes everything else
+with it (`ON DELETE CASCADE`): the person's study reviewers, upvotes, views, saved items, notes,
+flashcards, and reports. Their uploaded files are deleted from disk, and then the browser deletes
+the Firebase login. Other people's saved copies of their study reviewers keep the saved title and
+those people's own notes, as when an uploader deletes one reviewer.
+
+It needs a login from the last 5 minutes (the token's `auth_time`), so a phone left logged in
+cannot be used to delete someone's account. Firebase asks the same before it deletes a login, so
+the check also makes that step work. With an older login the page offers "Log in again" and
+returns to the Profile page.
+
+## Backups
+
+`backend/scripts/backup.sh` writes `atlas-db-YYYY-MM-DD.sql.gz` (`pg_dump`) and
+`atlas-uploads-YYYY-MM-DD.tar.gz` to `/var/backups/atlas` (`BACKUP_DIR`), readable only by its
+owner, and keeps 14 nights (`KEEP_DAYS`). It reads `DATABASE_URL` and `UPLOAD_DIR` from
+`backend/.env`. On the VPS, run it each night from the crontab of the user that runs the API
+(`crontab -e`):
+
+```
+30 2 * * * /var/www/learnhub/backend/scripts/backup.sh >> /var/log/atlas-backup.log 2>&1
+```
+
+Needs `pg_dump` (`sudo apt install postgresql-client`, same major version as the server). A
+backup on the same disk is lost with the disk, so also copy the folder somewhere else, for example
+`rsync -a /var/backups/atlas/ you@other-machine:atlas-backups/` from a second cron line.
+
+To restore: `gunzip -c atlas-db-2026-10-29.sql.gz | psql "$DATABASE_URL"` into an empty database,
+and `tar -xzf atlas-uploads-2026-10-29.tar.gz -C /var/www/learnhub/backend`.
+
 ## Migrations
 
 ```bash
@@ -447,7 +479,8 @@ add `"fields": { "title": "..." }`.
 | `DELETE /api/reviewers/:id` | owner | Delete the reviewer and its file |
 | `PUT` / `DELETE /api/reviewers/:id/upvote` | yes | Add / remove my upvote (both safe to repeat) |
 | `POST /api/reviewers/:id/view` | yes | Record in my recently viewed |
-| `GET` / `PUT /api/me` | yes | Find-or-create my profile / change my display name |
+| `GET` / `PUT /api/me` | yes | Find-or-create my profile (with `uploadCount` and `uploadLimit`) / change my display name |
+| `DELETE /api/me` | yes | Delete my account and everything in it. 401 unless I logged in within the last 5 minutes |
 | `GET /api/me/reviewers` | yes | My uploads |
 | `GET /api/me/recently-viewed` | yes | My last 20 viewed |
 | `PUT` / `DELETE /api/reviewers/:id/save` | yes | Save to / remove from my Saved list (both safe to repeat). Removing also deletes my notes and flashcards for it |
@@ -591,12 +624,11 @@ results, the chosen file, save success, and delete success are announced politel
   recommends PDF, image, or text files for that reason. Old `.doc` and `.ppt` files can no longer
   be uploaded; ones uploaded before still download, but cannot be turned into flashcards.
 - The PDF script check reads the file as it is stored. A script hidden inside a compressed part of
-  the PDF is not seen by it; ClamAV is the second line there, and the report button (planned) the third.
+  the PDF is not seen by it; ClamAV is the second line there, and the Report button the third.
 - ClamAV only knows malware that is already on its list, so a brand-new threat can pass it.
 - Some phone browsers show only the first page of a PDF (or a link) inside the study page.
   "Open in new tab" there always shows the whole file.
-- Flashcards are written by AI and can contain mistakes; the page says so. The daily limit of 10
-  sets per user is kept in memory, like the other rate limits.
+- Flashcards are written by AI and can contain mistakes; the page says so.
 - Large Word or PowerPoint files are cut to about 200,000 characters of text before Gemini sees
   them, which is far more than 100 cards need. Their text is read by a small built-in ZIP reader
   (`backend/src/utils/zipReader.js`, Node's own `zlib`), not by an extra package.
@@ -605,19 +637,16 @@ results, the chosen file, save success, and delete success are announced politel
 - Scrollbars follow the theme everywhere except inside the browser's own PDF viewer, which
   cannot be styled from the page.
 
-- The file-type check trusts the file extension and the content type sent by the browser; it does
-  not inspect file contents. Files are never executed, are stored under random names, and are
-  served with their allowlisted content type plus `nosniff`, so a disguised file cannot run as a
-  web page, but it could still be a mislabelled download.
 - Some systems report an unusual content type for Office files (for example when Office is not
   installed). Those uploads are rejected with the "file type is not allowed" message.
-- Rate limits are kept in memory: they reset when the API restarts and are per process.
+- The general (600 per 15 minutes) and study-save limits are kept in memory, so they reset when
+  the API restarts and are per process; they only smooth out bursts. The write limit (120 per 15
+  minutes) and the daily flashcard limit (10) are kept in Postgres (`rate_limits` table) and
+  survive restarts. If the database cannot be reached, those two let requests through.
 - The remembered feed (for the Back button) lives in the page's memory only. After a reload the
   filters are still restored from the address, but the list starts again from page 1 at the top.
 - Text inside the clickable part of a card cannot be selected by dragging; it can on the
   reviewer's own page.
 - Choosing a tag searches titles, descriptions, and tags for that word, so it can also match
   reviewers that mention the word without having the tag.
-- Deleting a Firebase account does not delete its row in `users` (there is no account-deletion
-  feature yet).
 - Timestamps are stored as `TIMESTAMP` (no time zone) in the database server's local time.

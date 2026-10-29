@@ -158,6 +158,14 @@ ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS rights_confirmed_at TIMESTAMP;
 -- so the same file cannot be posted twice. Empty for files uploaded before this existed.
 ALTER TABLE reviewers ADD COLUMN IF NOT EXISTS file_hash TEXT;
 
+-- Rate limit counts that must survive a restart (see backend/src/utils/rateLimitStore.js).
+-- TIMESTAMPTZ, unlike the other tables, because the API compares reset_at with its own clock.
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key TEXT PRIMARY KEY,
+  hits INTEGER NOT NULL,
+  reset_at TIMESTAMPTZ NOT NULL
+);
+
 -- Indexes speed up the lookups the app does most often.
 CREATE INDEX IF NOT EXISTS idx_reviewers_created_at ON reviewers (created_at);
 CREATE INDEX IF NOT EXISTS idx_reviewers_subject ON reviewers (subject);

@@ -10,6 +10,10 @@ export const updateMyProfile = (displayName) => {
   return apiRequest('/api/me', { method: 'PUT', json: { displayName: displayName } });
 };
 
+export const deleteMyAccount = () => {
+  return apiRequest('/api/me', { method: 'DELETE' });
+};
+
 export const listMyReviewers = () => {
   return apiRequest('/api/me/reviewers');
 };

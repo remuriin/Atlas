@@ -31,7 +31,14 @@ const updateUserDisplayName = async (userId, displayName) => {
   return result.rows[0] || null;
 };
 
+const deleteUser = async (userId) => {
+  // Remove a user. ON DELETE CASCADE removes their study reviewers, upvotes, views,
+  // saved items, notes, flashcards, and reports with them.
+  await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+};
+
 module.exports = {
+  deleteUser: deleteUser,
   findUserByFirebaseUid: findUserByFirebaseUid,
   createUser: createUser,
   updateUserDisplayName: updateUserDisplayName,

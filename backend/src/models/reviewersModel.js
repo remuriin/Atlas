@@ -162,6 +162,14 @@ const updateReviewerWithFile = async (reviewerId, reviewer) => {
   return result.rows[0] || null;
 };
 
+const listStoredNamesByAuthor = async (authorId) => {
+  // The names on disk of every file one user uploaded (to delete them with the account).
+  const result = await pool.query('SELECT stored_name FROM reviewers WHERE author_id = $1', [
+    authorId,
+  ]);
+  return result.rows.map((row) => row.stored_name);
+};
+
 const countReviewersByAuthor = async (authorId) => {
   // How many study reviewers one user has now.
   const result = await pool.query('SELECT COUNT(*) AS count FROM reviewers WHERE author_id = $1', [
@@ -215,6 +223,7 @@ module.exports = {
   updateReviewer: updateReviewer,
   updateReviewerWithFile: updateReviewerWithFile,
   countReviewersByAuthor: countReviewersByAuthor,
+  listStoredNamesByAuthor: listStoredNamesByAuthor,
   findReviewerByFileHash: findReviewerByFileHash,
   setHidden: setHidden,
   updateCategory: updateCategory,

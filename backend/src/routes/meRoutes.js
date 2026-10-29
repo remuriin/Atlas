@@ -10,6 +10,7 @@ router.use(auth.requireAuth);
 
 router.get('/', meController.getMe);
 router.put('/', rateLimit.writeLimiter, meController.updateMe);
+router.delete('/', rateLimit.writeLimiter, meController.deleteMe);
 router.get('/reviewers', meController.listMyReviewers);
 router.get('/recently-viewed', meController.listMyRecentlyViewed);
 router.get('/saved', meController.listMySaved);

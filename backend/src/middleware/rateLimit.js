@@ -1,14 +1,22 @@
 // Limits how many requests one visitor can make, to slow down abuse.
+// The general and study limits only smooth out bursts, so they are counted in memory
+// (fast, and a restart forgetting them does no harm). The write and flashcard limits
+// are counted in Postgres, so a restart does not reset them.
 const { rateLimit } = require('express-rate-limit');
+const createPostgresStore = require('../utils/rateLimitStore');
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
-const buildLimiter = (maxRequests, message) => {
+// "store" is left out for in-memory counting.
+const buildLimiter = (maxRequests, message, store) => {
   return rateLimit({
     windowMs: FIFTEEN_MINUTES,
     limit: maxRequests,
     standardHeaders: true,
     legacyHeaders: false,
+    store: store,
+    // If the database cannot be reached, let the request through rather than fail it.
+    passOnStoreError: true,
     // Same error shape as every other error from this API.
     message: { error: { message: message } },
   });
@@ -23,7 +31,8 @@ const generalLimiter = buildLimiter(
 // Stricter: applies to requests that change data (upload, edit, delete, upvote).
 const writeLimiter = buildLimiter(
   120,
-  'You are making changes too quickly. Please wait a few minutes and try again.'
+  'You are making changes too quickly. Please wait a few minutes and try again.',
+  createPostgresStore('write:')
 );
 
 // For small saves made while studying (notes autosave, marking a flashcard as known).
@@ -43,6 +52,8 @@ const flashcardLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => `user-${req.user.id}`,
+  store: createPostgresStore('flashcards:'),
+  passOnStoreError: true,
   // Only sets that were really made count; a failed attempt does not use up a turn.
   skipFailedRequests: true,
   message: {
