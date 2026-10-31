@@ -164,7 +164,7 @@ Then create the tables:
 ```bash
 cd backend
 npm run db:migrate      # safe to run again at any time
-npm run db:seed         # optional: adds 20 sample study reviewers
+npm run db:seed         # optional: adds 6 sample students and 16 study reviewers (PDFs)
 ```
 
 Need a throwaway local database? With Docker:
@@ -324,6 +324,7 @@ and `pm2 restart learnhub-api`. To check it, this must fail with "must be owner 
 cd backend
 npm run db:migrate   # runs db/schema.sql
 npm run db:seed      # optional sample data, never runs automatically
+npm run db:seed -- --reset --backup ../backup.json   # saves every table, deletes all old data (admins kept), then adds the sample data
 ```
 
 `db/schema.sql` uses only `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`, so running
