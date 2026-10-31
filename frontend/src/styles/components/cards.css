@@ -144,7 +144,7 @@
   padding: var(--space-3) var(--space-4);
   background-color: var(--color-subtle);
   border-top: var(--border-width) solid var(--color-border);
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
 }
 
 .meta {
