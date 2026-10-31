@@ -19,13 +19,13 @@ function ThemeToggle() {
   return (
     <button
       type="button"
-      className="button button--quiet theme-toggle"
+      className="button button-quiet theme-toggle"
       aria-pressed={isDark}
       onClick={themeContext.toggleTheme}
     >
       <Icon name={iconName} />
       <span>Dark mode</span>
-      <span className="theme-toggle__state" aria-hidden="true">
+      <span className="theme-toggle-state" aria-hidden="true">
         {stateText}
       </span>
     </button>

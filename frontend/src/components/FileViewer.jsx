@@ -96,7 +96,7 @@ function FileViewer(props) {
         <h2 id="material-heading" className="section-heading">
           Material
         </h2>
-        <div className="card card--padded file-unavailable">
+        <div className="card card-padded file-unavailable">
           <Icon name="file" large />
           <p>The original file was removed by its uploader.</p>
         </div>
@@ -114,7 +114,7 @@ function FileViewer(props) {
 
       <div className="viewer-toolbar">
         <p className="meta">
-          <span className="meta__item">
+          <span className="meta-item">
             <Icon name="file" />
             {reviewer.fileName}
           </span>
@@ -124,7 +124,7 @@ function FileViewer(props) {
         </p>
         <div className="row">
           {/* Saves the file to the device, so it can be read without internet. */}
-          <a className="button button--primary" href={getFileUrl(reviewer.id, true)}>
+          <a className="button button-primary" href={getFileUrl(reviewer.id, true)}>
             <Icon name="download" />
             Download file
           </a>
@@ -144,7 +144,7 @@ function FileViewer(props) {
       </div>
 
       {viewKind === 'download-only' && (
-        <div className="card card--padded file-unavailable">
+        <div className="card card-padded file-unavailable">
           <Icon name="file" large />
           <p>
             {fileType} files cannot be shown inside the browser. Download it to read it, then

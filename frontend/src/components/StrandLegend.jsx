@@ -9,8 +9,8 @@ function StrandLegend(props) {
   // aria-current marks the strand the feed is showing (bold text marks it on screen).
   return (
     <details className="strand-legend">
-      <summary className="strand-legend__summary">Strand colors</summary>
-      <ul className="strand-legend__list" aria-label="Strand colors">
+      <summary className="strand-legend-summary">Strand colors</summary>
+      <ul className="strand-legend-list" aria-label="Strand colors">
         {STRANDS.map((strand) => {
           const isActive = strand === props.activeStrand;
           let ariaCurrent;
@@ -20,11 +20,11 @@ function StrandLegend(props) {
           return (
             <li key={strand}>
               <Link
-                className={`strand-legend__link strand--${strandSlug(strand)}`}
+                className={`strand-legend-link strand-${strandSlug(strand)}`}
                 to={`/browse?strand=${encodeURIComponent(strand)}`}
                 aria-current={ariaCurrent}
               >
-                <span className="strand-legend__swatch" aria-hidden="true"></span>
+                <span className="strand-legend-swatch" aria-hidden="true"></span>
                 {strand}
               </Link>
             </li>

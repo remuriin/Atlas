@@ -159,9 +159,9 @@ function NotesPanel(props) {
     statusText = `All notes saved at ${formatTime(savedAt)}.`;
   }
 
-  let statusClassName = 'notes-panel__status';
+  let statusClassName = 'notes-panel-status';
   if (isTooLong || saveState === 'error') {
-    statusClassName = 'notes-panel__status notes-panel__status--error';
+    statusClassName = 'notes-panel-status notes-panel-status-error';
   }
 
   return (
@@ -171,10 +171,10 @@ function NotesPanel(props) {
       </h2>
 
       <div className="field">
-        <span className="field__label" id="study-notes-label">
+        <span className="field-label" id="study-notes-label">
           Notes for this study reviewer
         </span>
-        <p className="field__hint" id="study-notes-hint">
+        <p className="field-hint" id="study-notes-hint">
           Only you can see these. They save on their own a moment after you stop typing.
           Shortcuts: {MOD}+B bold, {MOD}+I italic, {MOD}+Alt+1, 2, or 3 headings, {MOD}+Shift+8
           bullets, {MOD}+] and {MOD}+[ indent. Tab moves on to the next button.
@@ -190,7 +190,7 @@ function NotesPanel(props) {
         />
       </div>
 
-      <div className="notes-panel__footer">
+      <div className="notes-panel-footer">
         <p className={statusClassName} role="status">
           {saveState === 'saved' && !hasUnsavedChanges && <Icon name="check" />}
           {(isTooLong || saveState === 'error') && <Icon name="alert" />}

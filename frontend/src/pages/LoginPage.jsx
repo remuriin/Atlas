@@ -176,7 +176,7 @@ function LoginPage() {
 
     return (
       <div className="page-form">
-        <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
+        <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
         <PageHeading title="Reset your password" />
         <p className="page-intro">
           Enter the email address you signed up with. We will email you a link for choosing a new
@@ -204,8 +204,8 @@ function LoginPage() {
             error={errors.email}
           />
 
-          <div className="form__actions">
-            <button type="submit" className="button button--primary" aria-disabled={isSubmitting}>
+          <div className="form-actions">
+            <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
               {resetButtonText}
             </button>
             <button type="button" className="button" onClick={() => showView('login')}>
@@ -224,7 +224,7 @@ function LoginPage() {
 
   return (
     <div className="page-form">
-      <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
+      <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Log in" />
       <p className="page-intro">Log in to upvote, share, and manage your study reviewers.</p>
 
@@ -260,8 +260,8 @@ function LoginPage() {
           error={errors.password}
         />
 
-        <div className="form__actions">
-          <button type="submit" className="button button--primary" aria-disabled={isSubmitting}>
+        <div className="form-actions">
+          <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
             {loginButtonText}
           </button>
           <button type="button" className="link-button" onClick={() => showView('reset')}>
@@ -269,7 +269,7 @@ function LoginPage() {
           </button>
         </div>
 
-        <p className="form__footer">
+        <p className="form-footer">
           New to Atlas?{' '}
           <Link to="/register" state={location.state}>
             Create an account

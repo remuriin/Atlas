@@ -8,11 +8,11 @@
   border-radius: var(--radius-large);
 }
 
-.card--padded {
+.card-padded {
   padding: var(--space-5);
 }
 
-.card--narrow {
+.card-narrow {
   max-width: 32rem;
 }
 
@@ -42,7 +42,7 @@
   border-color: var(--color-border-control);
 }
 
-.reviewer-card__body {
+.reviewer-card-body {
   /* The stretched title link below is positioned against this box. */
   position: relative;
   display: flex;
@@ -53,13 +53,13 @@
   padding: var(--space-1) var(--space-4) var(--space-4);
 }
 
-.reviewer-card__title {
+.reviewer-card-title {
   /* Tucks the title up under the strand row's built-in space. */
   margin-top: calc(var(--space-2) * -1);
   font-size: var(--font-size-md);
 }
 
-.reviewer-card__title a {
+.reviewer-card-title a {
   display: flex;
   align-items: center;
   min-height: var(--touch-target);
@@ -67,13 +67,13 @@
 
 /* Makes the whole upper part of the card open the reviewer. It is still one
    link: this invisible layer belongs to the title link and covers the card body. */
-.reviewer-card__title a::after {
+.reviewer-card-title a::after {
   content: "";
   position: absolute;
   inset: 0;
 }
 
-.reviewer-card__body .meta {
+.reviewer-card-body .meta {
   margin-top: var(--space-1);
 }
 
@@ -100,13 +100,13 @@
 }
 
 /* Subject, grade, quarter, and material type on one line, under the title. */
-.reviewer-card__category {
+.reviewer-card-category {
   margin-bottom: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.reviewer-card__description {
+.reviewer-card-description {
   /* Shows up to three lines. The full text is on the reviewer's own page. */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -117,7 +117,7 @@
   font-size: var(--font-size-sm);
 }
 
-.reviewer-card__footer {
+.reviewer-card-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -138,7 +138,7 @@
   font-size: var(--font-size-sm);
 }
 
-.meta__item {
+.meta-item {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);

@@ -390,8 +390,8 @@ function ReviewerForm(props) {
         {file && !errors.file && (
           <div className="file-summary">
             <Icon name="check" />
-            <p className="file-summary__text">
-              <span className="file-summary__name">Selected: {file.name}</span>
+            <p className="file-summary-text">
+              <span className="file-summary-name">Selected: {file.name}</span>
               <span className="text-muted">
                 {describeFileType(file.name)}, {formatFileSize(file.size)}
               </span>
@@ -423,17 +423,17 @@ function ReviewerForm(props) {
               aria-describedby={errors.rightsConfirmed ? 'reviewer-rightsConfirmed-error' : undefined}
             />
             <label htmlFor="reviewer-rightsConfirmed">
-              <span className="choice__name">
+              <span className="choice-name">
                 I made this file, or I have the right to share it (required)
               </span>
-              <span className="choice__hint">
+              <span className="choice-hint">
                 Textbooks, paid review-center files, and other people’s work are not allowed. See
                 the <Link to="/terms">terms of use</Link>.
               </span>
             </label>
           </div>
           {errors.rightsConfirmed && (
-            <p className="field__error" id="reviewer-rightsConfirmed-error">
+            <p className="field-error" id="reviewer-rightsConfirmed-error">
               {errors.rightsConfirmed}
             </p>
           )}
@@ -454,8 +454,8 @@ function ReviewerForm(props) {
         {progressAnnouncement}
       </p>
 
-      <div className="form__actions">
-        <button type="submit" className="button button--primary" aria-disabled={isSubmitting}>
+      <div className="form-actions">
+        <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
           {submitText}
         </button>
         <Link className="button" to={cancelPath}>

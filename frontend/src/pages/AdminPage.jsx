@@ -211,20 +211,20 @@ function AdminPage() {
       {status === 'ready' && items.length > 0 && (
         <ul className="report-list">
           {items.map((item) => (
-            <li key={item.id} className="card card--padded">
+            <li key={item.id} className="card card-padded">
               <p>
                 <StrandLink strand={item.strand} />
               </p>
-              <h2 className="reviewer-card__title">
+              <h2 className="reviewer-card-title">
                 <Link to={`/reviewers/${item.id}`}>{item.title}</Link>
               </h2>
-              <p className="reviewer-card__category">{describeCategory(item)}</p>
+              <p className="reviewer-card-category">{describeCategory(item)}</p>
               <p className="meta">
-                <span className="meta__item">
+                <span className="meta-item">
                   <Icon name="user" />
                   Shared by {item.authorName}
                 </span>
-                <span className="meta__item">
+                <span className="meta-item">
                   <Icon name="alert" />
                   {countLabel(item.reportCount, 'report', 'reports')}
                 </span>
@@ -236,7 +236,7 @@ function AdminPage() {
                 </p>
               )}
 
-              <ul className="report-item__reasons">
+              <ul className="report-item-reasons">
                 {item.reports.map((report, index) => (
                   <li key={index}>
                     <strong>{report.reason}</strong>, {formatDate(report.createdAt)}
@@ -247,7 +247,7 @@ function AdminPage() {
 
               {editingId === item.id && (
                 <form className="stack" onSubmit={(event) => handleSaveCategory(event, item)} noValidate>
-                  <div className="report-item__category">
+                  <div className="report-item-category">
                     <FormField
                       id={`category-strand-${item.id}`}
                       label="Strand"
@@ -299,10 +299,10 @@ function AdminPage() {
                       error={categoryErrors.materialType}
                     />
                   </div>
-                  <div className="report-item__actions">
+                  <div className="report-item-actions">
                     <button
                       type="submit"
-                      className="button button--primary"
+                      className="button button-primary"
                       aria-disabled={busyId === item.id}
                     >
                       Save category and show it
@@ -315,7 +315,7 @@ function AdminPage() {
               )}
 
               {editingId !== item.id && (
-                <div className="report-item__actions">
+                <div className="report-item-actions">
                   <button type="button" className="button" onClick={() => handleOpenFile(item)}>
                     <Icon name="external" />
                     Open file
@@ -336,7 +336,7 @@ function AdminPage() {
                   </button>
                   <button
                     type="button"
-                    className="button button--danger-outline"
+                    className="button button-danger-outline"
                     onClick={() => setItemToDelete(item)}
                   >
                     <Icon name="trash" />

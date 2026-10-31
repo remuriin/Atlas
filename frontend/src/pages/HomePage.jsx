@@ -406,10 +406,10 @@ function HomePage() {
       <div id="feed-controls" className="feed-controls">
         <div className="feed-toolbar">
           <form className="search-form" role="search" onSubmit={handleSearchSubmit}>
-            <label className="field__label" htmlFor="feed-search">
+            <label className="field-label" htmlFor="feed-search">
               Search study reviewers
             </label>
-            <div className="search-form__row">
+            <div className="search-form-row">
               <input
                 id="feed-search"
                 className="input"
@@ -456,7 +456,7 @@ function HomePage() {
             options={QUARTERS}
             placeholderOption="Any quarter"
           />
-          <div className="feed-filters__subject">
+          <div className="feed-filters-subject">
             <FormField
               id="feed-subject"
               label="Subject"
@@ -523,7 +523,7 @@ function HomePage() {
             title="No study reviewers yet"
             message="Be the first to share your notes or study guide."
           >
-            <Link className="button button--primary" to="/upload">
+            <Link className="button button-primary" to="/upload">
               <Icon name="upload" />
               Share a study reviewer
             </Link>

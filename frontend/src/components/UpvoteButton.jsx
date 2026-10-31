@@ -84,7 +84,7 @@ function UpvoteButton(props) {
       >
         <Icon name="arrow-up" filled={hasUpvoted} />
         <span>{visibleText}</span>
-        <span className="upvote-button__count">{count}</span>
+        <span className="upvote-button-count">{count}</span>
       </button>
       {/* Screen readers read this out when it changes, without moving focus. */}
       <span className="visually-hidden" role="status">

@@ -10,11 +10,11 @@
   stroke-linejoin: round;
 }
 
-.icon--filled {
+.icon-filled {
   fill: currentColor;
 }
 
-.icon--large {
+.icon-large {
   width: 2rem;
   height: 2rem;
   stroke-width: 1.5;

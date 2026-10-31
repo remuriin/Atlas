@@ -229,7 +229,7 @@ function NoteEditor(props) {
       <button
         key={key}
         type="button"
-        className="button note-toolbar__button"
+        className="button note-toolbar-button"
         aria-label={label}
         aria-pressed={pressed}
         title={`${label} (${shortcut})`}
@@ -245,11 +245,11 @@ function NoteEditor(props) {
     const isOpen = openMenu === kind;
     const menuId = `${props.id}-${kind}-menu`;
     return (
-      <div className="note-toolbar__menu-area" id={`${props.id}-${kind}-area`}>
+      <div className="note-toolbar-menu-area" id={`${props.id}-${kind}-area`}>
         <button
           type="button"
           id={`${props.id}-${kind}-button`}
-          className="button note-toolbar__button"
+          className="button note-toolbar-button"
           aria-expanded={isOpen}
           aria-controls={menuId}
           onMouseDown={(event) => event.preventDefault()}
@@ -259,17 +259,17 @@ function NoteEditor(props) {
           <Icon name="chevron-down" />
         </button>
         {isOpen && (
-          <ul className="note-toolbar__menu" id={menuId} aria-label={label}>
+          <ul className="note-toolbar-menu" id={menuId} aria-label={label}>
             {items.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
-                  className="note-toolbar__swatch-button"
+                  className="note-toolbar-swatch-button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => chooseColor(kind, item.marker)}
                 >
                   <span
-                    className={`note-swatch note-swatch--${kind}-${item.id}`}
+                    className={`note-swatch note-swatch-${kind}-${item.id}`}
                     aria-hidden="true"
                   ></span>
                   {item.label}

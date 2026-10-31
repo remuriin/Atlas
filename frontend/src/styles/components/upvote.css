@@ -13,7 +13,7 @@
   color: var(--color-accent);
 }
 
-.upvote-button__count {
+.upvote-button-count {
   font-weight: var(--font-weight-bold);
 }
 

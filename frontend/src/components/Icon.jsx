@@ -56,10 +56,10 @@ function Icon(props) {
 
   let className = 'icon';
   if (props.filled) {
-    className = `${className} icon--filled`;
+    className = `${className} icon-filled`;
   }
   if (props.large) {
-    className = `${className} icon--large`;
+    className = `${className} icon-large`;
   }
 
   return (

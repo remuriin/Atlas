@@ -69,20 +69,20 @@ function ConfirmDialog(props) {
       aria-describedby={messageId}
       onCancel={handleCancel}
     >
-      <h2 className="dialog__title" id={titleId}>
+      <h2 className="dialog-title" id={titleId}>
         {props.title}
       </h2>
       <p id={messageId}>{props.message}</p>
 
       {props.error !== '' && (
-        <p className="field__error" role="alert">
+        <p className="field-error" role="alert">
           {props.error}
         </p>
       )}
 
       {/* Cancel comes first, so it is the button that receives focus when the
           dialog opens. A stray press of Enter then does nothing harmful. */}
-      <div className="dialog__actions">
+      <div className="dialog-actions">
         <button
           type="button"
           className="button"
@@ -93,7 +93,7 @@ function ConfirmDialog(props) {
         </button>
         <button
           type="button"
-          className="button button--danger"
+          className="button button-danger"
           onClick={handleConfirmClick}
           aria-disabled={props.isBusy}
         >

@@ -80,7 +80,7 @@ function ReportDialog(props) {
       onCancel={handleCancel}
     >
       <form onSubmit={handleSubmit} noValidate>
-        <h2 className="dialog__title" id={`${DIALOG_ID}-title`}>
+        <h2 className="dialog-title" id={`${DIALOG_ID}-title`}>
           Report “{props.title}”
         </h2>
         <p className="text-small">
@@ -89,7 +89,7 @@ function ReportDialog(props) {
         </p>
 
         <fieldset className="choice-list" aria-describedby={reasonError ? 'report-reason-error' : undefined}>
-          <legend className="field__label">Reason (required)</legend>
+          <legend className="field-label">Reason (required)</legend>
           {REPORT_REASONS.map((option, index) => (
             <div className="choice" key={option.name}>
               <input
@@ -101,13 +101,13 @@ function ReportDialog(props) {
                 onChange={() => setReason(option.name)}
               />
               <label htmlFor={`report-reason-${index}`}>
-                <span className="choice__name">{option.name}</span>
-                <span className="choice__hint">{option.hint}</span>
+                <span className="choice-name">{option.name}</span>
+                <span className="choice-hint">{option.hint}</span>
               </label>
             </div>
           ))}
           {reasonError !== '' && (
-            <p className="field__error" id="report-reason-error" role="alert">
+            <p className="field-error" id="report-reason-error" role="alert">
               {reasonError}
             </p>
           )}
@@ -125,16 +125,16 @@ function ReportDialog(props) {
         />
 
         {props.error !== '' && (
-          <p className="field__error" role="alert">
+          <p className="field-error" role="alert">
             {props.error}
           </p>
         )}
 
-        <div className="dialog__actions">
+        <div className="dialog-actions">
           <button type="button" className="button" onClick={handleCancelClick} aria-disabled={props.isBusy}>
             Cancel
           </button>
-          <button type="submit" className="button button--primary" aria-disabled={props.isBusy}>
+          <button type="submit" className="button button-primary" aria-disabled={props.isBusy}>
             {submitText}
           </button>
         </div>

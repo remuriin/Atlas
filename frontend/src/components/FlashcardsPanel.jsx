@@ -365,17 +365,17 @@ function FlashcardsPanel(props) {
       )}
 
       {status === 'ready' && cards.length === 0 && props.canMake && (
-        <div className="card card--padded flashcards-start">
+        <div className="card card-padded flashcards-start">
           <Icon name="cards" large />
-          <p className="empty-state__title">Turn this study reviewer into flashcards</p>
+          <p className="empty-state-title">Turn this study reviewer into flashcards</p>
           <p className="text-muted">
             AI (Google Gemini) reads the file and writes question-and-answer cards from it. Check
             them as you study: AI can make mistakes. Only you can see your flashcards.
           </p>
 
-          <form className="flashcards-start__form" onSubmit={handleMakeSubmit} noValidate>
+          <form className="flashcards-start-form" onSubmit={handleMakeSubmit} noValidate>
             {countField}
-            <button type="submit" className="button button--primary" aria-disabled={isMaking}>
+            <button type="submit" className="button button-primary" aria-disabled={isMaking}>
               <Icon name="cards" />
               {makeButtonText}
             </button>
@@ -391,9 +391,9 @@ function FlashcardsPanel(props) {
           {fewerNote !== '' && <Alert type="info">{fewerNote}</Alert>}
           <ul className="progress-tiles" aria-label="Your progress">
             {STATUS_TILES.map((tile) => (
-              <li key={tile.status} className={`progress-tile progress-tile--${tile.status}`}>
-                <span className="progress-tile__count">{countFor(tile.status)}</span>
-                <span className="progress-tile__label">{tile.label}</span>
+              <li key={tile.status} className={`progress-tile progress-tile-${tile.status}`}>
+                <span className="progress-tile-count">{countFor(tile.status)}</span>
+                <span className="progress-tile-label">{tile.label}</span>
               </li>
             ))}
           </ul>
@@ -429,11 +429,11 @@ function FlashcardsPanel(props) {
 
           {currentCard && (
             <div className="flashcard-study">
-              <p className="flashcard-study__position">
+              <p className="flashcard-study-position">
                 Card {currentIndex + 1} of {studyCards.length}
               </p>
               <progress
-                className="flashcard-study__progress"
+                className="flashcard-study-progress"
                 max={studyCards.length}
                 value={currentIndex + 1}
                 aria-label="Position in the set"
@@ -451,7 +451,7 @@ function FlashcardsPanel(props) {
                 onFlip={flipCard}
               />
 
-              <div className="flashcard-study__nav">
+              <div className="flashcard-study-nav">
                 <button
                   type="button"
                   className="button"
@@ -472,13 +472,13 @@ function FlashcardsPanel(props) {
                 </button>
               </div>
 
-              <div className="flashcard-study__rate">
+              <div className="flashcard-study-rate">
                 <button type="button" className="button" onClick={() => markCard('learning')}>
                   Still learning
                 </button>
                 <button
                   type="button"
-                  className="button button--primary"
+                  className="button button-primary"
                   onClick={() => markCard('learned')}
                 >
                   <Icon name="check" />
@@ -497,7 +497,7 @@ function FlashcardsPanel(props) {
           <div className="flashcards-manage">
             <h3>Manage this set</h3>
             {props.canMake && (
-              <form className="flashcards-start__form" onSubmit={handleRemakeSubmit} noValidate>
+              <form className="flashcards-start-form" onSubmit={handleRemakeSubmit} noValidate>
                 {countField}
                 <button type="submit" className="button" aria-disabled={isMaking}>
                   <Icon name="flip" />
@@ -510,7 +510,7 @@ function FlashcardsPanel(props) {
             <div>
               <button
                 type="button"
-                className="button button--danger-outline"
+                className="button button-danger-outline"
                 onClick={() => setIsDeleteOpen(true)}
               >
                 <Icon name="trash" />

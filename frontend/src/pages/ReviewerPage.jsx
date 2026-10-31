@@ -245,13 +245,13 @@ function ReviewerPage() {
             <p>
               <StrandLink strand={reviewer.strand} />
             </p>
-            <p className="reviewer-card__category">{describeCategory(reviewer)}</p>
+            <p className="reviewer-card-category">{describeCategory(reviewer)}</p>
             <p className="meta">
-              <span className="meta__item">
+              <span className="meta-item">
                 <Icon name="user" />
                 Shared by {reviewer.authorName}
               </span>
-              <span className="meta__item">
+              <span className="meta-item">
                 <Icon name="clock" />
                 Posted {formatDate(reviewer.createdAt)}
               </span>
@@ -284,7 +284,7 @@ function ReviewerPage() {
               {reviewer.isOwner && (
                 <button
                   type="button"
-                  className="button button--danger-outline"
+                  className="button button-danger-outline"
                   onClick={() => setIsDeleteOpen(true)}
                 >
                   <Icon name="trash" />
@@ -314,7 +314,7 @@ function ReviewerPage() {
             <h2 id="file-heading">File</h2>
             <div className="card file-box">
               <div>
-                <p className="file-box__name">{reviewer.fileName}</p>
+                <p className="file-box-name">{reviewer.fileName}</p>
                 <p className="meta">
                   {describeFileType(reviewer.fileName)}, {formatFileSize(reviewer.fileSize)}
                 </p>
@@ -323,7 +323,7 @@ function ReviewerPage() {
               {reviewer.isHidden ? (
                 <button
                   type="button"
-                  className="button button--primary"
+                  className="button button-primary"
                   onClick={() => openFileInNewTab(reviewer.id).catch((err) => setFileError(err.message))}
                 >
                   <Icon name="external" />
@@ -332,7 +332,7 @@ function ReviewerPage() {
                 </button>
               ) : (
                 <a
-                  className="button button--primary"
+                  className="button button-primary"
                   href={getFileUrl(reviewer.id)}
                   target="_blank"
                   rel="noopener noreferrer"

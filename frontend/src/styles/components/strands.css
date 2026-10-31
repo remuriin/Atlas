@@ -1,16 +1,16 @@
 /* ---------- Strand colors ---------- */
 
-/* A "strand--X" class picks that strand's three colors from the --subject-* tokens in
+/* A "strand-X" class picks that strand's three colors from the --subject-* tokens in
    tokens.css (their contrast is checked there). The pieces below (card stripe, pill,
    legend swatch) only use the short names. */
-.strand--all { --strand-color: var(--subject-other); --strand-bg: var(--subject-other-bg); --strand-text: var(--subject-other-text); }
-.strand--stem { --strand-color: var(--subject-science); --strand-bg: var(--subject-science-bg); --strand-text: var(--subject-science-text); }
-.strand--abm { --strand-color: var(--subject-business); --strand-bg: var(--subject-business-bg); --strand-text: var(--subject-business-text); }
-.strand--humss { --strand-color: var(--subject-history); --strand-bg: var(--subject-history-bg); --strand-text: var(--subject-history-text); }
-.strand--gas { --strand-color: var(--subject-social); --strand-bg: var(--subject-social-bg); --strand-text: var(--subject-social-text); }
-.strand--tvl { --strand-color: var(--subject-engineering); --strand-bg: var(--subject-engineering-bg); --strand-text: var(--subject-engineering-text); }
-.strand--arts { --strand-color: var(--subject-arts); --strand-bg: var(--subject-arts-bg); --strand-text: var(--subject-arts-text); }
-.strand--sports { --strand-color: var(--subject-health); --strand-bg: var(--subject-health-bg); --strand-text: var(--subject-health-text); }
+.strand-all { --strand-color: var(--subject-other); --strand-bg: var(--subject-other-bg); --strand-text: var(--subject-other-text); }
+.strand-stem { --strand-color: var(--subject-science); --strand-bg: var(--subject-science-bg); --strand-text: var(--subject-science-text); }
+.strand-abm { --strand-color: var(--subject-business); --strand-bg: var(--subject-business-bg); --strand-text: var(--subject-business-text); }
+.strand-humss { --strand-color: var(--subject-history); --strand-bg: var(--subject-history-bg); --strand-text: var(--subject-history-text); }
+.strand-gas { --strand-color: var(--subject-social); --strand-bg: var(--subject-social-bg); --strand-text: var(--subject-social-text); }
+.strand-tvl { --strand-color: var(--subject-engineering); --strand-bg: var(--subject-engineering-bg); --strand-text: var(--subject-engineering-text); }
+.strand-arts { --strand-color: var(--subject-arts); --strand-bg: var(--subject-arts-bg); --strand-text: var(--subject-arts-text); }
+.strand-sports { --strand-color: var(--subject-health); --strand-bg: var(--subject-health-bg); --strand-text: var(--subject-health-text); }
 
 /* A thick stripe down the left edge of a card. Cards without a strand
    (the grey loading placeholders) keep the plain border color. */
@@ -18,13 +18,19 @@
   border-left: 4px solid var(--strand-color, var(--color-border));
 }
 
-.label--strand {
+/* The strand's pale color washes the top of the card and fades out by 6rem.
+   Text over it stays readable: it is the same background the strand pills use. */
+.reviewer-card[class*="strand-"] {
+  background-image: linear-gradient(var(--strand-bg), transparent 6rem);
+}
+
+.label-strand {
   background-color: var(--strand-bg);
   border-color: var(--strand-color);
   color: var(--strand-text);
 }
 
-.chip-link:hover .label--strand {
+.chip-link:hover .label-strand {
   background-color: var(--strand-bg);
 }
 
@@ -35,7 +41,7 @@
   font-size: var(--font-size-sm);
 }
 
-.strand-legend__summary {
+.strand-legend-summary {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
@@ -43,11 +49,11 @@
   cursor: pointer;
 }
 
-.strand-legend__summary:hover {
+.strand-legend-summary:hover {
   text-decoration: underline;
 }
 
-.strand-legend__list {
+.strand-legend-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: 0 var(--space-3);
@@ -57,7 +63,7 @@
   border-radius: var(--radius);
 }
 
-.strand-legend__link {
+.strand-legend-link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -66,20 +72,20 @@
   text-decoration: none;
 }
 
-.strand-legend__link:hover {
+.strand-legend-link:hover {
   text-decoration: underline;
 }
 
 /* The strand the feed is showing: bold text and a ring round its swatch. */
-.strand-legend__link[aria-current="true"] {
+.strand-legend-link[aria-current="true"] {
   font-weight: var(--font-weight-bold);
 }
 
-.strand-legend__link[aria-current="true"] .strand-legend__swatch {
+.strand-legend-link[aria-current="true"] .strand-legend-swatch {
   box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--strand-color);
 }
 
-.strand-legend__swatch {
+.strand-legend-swatch {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;

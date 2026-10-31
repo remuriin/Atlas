@@ -21,7 +21,7 @@
   background-color: var(--color-subtle);
 }
 
-.file-box__name {
+.file-box-name {
   font-weight: var(--font-weight-bold);
 }
 

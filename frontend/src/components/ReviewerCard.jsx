@@ -26,13 +26,13 @@ function ReviewerCard(props) {
 
   return (
     // The colored stripe down the left edge shows the strand at a glance.
-    <article className={`card reviewer-card strand--${strandSlug(reviewer.strand)}`}>
-      <div className="reviewer-card__body">
+    <article className={`card reviewer-card strand-${strandSlug(reviewer.strand)}`}>
+      <div className="reviewer-card-body">
         <p>
           <StrandLink strand={reviewer.strand} />
         </p>
 
-        <Heading className="reviewer-card__title">
+        <Heading className="reviewer-card-title">
           {/* "fromPath" tells the reviewer's page where its Back link should lead. */}
           <Link
             id={`reviewer-link-${reviewer.id}`}
@@ -44,7 +44,7 @@ function ReviewerCard(props) {
           </Link>
         </Heading>
 
-        <p className="reviewer-card__category">{describeCategory(reviewer)}</p>
+        <p className="reviewer-card-category">{describeCategory(reviewer)}</p>
 
         {/* Only the uploader (on the profile page) and admins ever get a hidden one. */}
         {reviewer.isHidden && (
@@ -54,24 +54,24 @@ function ReviewerCard(props) {
           </p>
         )}
 
-        <p className="reviewer-card__description">{reviewer.description}</p>
+        <p className="reviewer-card-description">{reviewer.description}</p>
 
         <TagList tags={reviewer.tags} />
 
         <p className="meta">
-          <span className="meta__item">
+          <span className="meta-item">
             <Icon name="user" />
             <span className="visually-hidden">Shared by</span>
             {reviewer.authorName}
           </span>
-          <span className="meta__item">
+          <span className="meta-item">
             <Icon name="clock" />
             <span className="visually-hidden">Posted</span>
             {formatDate(reviewer.createdAt)}
           </span>
         </p>
         <p className="meta">
-          <span className="meta__item">
+          <span className="meta-item">
             <Icon name="file" />
             <span className="visually-hidden">File:</span>
             <span className="mono">
@@ -81,7 +81,7 @@ function ReviewerCard(props) {
         </p>
       </div>
 
-      <div className="reviewer-card__footer">
+      <div className="reviewer-card-footer">
         <div className="row">
           <UpvoteButton
             reviewerId={reviewer.id}
@@ -105,7 +105,7 @@ function ReviewerCard(props) {
             <button
               type="button"
               id={`delete-button-${reviewer.id}`}
-              className="button button--danger-outline"
+              className="button button-danger-outline"
               aria-label={`Delete ${reviewer.title}`}
               onClick={() => props.onDelete(reviewer)}
             >

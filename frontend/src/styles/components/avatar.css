@@ -13,13 +13,13 @@
   line-height: 1;
 }
 
-.avatar--small {
+.avatar-small {
   width: 1.75rem;
   height: 1.75rem;
   font-size: var(--font-size-xs);
 }
 
-.avatar--large {
+.avatar-large {
   width: 4rem;
   height: 4rem;
   font-size: var(--font-size-xl);
@@ -30,7 +30,7 @@ img.avatar {
   border: var(--border-width) solid var(--color-border);
 }
 
-.site-nav__user {
+.site-nav-user {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -45,7 +45,7 @@ img.avatar {
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.profile-identity__name {
+.profile-identity-name {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
 }

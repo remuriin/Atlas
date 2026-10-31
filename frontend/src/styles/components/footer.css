@@ -8,25 +8,25 @@
   font-size: var(--font-size-sm);
 }
 
-.site-footer__inner {
+.site-footer-inner {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-4);
 }
 
-.site-footer__brand {
+.site-footer-brand {
   max-width: 28rem;
 }
 
-.site-footer__brand strong {
+.site-footer-brand strong {
   display: block;
   margin-bottom: var(--space-1);
   color: var(--color-text);
   font-size: var(--font-size-md);
 }
 
-.site-footer__links {
+.site-footer-links {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
@@ -35,13 +35,13 @@
   list-style: none;
 }
 
-.site-footer__links a {
+.site-footer-links a {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
   color: var(--color-text-muted);
 }
 
-.site-footer__links a:hover {
+.site-footer-links a:hover {
   color: var(--color-accent);
 }

@@ -135,7 +135,7 @@ function SavedPage() {
           title="Nothing saved yet"
           message="Press Save on any study reviewer to keep it here, with room for your own notes and flashcards."
         >
-          <Link className="button button--primary" to="/browse">
+          <Link className="button button-primary" to="/browse">
             Browse study reviewers
           </Link>
         </EmptyState>
@@ -145,20 +145,20 @@ function SavedPage() {
         <ul className="reviewer-grid">
           {items.map((item) => (
             <li key={item.id}>
-              <article className={`card reviewer-card strand--${strandSlug(item.strand)}`}>
-                <div className="reviewer-card__body">
+              <article className={`card reviewer-card strand-${strandSlug(item.strand)}`}>
+                <div className="reviewer-card-body">
                   <p>
                     <StrandLink strand={item.strand} />
                   </p>
 
-                  <h2 className="reviewer-card__title">
+                  <h2 className="reviewer-card-title">
                     <Link id={`saved-link-${item.id}`} to={`/saved/${item.id}`}>
                       {item.title}
                     </Link>
                   </h2>
 
                   {/* Grade, quarter, and type are only known while the original exists. */}
-                  <p className="reviewer-card__category">
+                  <p className="reviewer-card-category">
                     {describeCategory(Object.assign({ subject: item.subject }, item.reviewer))}
                   </p>
 
@@ -172,12 +172,12 @@ function SavedPage() {
 
                   {!item.isRemoved && (
                     <p className="meta">
-                      <span className="meta__item">
+                      <span className="meta-item">
                         <Icon name="user" />
                         <span className="visually-hidden">Shared by</span>
                         {item.reviewer.authorName}
                       </span>
-                      <span className="meta__item">
+                      <span className="meta-item">
                         <Icon name="file" />
                         <span className="visually-hidden">File:</span>
                         {describeFileType(item.reviewer.fileName)}
@@ -186,25 +186,25 @@ function SavedPage() {
                   )}
 
                   <p className="meta">
-                    <span className="meta__item">
+                    <span className="meta-item">
                       <Icon name="pencil" />
                       {describeNotes(item)}
                     </span>
-                    <span className="meta__item">
+                    <span className="meta-item">
                       <Icon name="cards" />
                       {countLabel(item.flashcardCount, 'flashcard', 'flashcards')}
                     </span>
-                    <span className="meta__item">
+                    <span className="meta-item">
                       <Icon name="clock" />
                       Saved {formatDate(item.savedAt)}
                     </span>
                   </p>
                 </div>
 
-                <div className="reviewer-card__footer">
+                <div className="reviewer-card-footer">
                   <button
                     type="button"
-                    className="button button--danger-outline"
+                    className="button button-danger-outline"
                     aria-label={`Remove ${item.title} from Saved`}
                     onClick={() => setItemToRemove(item)}
                   >
