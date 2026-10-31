@@ -99,7 +99,7 @@ function FormField(props) {
     }
 
     control = (
-      <div className="field__control-row">
+      <div className="field-control-row">
         <input
           id={props.id}
           className="input"
@@ -145,18 +145,18 @@ function FormField(props) {
 
   return (
     <div className="field">
-      <label className="field__label" htmlFor={props.id}>
+      <label className="field-label" htmlFor={props.id}>
         {props.label}
-        {props.required && <span className="field__required"> (required)</span>}
+        {props.required && <span className="field-required"> (required)</span>}
       </label>
       {props.hint && (
-        <p className="field__hint" id={hintId}>
+        <p className="field-hint" id={hintId}>
           {props.hint}
         </p>
       )}
       {control}
       {hasError && (
-        <p className="field__error" id={errorId}>
+        <p className="field-error" id={errorId}>
           <Icon name="alert" />
           <span>
             <span className="visually-hidden">Error: </span>

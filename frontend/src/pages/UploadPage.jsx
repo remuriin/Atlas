@@ -57,7 +57,7 @@ function UploadPage() {
             you no longer need to upload another.
           </Alert>
           <div>
-            <Link className="button button--primary" to="/profile">
+            <Link className="button button-primary" to="/profile">
               Go to your profile
             </Link>
           </div>

@@ -17,12 +17,12 @@
   background-color: var(--color-backdrop);
 }
 
-.dialog__title {
+.dialog-title {
   margin-bottom: var(--space-2);
   font-size: var(--font-size-lg);
 }
 
-.dialog__actions {
+.dialog-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -63,12 +63,12 @@
   margin-top: 0.125rem;
 }
 
-.choice__name {
+.choice-name {
   display: block;
   font-weight: var(--font-weight-bold);
 }
 
-.choice__hint {
+.choice-hint {
   display: block;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);

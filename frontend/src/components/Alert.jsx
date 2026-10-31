@@ -24,15 +24,15 @@ function Alert(props) {
   }
 
   return (
-    <div className={`alert alert--${props.type}`} role={role}>
+    <div className={`alert alert-${props.type}`} role={role}>
       <Icon name={iconName} />
-      <div className="alert__body">
-        <span className="alert__title">{title}</span> {props.children}
+      <div className="alert-body">
+        <span className="alert-title">{title}</span> {props.children}
       </div>
       {props.onDismiss && (
         <button
           type="button"
-          className="button button--quiet alert__dismiss"
+          className="button button-quiet alert-dismiss"
           aria-label="Dismiss message"
           onClick={props.onDismiss}
         >

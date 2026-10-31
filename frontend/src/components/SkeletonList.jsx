@@ -15,16 +15,16 @@ function SkeletonList(props) {
       {placeholders.map((number) => (
         <li key={number}>
           <div className="card reviewer-card">
-            <div className="reviewer-card__body skeleton-card__body">
-              <span className="skeleton skeleton--chip"></span>
-              <span className="skeleton skeleton--title"></span>
-              <span className="skeleton skeleton--line"></span>
-              <span className="skeleton skeleton--line"></span>
-              <span className="skeleton skeleton--short"></span>
-              <span className="skeleton skeleton--short"></span>
+            <div className="reviewer-card-body skeleton-card-body">
+              <span className="skeleton skeleton-chip"></span>
+              <span className="skeleton skeleton-title"></span>
+              <span className="skeleton skeleton-line"></span>
+              <span className="skeleton skeleton-line"></span>
+              <span className="skeleton skeleton-short"></span>
+              <span className="skeleton skeleton-short"></span>
             </div>
-            <div className="reviewer-card__footer">
-              <span className="skeleton skeleton--button"></span>
+            <div className="reviewer-card-footer">
+              <span className="skeleton skeleton-button"></span>
             </div>
           </div>
         </li>

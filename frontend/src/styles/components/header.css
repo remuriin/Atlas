@@ -22,7 +22,7 @@
   }
 }
 
-.site-header__inner {
+.site-header-inner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -45,21 +45,21 @@
 
 /* "Sign up" in the header bar: phones only. On the narrowest screens there is
    no room beside the logo and the Menu button, so there it stays in the menu. */
-.site-header__cta {
+.site-header-cta {
   display: none;
 }
 
 @media (min-width: 22.5rem) and (max-width: 47.99rem) {
-  .site-header__cta {
+  .site-header-cta {
     display: inline-flex;
   }
 
-  .site-nav__signup {
+  .site-nav-signup {
     display: none;
   }
 }
 
-.site-logo__mark {
+.site-logo-mark {
   width: 2rem;
   height: 2rem;
 }
@@ -75,16 +75,16 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.site-nav--open {
+.site-nav-open {
   display: flex;
 }
 
-.site-nav__list {
+.site-nav-list {
   display: flex;
   flex-direction: column;
 }
 
-.site-nav__link {
+.site-nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -99,16 +99,16 @@
   text-decoration: none;
 }
 
-.site-nav__link:hover {
+.site-nav-link:hover {
   background-color: var(--color-button-hover);
 }
 
-.site-nav__link[aria-current="page"] {
-  border-left-color: var(--color-text);
+.site-nav-link[aria-current="page"] {
+  border-left-color: var(--color-success-text);
   font-weight: var(--font-weight-bold);
 }
 
-.site-nav__actions {
+.site-nav-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -117,13 +117,13 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.site-nav__user {
+.site-nav-user {
   flex-basis: 100%;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.theme-toggle__state {
+.theme-toggle-state {
   color: var(--color-text-muted);
 }
 
@@ -133,7 +133,7 @@
   }
 
   .site-nav,
-  .site-nav--open {
+  .site-nav-open {
     display: flex;
     flex: 1;
     flex-basis: auto;
@@ -145,30 +145,30 @@
     border-top: 0;
   }
 
-  .site-nav__list {
+  .site-nav-list {
     flex-direction: row;
     gap: var(--space-1);
     margin-left: var(--space-4);
   }
 
-  .site-nav__link {
+  .site-nav-link {
     border-left: 0;
     border-bottom: 3px solid transparent;
     border-top: 3px solid transparent;
     border-radius: 0;
   }
 
-  .site-nav__link[aria-current="page"] {
-    border-bottom-color: var(--color-text);
+  .site-nav-link[aria-current="page"] {
+    border-bottom-color: var(--color-success-text);
   }
 
-  .site-nav__actions {
+  .site-nav-actions {
     flex-wrap: nowrap;
     padding-top: 0;
     border-top: 0;
   }
 
-  .site-nav__user {
+  .site-nav-user {
     flex-basis: auto;
     /* Room for the picture and a typical name on one line. */
     max-width: 16rem;

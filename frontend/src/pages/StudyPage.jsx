@@ -120,7 +120,7 @@ function StudyPage() {
       {status === 'ready' && (
         <>
           <div className="row">
-            <span className={`label label--strand strand--${strandSlug(item.strand)}`}>
+            <span className={`label label-strand strand-${strandSlug(item.strand)}`}>
               <span className="visually-hidden">Strand: </span>
               {item.strand}
             </span>

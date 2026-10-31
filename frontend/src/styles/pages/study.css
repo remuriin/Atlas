@@ -90,24 +90,24 @@
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
-.note-toolbar__button {
+.note-toolbar-button {
   padding-inline: var(--space-3);
 }
 
 /* A pressed button (bold is on, this is a heading...) looks pressed, not only colored. */
-.note-toolbar__button[aria-pressed="true"],
-.note-toolbar__button[aria-expanded="true"] {
+.note-toolbar-button[aria-pressed="true"],
+.note-toolbar-button[aria-expanded="true"] {
   background-color: var(--color-accent-subtle);
   border-color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent);
   color: var(--color-accent);
 }
 
-.note-toolbar__menu-area {
+.note-toolbar-menu-area {
   position: relative;
 }
 
-.note-toolbar__menu {
+.note-toolbar-menu {
   position: absolute;
   top: calc(100% + var(--space-1));
   left: 0;
@@ -120,7 +120,7 @@
   box-shadow: var(--shadow-dialog);
 }
 
-.note-toolbar__swatch-button {
+.note-toolbar-swatch-button {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -136,7 +136,7 @@
   cursor: pointer;
 }
 
-.note-toolbar__swatch-button:hover {
+.note-toolbar-swatch-button:hover {
   background-color: var(--color-button-hover);
 }
 
@@ -148,20 +148,20 @@
   border-radius: 0.25rem;
 }
 
-.note-swatch--color-default { background-color: var(--color-text); }
-.note-swatch--color-red { background-color: var(--note-red); }
-.note-swatch--color-orange { background-color: var(--note-orange); }
-.note-swatch--color-green { background-color: var(--note-green); }
-.note-swatch--color-blue { background-color: var(--note-blue); }
-.note-swatch--color-purple { background-color: var(--note-purple); }
-.note-swatch--highlight-yellow { background-color: var(--note-hl-yellow); }
-.note-swatch--highlight-green { background-color: var(--note-hl-green); }
-.note-swatch--highlight-blue { background-color: var(--note-hl-blue); }
-.note-swatch--highlight-pink { background-color: var(--note-hl-pink); }
-.note-swatch--highlight-orange { background-color: var(--note-hl-orange); }
+.note-swatch-color-default { background-color: var(--color-text); }
+.note-swatch-color-red { background-color: var(--note-red); }
+.note-swatch-color-orange { background-color: var(--note-orange); }
+.note-swatch-color-green { background-color: var(--note-green); }
+.note-swatch-color-blue { background-color: var(--note-blue); }
+.note-swatch-color-purple { background-color: var(--note-purple); }
+.note-swatch-highlight-yellow { background-color: var(--note-hl-yellow); }
+.note-swatch-highlight-green { background-color: var(--note-hl-green); }
+.note-swatch-highlight-blue { background-color: var(--note-hl-blue); }
+.note-swatch-highlight-pink { background-color: var(--note-hl-pink); }
+.note-swatch-highlight-orange { background-color: var(--note-hl-orange); }
 
 /* "None": an empty box with a slash through it. */
-.note-swatch--highlight-none {
+.note-swatch-highlight-none {
   background: linear-gradient(
       to top right,
       transparent 45%,
@@ -263,14 +263,14 @@
 .note-editor [style*="background-color: rgb(253, 0, 4)"] { background-color: var(--note-hl-pink) !important; }
 .note-editor [style*="background-color: rgb(253, 0, 5)"] { background-color: var(--note-hl-orange) !important; }
 
-.notes-panel__footer {
+.notes-panel-footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-1) var(--space-3);
 }
 
-.notes-panel__status {
+.notes-panel-status {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -279,7 +279,7 @@
   font-size: var(--font-size-sm);
 }
 
-.notes-panel__status .icon {
+.notes-panel-status .icon {
   color: var(--color-success-text);
 }
 

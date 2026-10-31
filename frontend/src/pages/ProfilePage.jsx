@@ -273,7 +273,7 @@ function ProfilePage() {
   }
 
   return (
-    <div className="stack stack--loose">
+    <div className="stack stack-loose">
       <div>
         <PageHeading title="Your profile" />
         <p className="text-muted">Manage your account and the study reviewers you have shared.</p>
@@ -300,11 +300,11 @@ function ProfilePage() {
         {profileError === '' && !auth.profile && <Spinner label="Loading your account…" />}
 
         {auth.profile && (
-          <div className="card card--padded card--narrow">
+          <div className="card card-padded card-narrow">
             <div className="profile-identity">
               <Avatar photoUrl={photoUrl} name={auth.profile.displayName} size="large" />
               <div>
-                <p className="profile-identity__name">{auth.profile.displayName}</p>
+                <p className="profile-identity-name">{auth.profile.displayName}</p>
                 <p className="text-muted text-small">{signInText}</p>
               </div>
             </div>
@@ -327,7 +327,7 @@ function ProfilePage() {
                 hint="Shown next to the study reviewers you share."
                 error={nameError}
               />
-              <div className="form__actions">
+              <div className="form-actions">
                 <button type="submit" className="button" aria-disabled={isSavingName}>
                   {saveNameText}
                 </button>
@@ -335,7 +335,7 @@ function ProfilePage() {
               {/* Always on the page, so screen readers announce the text when it appears. */}
               <div role="status">
                 {nameSuccess !== '' && (
-                  <p className="field__success">
+                  <p className="field-success">
                     <Icon name="check" />
                     <span>{nameSuccess}</span>
                   </p>
@@ -420,7 +420,7 @@ function ProfilePage() {
               title="You have not shared anything yet"
               message="Have notes or a study guide you made? Share it so other learners can use it."
             >
-              <Link className="button button--primary" to="/upload">
+              <Link className="button button-primary" to="/upload">
                 <Icon name="upload" />
                 Share a study reviewer
               </Link>
@@ -442,7 +442,7 @@ function ProfilePage() {
         <h2 id="delete-account-heading" className="section-heading">
           Delete account
         </h2>
-        <div className="card card--padded card--narrow stack">
+        <div className="card card-padded card-narrow stack">
           <p>
             This deletes your profile, every study reviewer you shared (and its file), your upvotes,
             saved list, notes, flashcards, and reports, and your login. It cannot be undone.
@@ -454,7 +454,7 @@ function ProfilePage() {
                 For your safety, log in again, then delete your account within 5 minutes.
               </Alert>
               <div>
-                <button type="button" className="button button--primary" onClick={handleFreshLogin}>
+                <button type="button" className="button button-primary" onClick={handleFreshLogin}>
                   Log in again
                 </button>
               </div>
@@ -463,7 +463,7 @@ function ProfilePage() {
           <div>
             <button
               type="button"
-              className="button button--danger-outline"
+              className="button button-danger-outline"
               onClick={() => setIsAccountDeleteOpen(true)}
             >
               <Icon name="trash" />

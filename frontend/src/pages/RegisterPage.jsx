@@ -108,7 +108,7 @@ function RegisterPage() {
 
   return (
     <div className="page-form">
-      <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
+      <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Create an account" />
       <p className="page-intro">
         An account lets you upvote and share study reviewers. Browsing is always free and open.
@@ -171,13 +171,13 @@ function RegisterPage() {
           error={errors.confirmPassword}
         />
 
-        <div className="form__actions">
-          <button type="submit" className="button button--primary" aria-disabled={isSubmitting}>
+        <div className="form-actions">
+          <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
             {submitText}
           </button>
         </div>
 
-        <p className="form__footer">
+        <p className="form-footer">
           Already have an account?{' '}
           <Link to="/login" state={location.state}>
             Log in

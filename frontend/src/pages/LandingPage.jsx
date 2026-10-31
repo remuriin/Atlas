@@ -97,22 +97,22 @@ const STRAND_DESCRIPTIONS = {
 function HighlightPicture(props) {
   if (props.name === 'filters') {
     return (
-      <div className="landing__picture landing__picture--filters" aria-hidden="true">
-        <span className="landing__chip landing__chip--on">Grade 11</span>
-        <span className="landing__chip">Q2</span>
-        <span className="landing__chip landing__chip--on">Gen Chem 1</span>
-        <span className="landing__chip">STEM</span>
+      <div className="landing-picture landing-picture-filters" aria-hidden="true">
+        <span className="landing-chip landing-chip-on">Grade 11</span>
+        <span className="landing-chip">Q2</span>
+        <span className="landing-chip landing-chip-on">Gen Chem 1</span>
+        <span className="landing-chip">STEM</span>
       </div>
     );
   }
   if (props.name === 'upvote') {
     return (
-      <div className="landing__picture landing__picture--upvote" aria-hidden="true">
-        <span className="landing__vote landing__vote--on">
+      <div className="landing-picture landing-picture-upvote" aria-hidden="true">
+        <span className="landing-vote landing-vote-on">
           <Icon name="arrow-up" />
           <span className="mono">128</span>
         </span>
-        <span className="landing__vote">
+        <span className="landing-vote">
           <Icon name="arrow-up" />
           <span className="mono">41</span>
         </span>
@@ -121,23 +121,23 @@ function HighlightPicture(props) {
   }
   if (props.name === 'notes') {
     return (
-      <div className="landing__picture landing__picture--notes" aria-hidden="true">
-        <span className="landing__page">
-          <span className="landing__line" />
-          <span className="landing__line landing__line--mark" />
-          <span className="landing__line" />
-          <span className="landing__line landing__line--short" />
+      <div className="landing-picture landing-picture-notes" aria-hidden="true">
+        <span className="landing-page">
+          <span className="landing-line" />
+          <span className="landing-line landing-line-mark" />
+          <span className="landing-line" />
+          <span className="landing-line landing-line-short" />
         </span>
-        <span className="landing__note">
-          <span className="landing__line" />
-          <span className="landing__line landing__line--short" />
+        <span className="landing-note">
+          <span className="landing-line" />
+          <span className="landing-line landing-line-short" />
         </span>
       </div>
     );
   }
   return (
-    <div className="landing__picture landing__picture--flashcard" aria-hidden="true">
-      <span className="landing__flashcard">
+    <div className="landing-picture landing-picture-flashcard" aria-hidden="true">
+      <span className="landing-flashcard">
         <span>What is Avogadro&rsquo;s number?</span>
         <span className="mono">6.022 × 10²³</span>
       </span>
@@ -169,38 +169,38 @@ function LandingPage() {
 
   return (
     <div className="landing">
-      <section className="landing__band landing__hero" aria-labelledby="page-heading">
-        <div className="container landing__hero-inner">
-          <div className="landing__hero-text">
+      <section className="landing-band landing-hero" aria-labelledby="page-heading">
+        <div className="container landing-hero-inner">
+          <div className="landing-hero-text">
             <FlashMessage />
             <PageHeading title="Reviewers for Senior High, made by students" />
-            <p className="landing__lead">
+            <p className="landing-lead">
               Share the reviewers you made, and find ones from other Grade 11 and 12 students
               for your next quarterly exam. Browsing is free and needs no account.
             </p>
-            <div className="landing__actions">
-              <Link className="button button--primary button--large" to="/register">
+            <div className="landing-actions">
+              <Link className="button button-primary button-large" to="/register">
                 Sign up free
               </Link>
-              <Link className="button button--large" to="/browse">
+              <Link className="button button-large" to="/browse">
                 Browse study reviewers
                 <Icon name="arrow-right" />
               </Link>
             </div>
           </div>
 
-          <div className="landing__preview" aria-hidden="true">
+          <div className="landing-preview" aria-hidden="true">
             {PREVIEW_CARDS.map((card) => (
               <div
                 key={card.title}
-                className={`card reviewer-card landing__preview-card strand--${strandSlug(card.strand)}`}
+                className={`card reviewer-card landing-preview-card strand-${strandSlug(card.strand)}`}
               >
-                <span className="label label--strand">{card.strand}</span>
-                <strong className="landing__preview-title">{card.title}</strong>
-                <span className="landing__preview-meta">
+                <span className="label label-strand">{card.strand}</span>
+                <strong className="landing-preview-title">{card.title}</strong>
+                <span className="landing-preview-meta">
                   <span>{card.meta}</span>
                   <span className="mono">{card.file}</span>
-                  <span className="landing__preview-votes">
+                  <span className="landing-preview-votes">
                     <Icon name="arrow-up" />
                     <span className="mono">{card.votes}</span>
                   </span>
@@ -211,20 +211,20 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="landing__band landing__strands" aria-labelledby="strands-heading">
+      <section className="landing-band landing-strands" aria-labelledby="strands-heading">
         <div className="container">
-          <h2 id="strands-heading" className="landing__band-heading">
+          <h2 id="strands-heading" className="landing-band-heading">
             Browse by strand
           </h2>
-          <ul className="landing__strand-list">
+          <ul className="landing-strand-list">
             {STRANDS.map((strand) => (
               <li key={strand}>
                 <Link
-                  className={`landing__strand strand--${strandSlug(strand)}`}
+                  className={`landing-strand strand-${strandSlug(strand)}`}
                   to={`/browse?strand=${encodeURIComponent(strand)}`}
                 >
                   <strong>{strand}</strong>
-                  <span className="landing__strand-text">{STRAND_DESCRIPTIONS[strand]}</span>
+                  <span className="landing-strand-text">{STRAND_DESCRIPTIONS[strand]}</span>
                 </Link>
               </li>
             ))}
@@ -232,36 +232,36 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="landing__band" aria-labelledby="why-heading">
+      <section className="landing-band" aria-labelledby="why-heading">
         <div className="container">
-          <h2 id="why-heading" className="landing__band-heading">
+          <h2 id="why-heading" className="landing-band-heading">
             Why Atlas
           </h2>
-          <ul className="landing__features">
+          <ul className="landing-features">
             {HIGHLIGHTS.map((highlight) => (
-              <li key={highlight.title} className="landing__feature">
+              <li key={highlight.title} className="landing-feature">
                 <HighlightPicture name={highlight.picture} />
-                <strong className="landing__feature-title">{highlight.title}</strong>
-                <span className="landing__feature-text">{highlight.text}</span>
+                <strong className="landing-feature-title">{highlight.title}</strong>
+                <span className="landing-feature-text">{highlight.text}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="landing__band landing__how" aria-labelledby="how-heading">
+      <section className="landing-band landing-how" aria-labelledby="how-heading">
         <div className="container">
-          <h2 id="how-heading" className="landing__band-heading">
+          <h2 id="how-heading" className="landing-band-heading">
             How it works
           </h2>
-          <ol className="landing__steps">
+          <ol className="landing-steps">
             {STEPS.map((step, index) => (
-              <li key={step.title} className="landing__step">
+              <li key={step.title} className="landing-step">
                 {/* The list itself already tells screen readers the step number. */}
-                <span className="landing__step-number mono" aria-hidden="true">
+                <span className="landing-step-number mono" aria-hidden="true">
                   {index + 1}
                 </span>
-                <strong className="landing__feature-title">{step.title}</strong>
+                <strong className="landing-feature-title">{step.title}</strong>
                 {step.text}
               </li>
             ))}
@@ -269,17 +269,17 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="landing__band landing__closing" aria-labelledby="closing-heading">
+      <section className="landing-band landing-closing" aria-labelledby="closing-heading">
         <div className="container">
-          <h2 id="closing-heading" className="landing__closing-heading">
+          <h2 id="closing-heading" className="landing-closing-heading">
             Got a reviewer that helped you?
           </h2>
-          <p className="landing__lead">Share it, and help the next student pass the same exam.</p>
-          <div className="landing__actions">
-            <Link className="button button--primary button--large" to="/register">
+          <p className="landing-lead">Share it, and help the next student pass the same exam.</p>
+          <div className="landing-actions">
+            <Link className="button button-primary button-large" to="/register">
               Sign up free
             </Link>
-            <Link className="button button--large" to="/terms">
+            <Link className="button button-large" to="/terms">
               What you may share
             </Link>
           </div>

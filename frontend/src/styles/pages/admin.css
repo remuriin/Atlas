@@ -6,7 +6,7 @@
   gap: var(--space-4);
 }
 
-.report-item__reasons {
+.report-item-reasons {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -14,14 +14,14 @@
   padding-left: var(--space-4);
 }
 
-.report-item__actions {
+.report-item-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
 
-.report-item__category {
+.report-item-category {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: var(--space-2) var(--space-3);

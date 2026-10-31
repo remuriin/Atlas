@@ -6,7 +6,7 @@ function EmptyState(props) {
   return (
     <div className="empty-state">
       <Icon name={props.icon || 'file'} large />
-      <p className="empty-state__title">{props.title}</p>
+      <p className="empty-state-title">{props.title}</p>
       <p>{props.message}</p>
       {props.children}
     </div>

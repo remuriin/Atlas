@@ -9,7 +9,7 @@
   text-align: center;
 }
 
-.flashcards-start__form {
+.flashcards-start-form {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -38,22 +38,22 @@
   text-align: center;
 }
 
-.progress-tile--learning {
+.progress-tile-learning {
   border-top-color: var(--color-attention);
 }
 
-.progress-tile--learned {
+.progress-tile-learned {
   border-top-color: var(--color-success-text);
 }
 
-.progress-tile__count {
+.progress-tile-count {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
   line-height: var(--line-height-tight);
 }
 
-.progress-tile__label {
+.progress-tile-label {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
@@ -72,12 +72,12 @@
   max-width: var(--reading-width);
 }
 
-.flashcard-study__position {
+.flashcard-study-position {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
 
-.flashcard-study__progress {
+.flashcard-study-progress {
   width: 100%;
   height: 0.5rem;
   accent-color: var(--color-success);
@@ -99,17 +99,17 @@
   perspective: 80rem;
 }
 
-.flashcard__inner {
+.flashcard-inner {
   display: grid;
   transition: transform var(--motion-base) var(--motion-ease);
   transform-style: preserve-3d;
 }
 
-.flashcard--flipped .flashcard__inner {
+.flashcard-flipped .flashcard-inner {
   transform: rotateY(180deg);
 }
 
-.flashcard__face {
+.flashcard-face {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
@@ -125,16 +125,16 @@
   backface-visibility: hidden;
 }
 
-.flashcard__face--back {
+.flashcard-face-back {
   background-color: var(--color-subtle);
   transform: rotateY(180deg);
 }
 
-.flashcard:hover .flashcard__face {
+.flashcard:hover .flashcard-face {
   border-color: var(--color-accent);
 }
 
-.flashcard__side {
+.flashcard-side {
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
@@ -142,13 +142,13 @@
   text-transform: uppercase;
 }
 
-.flashcard__text {
+.flashcard-text {
   font-size: var(--font-size-lg);
   line-height: var(--line-height-base);
   white-space: pre-wrap;
 }
 
-.flashcard__hint {
+.flashcard-hint {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -159,8 +159,8 @@
   font-weight: var(--font-weight-medium);
 }
 
-.flashcard-study__nav,
-.flashcard-study__rate {
+.flashcard-study-nav,
+.flashcard-study-rate {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
@@ -177,18 +177,18 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.flashcards-manage .flashcards-start__form {
+.flashcards-manage .flashcards-start-form {
   justify-content: flex-start;
 }
 
 /* The hint under the number box is long, so the field gets a readable width,
    and the box itself only needs room for three digits. */
-.flashcards-start__form .field {
+.flashcards-start-form .field {
   flex: 1 1 18rem;
   max-width: 32rem;
 }
 
-.flashcards-start__form input[type="number"] {
+.flashcards-start-form input[type="number"] {
   width: 8rem;
 }
 
@@ -200,11 +200,11 @@
     justify-content: space-between;
   }
 
-  .flashcard__face {
+  .flashcard-face {
     min-height: 20rem;
   }
 
-  .flashcard__text {
+  .flashcard-text {
     font-size: var(--font-size-xl);
   }
 }

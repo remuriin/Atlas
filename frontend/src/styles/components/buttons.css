@@ -27,7 +27,7 @@
   text-decoration: none;
 }
 
-.button--primary {
+.button-primary {
   background-color: var(--color-success);
   /* A transparent border keeps the size equal to other buttons and
      becomes a visible outline in Windows High Contrast mode. */
@@ -35,43 +35,43 @@
   color: var(--color-on-emphasis);
 }
 
-.button--primary:hover {
+.button-primary:hover {
   background-color: var(--color-success-hover);
 }
 
-.button--danger {
+.button-danger {
   background-color: var(--color-danger-emphasis);
   border-color: transparent;
   color: var(--color-on-emphasis);
 }
 
-.button--danger:hover {
+.button-danger:hover {
   background-color: var(--color-danger-hover);
 }
 
 /* Red text needs the plain page background behind it to stay readable (4.5:1)
    in both themes. On hover it turns into a solid danger button. */
-.button--danger-outline {
+.button-danger-outline {
   background-color: var(--color-canvas);
   color: var(--color-danger);
 }
 
-.button--danger-outline:hover {
+.button-danger-outline:hover {
   background-color: var(--color-danger-emphasis);
   border-color: transparent;
   color: var(--color-on-emphasis);
 }
 
-.button--quiet {
+.button-quiet {
   background-color: transparent;
   border-color: transparent;
 }
 
-.button--quiet:hover {
+.button-quiet:hover {
   background-color: var(--color-button-hover);
 }
 
-.button--block {
+.button-block {
   width: 100%;
 }
 

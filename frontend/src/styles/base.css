@@ -173,11 +173,27 @@ html {
 
 /* ---------- Layout shell ---------- */
 
+/* Behind the top of every page: the landing hero's grid on its raised color,
+   fading into the plain page color by 20rem down. Background layers are drawn
+   top first: the fade, then the lines across, then the lines down. */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  background-color: var(--color-subtle);
+  background-image: linear-gradient(transparent, var(--color-canvas) 20rem),
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: 100% 100%, 2.5rem 2.5rem, 2.5rem 2.5rem;
+}
+
+/* A dark closing panel, like the landing page's last band. */
+.band-inset {
+  padding: var(--space-6);
+  background-color: var(--color-inset);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
 }
 
 .container {
@@ -212,7 +228,7 @@ html {
   font-size: var(--font-size-xxl);
 }
 
-.page-form__logo {
+.page-form-logo {
   display: block;
   margin-bottom: var(--space-4);
 }
@@ -230,7 +246,7 @@ html {
   gap: var(--space-4);
 }
 
-.stack--loose {
+.stack-loose {
   gap: var(--space-6);
 }
 

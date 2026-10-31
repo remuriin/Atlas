@@ -34,7 +34,7 @@ function App() {
   const location = useLocation();
   let mainClass = 'container main';
   if (location.pathname === '/') {
-    mainClass = 'main main--bleed';
+    mainClass = 'main main-bleed';
   }
 
   return (
