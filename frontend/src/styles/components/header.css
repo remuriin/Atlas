@@ -1,6 +1,6 @@
 /* ---------- Header ---------- */
 
-.site-header {
+.header {
   /* Sticky: the header scrolls with the page until it reaches the top, then
      stays there, so the menu is always one step away on a long list. */
   position: sticky;
@@ -17,12 +17,12 @@
 /* On very short screens (a phone on its side, or a page zoomed to 400%) a stuck
    header would cover too much of the content, so there it scrolls away as usual. */
 @media (max-height: 30rem) {
-  .site-header {
+  .header {
     position: static;
   }
 }
 
-.site-header-inner {
+.header-inner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -30,7 +30,7 @@
   padding-block: var(--space-2);
 }
 
-.site-logo {
+.logo {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -45,28 +45,29 @@
 
 /* "Sign up" in the header bar: phones only. On the narrowest screens there is
    no room beside the logo and the Menu button, so there it stays in the menu. */
-.site-header-cta {
+.header-signup {
   display: none;
 }
 
 @media (min-width: 22.5rem) and (max-width: 47.99rem) {
-  .site-header-cta {
+  .header-signup {
     display: inline-flex;
   }
 
-  .site-nav-signup {
+  .nav-signup {
     display: none;
   }
 }
 
-.site-logo-mark {
+.logo-mark {
   width: 2rem;
   height: 2rem;
 }
 
 /* The menu is one <nav>. On small screens it is a panel that the Menu button
    opens and closes; on wide screens it is always shown as a row. */
-.site-nav {
+.nav,
+ .nav-open {
   display: none;
   flex-basis: 100%;
   flex-direction: column;
@@ -75,16 +76,16 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.site-nav-open {
+.nav-open {
   display: flex;
 }
 
-.site-nav-list {
+.nav-list {
   display: flex;
   flex-direction: column;
 }
 
-.site-nav-link {
+.nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -99,16 +100,16 @@
   text-decoration: none;
 }
 
-.site-nav-link:hover {
+.nav-link:hover {
   background-color: var(--color-button-hover);
 }
 
-.site-nav-link[aria-current="page"] {
+.nav-link[aria-current="page"] {
   border-left-color: var(--color-success-text);
   font-weight: var(--font-weight-bold);
 }
 
-.site-nav-actions {
+.nav-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -117,13 +118,13 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.site-nav-user {
+.nav-user {
   flex-basis: 100%;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.theme-toggle-state {
+.theme-state {
   color: var(--color-text-muted);
 }
 
@@ -132,8 +133,8 @@
     display: none;
   }
 
-  .site-nav,
-  .site-nav-open {
+  .nav,
+  .nav-open {
     display: flex;
     flex: 1;
     flex-basis: auto;
@@ -145,30 +146,30 @@
     border-top: 0;
   }
 
-  .site-nav-list {
+  .nav-list {
     flex-direction: row;
     gap: var(--space-1);
     margin-left: var(--space-4);
   }
 
-  .site-nav-link {
+  .nav-link {
     border-left: 0;
     border-bottom: 3px solid transparent;
     border-top: 3px solid transparent;
     border-radius: 0;
   }
 
-  .site-nav-link[aria-current="page"] {
+  .nav-link[aria-current="page"] {
     border-bottom-color: var(--color-success-text);
   }
 
-  .site-nav-actions {
+  .nav-actions {
     flex-wrap: nowrap;
     padding-top: 0;
     border-top: 0;
   }
 
-  .site-nav-user {
+  .nav-user {
     flex-basis: auto;
     /* Room for the picture and a typical name on one line. */
     max-width: 16rem;

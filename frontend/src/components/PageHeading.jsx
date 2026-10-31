@@ -30,7 +30,7 @@ function PageHeading(props) {
   }, [location.pathname]);
 
   return (
-    <h1 id="page-heading" className="page-heading" tabIndex="-1">
+    <h1 id="page-heading" className="page-title" tabIndex="-1">
       {props.title}
     </h1>
   );

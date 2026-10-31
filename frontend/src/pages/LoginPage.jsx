@@ -176,9 +176,9 @@ function LoginPage() {
 
     return (
       <div className="page-form">
-        <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
+        <img className="form-logo" src="/logo.png" alt="" width="48" height="48" />
         <PageHeading title="Reset your password" />
-        <p className="page-intro">
+        <p className="intro">
           Enter the email address you signed up with. We will email you a link for choosing a new
           password.
         </p>
@@ -205,7 +205,7 @@ function LoginPage() {
           />
 
           <div className="form-actions">
-            <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
+            <button type="submit" className="button-green" aria-disabled={isSubmitting}>
               {resetButtonText}
             </button>
             <button type="button" className="button" onClick={() => showView('login')}>
@@ -224,9 +224,9 @@ function LoginPage() {
 
   return (
     <div className="page-form">
-      <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
+      <img className="form-logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Log in" />
-      <p className="page-intro">Log in to upvote, share, and manage your study reviewers.</p>
+      <p className="intro">Log in to upvote, share, and manage your study reviewers.</p>
 
       <form className="form" onSubmit={handleLoginSubmit} noValidate>
         {reasonMessage !== '' && <Alert type="info">{reasonMessage}</Alert>}
@@ -261,7 +261,7 @@ function LoginPage() {
         />
 
         <div className="form-actions">
-          <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
+          <button type="submit" className="button-green" aria-disabled={isSubmitting}>
             {loginButtonText}
           </button>
           <button type="button" className="link-button" onClick={() => showView('reset')}>

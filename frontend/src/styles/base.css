@@ -189,33 +189,40 @@ html {
 }
 
 /* A dark closing panel, like the landing page's last band. */
-.band-inset {
+.notfound {
   padding: var(--space-6);
   background-color: var(--color-inset);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-large);
 }
 
-.container {
+.container,
+.header-inner,
+.footer-inner,
+.hero-inner,
+.main {
   width: 100%;
   max-width: var(--content-width);
   margin-inline: auto;
   padding-inline: var(--space-4);
 }
 
-.main {
+.main,
+.main-wide {
   flex: 1;
   padding-block: var(--space-5) var(--space-7);
 }
 
 /* Narrow column for forms and reading pages, so lines stay a comfortable length. */
-.page-narrow {
+.narrow,
+.notfound {
   max-width: var(--reading-width);
   margin-inline: auto;
 }
 
 /* Forms (log in, sign up, upload, edit) sit in one raised panel. */
-.page-form {
+.page-form,
+.edit-form {
   max-width: 32rem;
   margin-inline: auto;
   padding: var(--space-5);
@@ -224,23 +231,31 @@ html {
   border-radius: var(--radius-large);
 }
 
-.page-form .page-heading {
+.page-form .page-title,
+.edit-form .page-title {
   font-size: var(--font-size-xxl);
 }
 
-.page-form-logo {
+.form-logo {
   display: block;
   margin-bottom: var(--space-4);
 }
 
 @media (min-width: 40rem) {
-  .page-form {
+  .page-form,
+  .edit-form {
     margin-top: var(--space-4);
     padding: var(--space-6);
   }
 }
 
-.stack {
+.stack,
+.panel-stack,
+.narrow,
+.notfound,
+.edit-form,
+.stack-loose,
+.study-page {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -250,28 +265,36 @@ html {
   gap: var(--space-6);
 }
 
-.row {
+.row,
+.flash-options {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
-.text-muted {
+.muted,
+.hint {
   color: var(--color-text-muted);
 }
 
-.text-small {
+.small,
+.hint {
   font-size: var(--font-size-sm);
 }
 
-.mono {
+.mono,
+.step-number {
   font-family: var(--font-mono);
   font-size: 0.9em;
 }
 
 @media (min-width: 40rem) {
-  .container {
+  .container,
+  .header-inner,
+  .footer-inner,
+  .hero-inner,
+  .main {
     padding-inline: var(--space-5);
   }
 
@@ -281,7 +304,11 @@ html {
 }
 
 @media (min-width: 64rem) {
-  .container {
+  .container,
+  .header-inner,
+  .footer-inner,
+  .hero-inner,
+  .main {
     padding-inline: var(--space-6);
   }
 }

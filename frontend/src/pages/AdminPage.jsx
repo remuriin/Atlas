@@ -180,7 +180,7 @@ function AdminPage() {
     <div className="stack">
       <div>
         <PageHeading title="Reports" />
-        <p className="page-intro">
+        <p className="intro">
           Study reviewers people have reported. Those with 3 or more reports are already hidden
           from the feed. Reporters stay anonymous.
         </p>
@@ -211,14 +211,14 @@ function AdminPage() {
       {status === 'ready' && items.length > 0 && (
         <ul className="report-list">
           {items.map((item) => (
-            <li key={item.id} className="card card-padded">
+            <li key={item.id} className="panel">
               <p>
                 <StrandLink strand={item.strand} />
               </p>
-              <h2 className="reviewer-card-title">
+              <h2 className="review-title">
                 <Link to={`/reviewers/${item.id}`}>{item.title}</Link>
               </h2>
-              <p className="reviewer-card-category">{describeCategory(item)}</p>
+              <p className="review-category">{describeCategory(item)}</p>
               <p className="meta">
                 <span className="meta-item">
                   <Icon name="user" />
@@ -236,7 +236,7 @@ function AdminPage() {
                 </p>
               )}
 
-              <ul className="report-item-reasons">
+              <ul className="report-reasons">
                 {item.reports.map((report, index) => (
                   <li key={index}>
                     <strong>{report.reason}</strong>, {formatDate(report.createdAt)}
@@ -247,7 +247,7 @@ function AdminPage() {
 
               {editingId === item.id && (
                 <form className="stack" onSubmit={(event) => handleSaveCategory(event, item)} noValidate>
-                  <div className="report-item-category">
+                  <div className="report-category">
                     <FormField
                       id={`category-strand-${item.id}`}
                       label="Strand"
@@ -299,10 +299,10 @@ function AdminPage() {
                       error={categoryErrors.materialType}
                     />
                   </div>
-                  <div className="report-item-actions">
+                  <div className="report-actions">
                     <button
                       type="submit"
-                      className="button button-primary"
+                      className="button-green"
                       aria-disabled={busyId === item.id}
                     >
                       Save category and show it
@@ -315,7 +315,7 @@ function AdminPage() {
               )}
 
               {editingId !== item.id && (
-                <div className="report-item-actions">
+                <div className="report-actions">
                   <button type="button" className="button" onClick={() => handleOpenFile(item)}>
                     <Icon name="external" />
                     Open file
@@ -336,7 +336,7 @@ function AdminPage() {
                   </button>
                   <button
                     type="button"
-                    className="button button-danger-outline"
+                    className="button-outline"
                     onClick={() => setItemToDelete(item)}
                   >
                     <Icon name="trash" />

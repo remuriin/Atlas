@@ -11,20 +11,20 @@ function SkeletonList(props) {
   }
 
   return (
-    <ul className="reviewer-grid" aria-hidden="true">
+    <ul className="review-grid" aria-hidden="true">
       {placeholders.map((number) => (
         <li key={number}>
-          <div className="card reviewer-card">
-            <div className="reviewer-card-body skeleton-card-body">
-              <span className="skeleton skeleton-chip"></span>
-              <span className="skeleton skeleton-title"></span>
-              <span className="skeleton skeleton-line"></span>
-              <span className="skeleton skeleton-line"></span>
-              <span className="skeleton skeleton-short"></span>
-              <span className="skeleton skeleton-short"></span>
+          <div className="review">
+            <div className="skeleton-body">
+              <span className="skeleton-chip"></span>
+              <span className="skeleton-title"></span>
+              <span className="skeleton-line"></span>
+              <span className="skeleton-line"></span>
+              <span className="skeleton-short"></span>
+              <span className="skeleton-short"></span>
             </div>
-            <div className="reviewer-card-footer">
-              <span className="skeleton skeleton-button"></span>
+            <div className="review-footer">
+              <span className="skeleton-button"></span>
             </div>
           </div>
         </li>

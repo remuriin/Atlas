@@ -32,9 +32,9 @@ function App() {
 
   // The landing page runs its bands edge to edge, so it sets its own widths.
   const location = useLocation();
-  let mainClass = 'container main';
+  let mainClass = 'main';
   if (location.pathname === '/') {
-    mainClass = 'main main-bleed';
+    mainClass = 'main-wide';
   }
 
   return (

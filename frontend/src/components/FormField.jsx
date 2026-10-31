@@ -99,7 +99,7 @@ function FormField(props) {
     }
 
     control = (
-      <div className="field-control-row">
+      <div className="field-row">
         <input
           id={props.id}
           className="input"

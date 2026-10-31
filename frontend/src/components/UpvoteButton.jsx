@@ -76,7 +76,7 @@ function UpvoteButton(props) {
     <>
       <button
         type="button"
-        className="button upvote-button"
+        className="upvote"
         aria-pressed={hasUpvoted}
         aria-label={accessibleName}
         aria-disabled={isSaving}
@@ -84,7 +84,7 @@ function UpvoteButton(props) {
       >
         <Icon name="arrow-up" filled={hasUpvoted} />
         <span>{visibleText}</span>
-        <span className="upvote-button-count">{count}</span>
+        <span className="upvote-count">{count}</span>
       </button>
       {/* Screen readers read this out when it changes, without moving focus. */}
       <span className="visually-hidden" role="status">

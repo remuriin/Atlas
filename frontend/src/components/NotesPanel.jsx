@@ -159,14 +159,14 @@ function NotesPanel(props) {
     statusText = `All notes saved at ${formatTime(savedAt)}.`;
   }
 
-  let statusClassName = 'notes-panel-status';
+  let statusClassName = 'notes-status';
   if (isTooLong || saveState === 'error') {
-    statusClassName = 'notes-panel-status notes-panel-status-error';
+    statusClassName = 'notes-error';
   }
 
   return (
-    <section className="study-section notes-panel" aria-labelledby="notes-heading">
-      <h2 id="notes-heading" className="section-heading">
+    <section className="notes-panel" aria-labelledby="notes-heading">
+      <h2 id="notes-heading" className="section-title">
         Your notes
       </h2>
 
@@ -190,13 +190,13 @@ function NotesPanel(props) {
         />
       </div>
 
-      <div className="notes-panel-footer">
+      <div className="notes-footer">
         <p className={statusClassName} role="status">
           {saveState === 'saved' && !hasUnsavedChanges && <Icon name="check" />}
           {(isTooLong || saveState === 'error') && <Icon name="alert" />}
           <span>{statusText}</span>
         </p>
-        <p className="text-muted text-small">
+        <p className="hint">
           {textLength.toLocaleString()} / {NOTES_MAX.toLocaleString()} characters
         </p>
       </div>

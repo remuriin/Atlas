@@ -2,7 +2,7 @@
 
 /* Like the upvote button: the word, the icon (outline to solid), and the
    border all change, so the saved state never depends on color alone. */
-.save-button[aria-pressed="true"] {
+.save[aria-pressed="true"] {
   background-color: var(--color-success-subtle);
   border-color: var(--color-success-text);
   box-shadow: inset 0 0 0 1px var(--color-success-text);

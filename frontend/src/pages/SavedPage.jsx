@@ -104,7 +104,7 @@ function SavedPage() {
     <div className="stack">
       <div>
         <PageHeading title="Saved study reviewers" />
-        <p className="page-intro">
+        <p className="intro">
           Only you can see this list. Open one to read it, take notes, and practise with
           flashcards.
         </p>
@@ -135,30 +135,30 @@ function SavedPage() {
           title="Nothing saved yet"
           message="Press Save on any study reviewer to keep it here, with room for your own notes and flashcards."
         >
-          <Link className="button button-primary" to="/browse">
+          <Link className="button-green" to="/browse">
             Browse study reviewers
           </Link>
         </EmptyState>
       )}
 
       {status === 'ready' && items.length > 0 && (
-        <ul className="reviewer-grid">
+        <ul className="review-grid">
           {items.map((item) => (
             <li key={item.id}>
-              <article className={`card reviewer-card strand-${strandSlug(item.strand)}`}>
-                <div className="reviewer-card-body">
+              <article className={`review ${strandSlug(item.strand)}`}>
+                <div className="review-body">
                   <p>
                     <StrandLink strand={item.strand} />
                   </p>
 
-                  <h2 className="reviewer-card-title">
+                  <h2 className="review-title">
                     <Link id={`saved-link-${item.id}`} to={`/saved/${item.id}`}>
                       {item.title}
                     </Link>
                   </h2>
 
                   {/* Grade, quarter, and type are only known while the original exists. */}
-                  <p className="reviewer-card-category">
+                  <p className="review-category">
                     {describeCategory(Object.assign({ subject: item.subject }, item.reviewer))}
                   </p>
 
@@ -201,10 +201,10 @@ function SavedPage() {
                   </p>
                 </div>
 
-                <div className="reviewer-card-footer">
+                <div className="review-footer">
                   <button
                     type="button"
-                    className="button button-danger-outline"
+                    className="button-outline"
                     aria-label={`Remove ${item.title} from Saved`}
                     onClick={() => setItemToRemove(item)}
                   >

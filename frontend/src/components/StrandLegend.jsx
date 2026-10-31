@@ -8,9 +8,9 @@ function StrandLegend(props) {
   // <details> opens and closes with the keyboard and screen readers on its own.
   // aria-current marks the strand the feed is showing (bold text marks it on screen).
   return (
-    <details className="strand-legend">
-      <summary className="strand-legend-summary">Strand colors</summary>
-      <ul className="strand-legend-list" aria-label="Strand colors">
+    <details className="legend">
+      <summary className="legend-summary">Strand colors</summary>
+      <ul className="legend-list" aria-label="Strand colors">
         {STRANDS.map((strand) => {
           const isActive = strand === props.activeStrand;
           let ariaCurrent;
@@ -20,11 +20,11 @@ function StrandLegend(props) {
           return (
             <li key={strand}>
               <Link
-                className={`strand-legend-link strand-${strandSlug(strand)}`}
+                className={`legend-link ${strandSlug(strand)}`}
                 to={`/browse?strand=${encodeURIComponent(strand)}`}
                 aria-current={ariaCurrent}
               >
-                <span className="strand-legend-swatch" aria-hidden="true"></span>
+                <span className="legend-swatch" aria-hidden="true"></span>
                 {strand}
               </Link>
             </li>

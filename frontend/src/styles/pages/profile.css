@@ -1,18 +1,18 @@
 /* ---------- Profile ---------- */
 
-.profile-details {
+.details {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
   margin: 0;
 }
 
-.profile-details dt {
+.details dt {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.profile-details dd {
+.details dd {
   margin: 0 0 var(--space-3);
 }
 

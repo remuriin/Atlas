@@ -84,7 +84,7 @@ function StudyPage() {
   }
 
   return (
-    <div className="stack study-page">
+    <div className="study-page">
       <div>
         <Link className="back-link" to="/saved">
           <Icon name="arrow-left" />
@@ -120,13 +120,13 @@ function StudyPage() {
       {status === 'ready' && (
         <>
           <div className="row">
-            <span className={`label label-strand strand-${strandSlug(item.strand)}`}>
+            <span className={`pill ${strandSlug(item.strand)}`}>
               <span className="visually-hidden">Strand: </span>
               {item.strand}
             </span>
-            <span className="text-small">{item.subject}</span>
+            <span className="small">{item.subject}</span>
             {!item.isRemoved && (
-              <Link className="text-small" to={`/reviewers/${item.reviewerId}`}>
+              <Link className="small" to={`/reviewers/${item.reviewerId}`}>
                 See it in the feed (upvotes, details)
               </Link>
             )}

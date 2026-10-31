@@ -7,18 +7,22 @@
   padding-top: var(--space-5);
 }
 
-.study-section {
+.study-section,
+.notes-panel,
+.flash-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   min-width: 0;
 }
 
-.study-section .section-heading {
+.study-section .section-title,
+.notes-panel .section-title,
+.flash-panel .section-title {
   margin-bottom: 0;
 }
 
-.flashcards-panel {
+.flash-panel {
   padding-top: var(--space-5);
 }
 
@@ -37,7 +41,7 @@
   border-radius: var(--radius-large);
 }
 
-.file-image-wrap {
+.image-wrap {
   padding: var(--space-2);
   background-color: var(--color-subtle);
   border: var(--border-width) solid var(--color-border);
@@ -63,7 +67,7 @@
   white-space: pre-wrap;
 }
 
-.file-unavailable {
+.file-missing {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,13 +78,13 @@
 
 /* Notes editor: a toolbar on top of a box you type in. */
 
-.note-editor-wrap {
+.editor-wrap {
   background-color: var(--color-canvas);
   border: var(--border-width) solid var(--color-border-control);
   border-radius: var(--radius-large);
 }
 
-.note-toolbar {
+.toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -90,24 +94,24 @@
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
-.note-toolbar-button {
+.tool-button {
   padding-inline: var(--space-3);
 }
 
 /* A pressed button (bold is on, this is a heading...) looks pressed, not only colored. */
-.note-toolbar-button[aria-pressed="true"],
-.note-toolbar-button[aria-expanded="true"] {
+.tool-button[aria-pressed="true"],
+.tool-button[aria-expanded="true"] {
   background-color: var(--color-accent-subtle);
   border-color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent);
   color: var(--color-accent);
 }
 
-.note-toolbar-menu-area {
+.menu-area {
   position: relative;
 }
 
-.note-toolbar-menu {
+.tool-menu {
   position: absolute;
   top: calc(100% + var(--space-1));
   left: 0;
@@ -120,7 +124,7 @@
   box-shadow: var(--shadow-dialog);
 }
 
-.note-toolbar-swatch-button {
+.swatch-button {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -136,11 +140,11 @@
   cursor: pointer;
 }
 
-.note-toolbar-swatch-button:hover {
+.swatch-button:hover {
   background-color: var(--color-button-hover);
 }
 
-.note-swatch {
+.swatch {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
@@ -148,20 +152,20 @@
   border-radius: 0.25rem;
 }
 
-.note-swatch-color-default { background-color: var(--color-text); }
-.note-swatch-color-red { background-color: var(--note-red); }
-.note-swatch-color-orange { background-color: var(--note-orange); }
-.note-swatch-color-green { background-color: var(--note-green); }
-.note-swatch-color-blue { background-color: var(--note-blue); }
-.note-swatch-color-purple { background-color: var(--note-purple); }
-.note-swatch-highlight-yellow { background-color: var(--note-hl-yellow); }
-.note-swatch-highlight-green { background-color: var(--note-hl-green); }
-.note-swatch-highlight-blue { background-color: var(--note-hl-blue); }
-.note-swatch-highlight-pink { background-color: var(--note-hl-pink); }
-.note-swatch-highlight-orange { background-color: var(--note-hl-orange); }
+.swatch.color-default { background-color: var(--color-text); }
+.swatch.color-red { background-color: var(--note-red); }
+.swatch.color-orange { background-color: var(--note-orange); }
+.swatch.color-green { background-color: var(--note-green); }
+.swatch.color-blue { background-color: var(--note-blue); }
+.swatch.color-purple { background-color: var(--note-purple); }
+.swatch.highlight-yellow { background-color: var(--note-hl-yellow); }
+.swatch.highlight-green { background-color: var(--note-hl-green); }
+.swatch.highlight-blue { background-color: var(--note-hl-blue); }
+.swatch.highlight-pink { background-color: var(--note-hl-pink); }
+.swatch.highlight-orange { background-color: var(--note-hl-orange); }
 
 /* "None": an empty box with a slash through it. */
-.note-swatch-highlight-none {
+.swatch.highlight-none {
   background: linear-gradient(
       to top right,
       transparent 45%,
@@ -172,7 +176,7 @@
     var(--color-canvas);
 }
 
-.note-editor {
+.editor {
   position: relative;
   min-height: 16rem;
   max-height: 65vh;
@@ -183,11 +187,11 @@
 }
 
 /* The ring sits inside the box, so the toolbar above does not hide it. */
-.note-editor:focus-visible {
+.editor:focus-visible {
   outline-offset: -3px;
 }
 
-.note-editor[data-empty="true"]::before {
+.editor[data-empty="true"]::before {
   content: attr(aria-placeholder);
   position: absolute;
   top: var(--space-3);
@@ -196,50 +200,50 @@
   pointer-events: none;
 }
 
-.note-editor p,
-.note-editor ul,
-.note-editor blockquote {
+.editor p,
+.editor ul,
+.editor blockquote {
   margin: 0 0 var(--space-2);
 }
 
-.note-editor h1,
-.note-editor h2,
-.note-editor h3 {
+.editor h1,
+.editor h2,
+.editor h3 {
   margin: var(--space-4) 0 var(--space-2);
 }
 
-.note-editor > :first-child {
+.editor > :first-child {
   margin-top: 0;
 }
 
-.note-editor h1 {
+.editor h1 {
   font-size: var(--font-size-xl);
 }
 
-.note-editor h2 {
+.editor h2 {
   font-size: var(--font-size-lg);
 }
 
-.note-editor h3 {
+.editor h3 {
   font-size: var(--font-size-md);
 }
 
-.note-editor ul {
+.editor ul {
   padding-left: var(--space-5);
   list-style: disc;
 }
 
-.note-editor ul ul {
+.editor ul ul {
   margin-bottom: 0;
   list-style: circle;
 }
 
-.note-editor ul ul ul {
+.editor ul ul ul {
   list-style: square;
 }
 
 /* An indented paragraph: just moved in, with no bar or quote styling. */
-.note-editor blockquote {
+.editor blockquote {
   margin-left: var(--space-6);
   padding: 0;
   border: 0;
@@ -248,29 +252,30 @@
 /* The editor marks colors with fixed "marker" values (see services/noteHtml.js);
    these rules swap each marker for its real color in the current theme. Text
    marked "default" goes back to the normal text color. */
-.note-editor font[color="#fe0000" i] { color: var(--color-text); }
-.note-editor font[color="#fe0001" i] { color: var(--note-red); }
-.note-editor font[color="#fe0002" i] { color: var(--note-orange); }
-.note-editor font[color="#fe0003" i] { color: var(--note-green); }
-.note-editor font[color="#fe0004" i] { color: var(--note-blue); }
-.note-editor font[color="#fe0005" i] { color: var(--note-purple); }
+.editor font[color="#fe0000" i] { color: var(--color-text); }
+.editor font[color="#fe0001" i] { color: var(--note-red); }
+.editor font[color="#fe0002" i] { color: var(--note-orange); }
+.editor font[color="#fe0003" i] { color: var(--note-green); }
+.editor font[color="#fe0004" i] { color: var(--note-blue); }
+.editor font[color="#fe0005" i] { color: var(--note-purple); }
 /* Highlights are written as inline styles by the browser, so !important is the
    only way to replace them. */
-.note-editor [style*="background-color: rgb(253, 0, 0)"] { background-color: transparent !important; }
-.note-editor [style*="background-color: rgb(253, 0, 1)"] { background-color: var(--note-hl-yellow) !important; }
-.note-editor [style*="background-color: rgb(253, 0, 2)"] { background-color: var(--note-hl-green) !important; }
-.note-editor [style*="background-color: rgb(253, 0, 3)"] { background-color: var(--note-hl-blue) !important; }
-.note-editor [style*="background-color: rgb(253, 0, 4)"] { background-color: var(--note-hl-pink) !important; }
-.note-editor [style*="background-color: rgb(253, 0, 5)"] { background-color: var(--note-hl-orange) !important; }
+.editor [style*="background-color: rgb(253, 0, 0)"] { background-color: transparent !important; }
+.editor [style*="background-color: rgb(253, 0, 1)"] { background-color: var(--note-hl-yellow) !important; }
+.editor [style*="background-color: rgb(253, 0, 2)"] { background-color: var(--note-hl-green) !important; }
+.editor [style*="background-color: rgb(253, 0, 3)"] { background-color: var(--note-hl-blue) !important; }
+.editor [style*="background-color: rgb(253, 0, 4)"] { background-color: var(--note-hl-pink) !important; }
+.editor [style*="background-color: rgb(253, 0, 5)"] { background-color: var(--note-hl-orange) !important; }
 
-.notes-panel-footer {
+.notes-footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-1) var(--space-3);
 }
 
-.notes-panel-status {
+.notes-status,
+.notes-error {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -279,7 +284,12 @@
   font-size: var(--font-size-sm);
 }
 
-.notes-panel-status .icon {
+.notes-status .icon,
+.notes-status .icon-filled,
+.notes-status .icon-large,
+.notes-error .icon,
+.notes-error .icon-filled,
+.notes-error .icon-large {
   color: var(--color-success-text);
 }
 

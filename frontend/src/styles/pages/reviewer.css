@@ -8,7 +8,7 @@
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.detail-description {
+.detail-text {
   /* Keeps the line breaks the author typed. */
   white-space: pre-wrap;
 }
@@ -21,7 +21,7 @@
   background-color: var(--color-subtle);
 }
 
-.file-box-name {
+.file-name {
   font-weight: var(--font-weight-bold);
 }
 

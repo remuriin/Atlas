@@ -1,6 +1,6 @@
 /* ---------- Flashcards ---------- */
 
-.flashcards-start {
+.flash-start {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,7 +9,7 @@
   text-align: center;
 }
 
-.flashcards-start-form {
+.start-form {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -18,7 +18,7 @@
   text-align: left;
 }
 
-.progress-tiles {
+.tiles {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
@@ -26,7 +26,7 @@
 }
 
 /* Each tile has a colored bar on top as well as its written label. */
-.progress-tile {
+.tile {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,46 +38,60 @@
   text-align: center;
 }
 
-.progress-tile-learning {
+.tile.learning {
   border-top-color: var(--color-attention);
 }
 
-.progress-tile-learned {
+.tile.learned {
   border-top-color: var(--color-success-text);
 }
 
-.progress-tile-count {
+.tile-count {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
   line-height: var(--line-height-tight);
 }
 
-.progress-tile-label {
+.tile-label {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.flashcards-options .button[aria-pressed="true"] {
+.flash-options .button[aria-pressed="true"],
+.flash-options .button-green[aria-pressed="true"],
+.flash-options .button-red[aria-pressed="true"],
+.flash-options .button-outline[aria-pressed="true"],
+.flash-options .cta[aria-pressed="true"],
+.flash-options .button-big[aria-pressed="true"],
+.flash-options .google-button[aria-pressed="true"],
+.flash-options .theme-toggle[aria-pressed="true"],
+.flash-options .alert-close[aria-pressed="true"],
+.flash-options .nav-signup[aria-pressed="true"],
+.flash-options .header-signup[aria-pressed="true"],
+.flash-options .upvote[aria-pressed="true"],
+.flash-options .save[aria-pressed="true"],
+.flash-options .menu-button[aria-pressed="true"],
+.flash-options .tool-button[aria-pressed="true"] {
   background-color: var(--color-accent-subtle);
   border-color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent);
   color: var(--color-accent);
 }
 
-.flashcard-study {
+.flash-study {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   max-width: var(--reading-width);
 }
 
-.flashcard-study-position {
+.study-position {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
 
-.flashcard-study-progress {
+.study-progress {
   width: 100%;
   height: 0.5rem;
   accent-color: var(--color-success);
@@ -85,7 +99,8 @@
 
 /* The card is one button. Its two faces sit in the same grid cell, so the card
    is as tall as the longer side, and turning it over never changes its size. */
-.flashcard {
+.flashcard,
+.flashcard-flipped {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -99,17 +114,18 @@
   perspective: 80rem;
 }
 
-.flashcard-inner {
+.flash-inner {
   display: grid;
   transition: transform var(--motion-base) var(--motion-ease);
   transform-style: preserve-3d;
 }
 
-.flashcard-flipped .flashcard-inner {
+.flashcard-flipped .flash-inner {
   transform: rotateY(180deg);
 }
 
-.flashcard-face {
+.face-front,
+.face-back {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
@@ -125,16 +141,19 @@
   backface-visibility: hidden;
 }
 
-.flashcard-face-back {
+.face-back {
   background-color: var(--color-subtle);
   transform: rotateY(180deg);
 }
 
-.flashcard:hover .flashcard-face {
+.flashcard:hover .face-front,
+.flashcard:hover .face-back,
+.flashcard-flipped:hover .face-front,
+.flashcard-flipped:hover .face-back {
   border-color: var(--color-accent);
 }
 
-.flashcard-side {
+.flash-side {
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
@@ -142,13 +161,13 @@
   text-transform: uppercase;
 }
 
-.flashcard-text {
+.flash-text {
   font-size: var(--font-size-lg);
   line-height: var(--line-height-base);
   white-space: pre-wrap;
 }
 
-.flashcard-hint {
+.flip-hint {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -159,14 +178,14 @@
   font-weight: var(--font-weight-medium);
 }
 
-.flashcard-study-nav,
-.flashcard-study-rate {
+.study-nav,
+.study-rate {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
-.flashcards-manage {
+.flash-manage {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -177,18 +196,18 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.flashcards-manage .flashcards-start-form {
+.flash-manage .start-form {
   justify-content: flex-start;
 }
 
 /* The hint under the number box is long, so the field gets a readable width,
    and the box itself only needs room for three digits. */
-.flashcards-start-form .field {
+.start-form .field {
   flex: 1 1 18rem;
   max-width: 32rem;
 }
 
-.flashcards-start-form input[type="number"] {
+.start-form input[type="number"] {
   width: 8rem;
 }
 
@@ -200,11 +219,12 @@
     justify-content: space-between;
   }
 
-  .flashcard-face {
+  .face-front,
+  .face-back {
     min-height: 20rem;
   }
 
-  .flashcard-text {
+  .flash-text {
     font-size: var(--font-size-xl);
   }
 }

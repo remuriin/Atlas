@@ -9,7 +9,7 @@ function StrandLink(props) {
   // while the pill itself stays small.
   return (
     <Link className="chip-link" to={`/browse?strand=${encodeURIComponent(props.strand)}`}>
-      <span className={`label label-strand strand-${strandSlug(props.strand)}`}>
+      <span className={`pill ${strandSlug(props.strand)}`}>
         <span className="visually-hidden">Strand: </span>
         {props.strand}
       </span>

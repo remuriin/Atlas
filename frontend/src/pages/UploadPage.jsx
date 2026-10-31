@@ -40,7 +40,7 @@ function UploadPage() {
   return (
     <div className="page-form">
       <PageHeading title="Share a study reviewer" />
-      <p className="page-intro">
+      <p className="intro">
         Upload notes, a study guide, or a review file you made yourself, so other learners can use
         it.
         {counts !== null && !isAtLimit && (
@@ -57,7 +57,7 @@ function UploadPage() {
             you no longer need to upload another.
           </Alert>
           <div>
-            <Link className="button button-primary" to="/profile">
+            <Link className="button-green" to="/profile">
               Go to your profile
             </Link>
           </div>

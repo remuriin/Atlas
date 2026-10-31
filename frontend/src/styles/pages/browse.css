@@ -2,7 +2,7 @@
 
 /* On phones the top of the feed is kept short, so the first study reviewer
    is visible without scrolling. */
-.feed-page .page-intro {
+.feed-page .intro {
   margin-bottom: var(--space-3);
 }
 
@@ -24,14 +24,14 @@
 
 /* Strand, grade, and quarter side by side; the long subject names get a full row
    on phones. */
-.feed-filters {
+.filters {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2) var(--space-3);
   margin-bottom: var(--space-2);
 }
 
-.feed-filters-subject {
+.filter-subject {
   grid-column: 1 / -1;
 }
 
@@ -41,12 +41,12 @@
   gap: var(--space-1);
 }
 
-.search-form-row {
+.search-row {
   display: flex;
   gap: var(--space-2);
 }
 
-.search-form-row .input {
+.search-row .input {
   flex: 1;
   min-width: 0;
 }
@@ -71,7 +71,7 @@
 }
 
 @media (min-width: 40rem) {
-  .feed-page .page-intro {
+  .feed-page .intro {
     margin-bottom: var(--space-5);
   }
 
@@ -86,17 +86,17 @@
     flex: 1;
   }
 
-  .feed-filters {
+  .filters {
     grid-template-columns: repeat(3, minmax(0, 9rem)) minmax(0, 1fr);
     margin-bottom: var(--space-4);
   }
 
-  .feed-filters-subject {
+  .filter-subject {
     grid-column: auto;
   }
 }
 
 /* Inside the panel the panel's own padding gives the space below. */
-.feed-controls .feed-filters {
+.feed-controls .filters {
   margin-bottom: 0;
 }

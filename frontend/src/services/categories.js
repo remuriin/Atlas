@@ -112,7 +112,7 @@ export const subjectsForStrand = (strand) => {
 // Every subject of every strand, for the feed filter.
 export const ALL_SUBJECTS = unique(STRANDS.flatMap((strand) => subjectsForStrand(strand)));
 
-// A short name for each strand, used in CSS class names such as "strand-stem".
+// A short name for each strand, used in CSS class names such as "stem".
 // The colors themselves are --subject-* tokens in styles/tokens.css (see components.css).
 const STRAND_SLUGS = {
   'All strands': 'all',

@@ -26,13 +26,13 @@ function ReviewerCard(props) {
 
   return (
     // The colored stripe down the left edge shows the strand at a glance.
-    <article className={`card reviewer-card strand-${strandSlug(reviewer.strand)}`}>
-      <div className="reviewer-card-body">
+    <article className={`review ${strandSlug(reviewer.strand)}`}>
+      <div className="review-body">
         <p>
           <StrandLink strand={reviewer.strand} />
         </p>
 
-        <Heading className="reviewer-card-title">
+        <Heading className="review-title">
           {/* "fromPath" tells the reviewer's page where its Back link should lead. */}
           <Link
             id={`reviewer-link-${reviewer.id}`}
@@ -44,7 +44,7 @@ function ReviewerCard(props) {
           </Link>
         </Heading>
 
-        <p className="reviewer-card-category">{describeCategory(reviewer)}</p>
+        <p className="review-category">{describeCategory(reviewer)}</p>
 
         {/* Only the uploader (on the profile page) and admins ever get a hidden one. */}
         {reviewer.isHidden && (
@@ -54,7 +54,7 @@ function ReviewerCard(props) {
           </p>
         )}
 
-        <p className="reviewer-card-description">{reviewer.description}</p>
+        <p className="review-text">{reviewer.description}</p>
 
         <TagList tags={reviewer.tags} />
 
@@ -81,7 +81,7 @@ function ReviewerCard(props) {
         </p>
       </div>
 
-      <div className="reviewer-card-footer">
+      <div className="review-footer">
         <div className="row">
           <UpvoteButton
             reviewerId={reviewer.id}
@@ -105,7 +105,7 @@ function ReviewerCard(props) {
             <button
               type="button"
               id={`delete-button-${reviewer.id}`}
-              className="button button-danger-outline"
+              className="button-outline"
               aria-label={`Delete ${reviewer.title}`}
               onClick={() => props.onDelete(reviewer)}
             >

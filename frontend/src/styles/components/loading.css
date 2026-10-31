@@ -35,12 +35,16 @@
 
 /* ---------- Loading placeholders ---------- */
 
-.skeleton-card-body {
+.skeleton-body {
   gap: var(--space-3);
   padding-top: var(--space-4);
 }
 
-.skeleton {
+.skeleton-short,
+.skeleton-line,
+.skeleton-title,
+.skeleton-chip,
+.skeleton-button {
   display: block;
   height: 0.875rem;
   background-color: var(--color-button-hover);
@@ -80,7 +84,11 @@
 
 /* For reduced-motion users the placeholders are simply still. */
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
+  .skeleton-short,
+  .skeleton-line,
+  .skeleton-title,
+  .skeleton-chip,
+  .skeleton-button {
     animation: none;
   }
 }

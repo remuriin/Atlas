@@ -93,7 +93,7 @@ function ConfirmDialog(props) {
         </button>
         <button
           type="button"
-          className="button button-danger"
+          className="button-red"
           onClick={handleConfirmClick}
           aria-disabled={props.isBusy}
         >

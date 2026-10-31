@@ -229,7 +229,7 @@ function NoteEditor(props) {
       <button
         key={key}
         type="button"
-        className="button note-toolbar-button"
+        className="tool-button"
         aria-label={label}
         aria-pressed={pressed}
         title={`${label} (${shortcut})`}
@@ -245,11 +245,11 @@ function NoteEditor(props) {
     const isOpen = openMenu === kind;
     const menuId = `${props.id}-${kind}-menu`;
     return (
-      <div className="note-toolbar-menu-area" id={`${props.id}-${kind}-area`}>
+      <div className="menu-area" id={`${props.id}-${kind}-area`}>
         <button
           type="button"
           id={`${props.id}-${kind}-button`}
-          className="button note-toolbar-button"
+          className="tool-button"
           aria-expanded={isOpen}
           aria-controls={menuId}
           onMouseDown={(event) => event.preventDefault()}
@@ -259,17 +259,17 @@ function NoteEditor(props) {
           <Icon name="chevron-down" />
         </button>
         {isOpen && (
-          <ul className="note-toolbar-menu" id={menuId} aria-label={label}>
+          <ul className="tool-menu" id={menuId} aria-label={label}>
             {items.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
-                  className="note-toolbar-swatch-button"
+                  className="swatch-button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => chooseColor(kind, item.marker)}
                 >
                   <span
-                    className={`note-swatch note-swatch-${kind}-${item.id}`}
+                    className={`swatch ${kind}-${item.id}`}
                     aria-hidden="true"
                   ></span>
                   {item.label}
@@ -283,8 +283,8 @@ function NoteEditor(props) {
   };
 
   return (
-    <div className="note-editor-wrap">
-      <div className="note-toolbar" role="group" aria-label="Formatting">
+    <div className="editor-wrap">
+      <div className="toolbar" role="group" aria-label="Formatting">
         {toolButton('bold', 'Bold', <strong>B</strong>, state.bold, () => runCommand('bold'), `${MOD}+B`)}
         {toolButton('italic', 'Italic', <em>I</em>, state.italic, () => runCommand('italic'), `${MOD}+I`)}
         {HEADINGS.map((tag, index) =>
@@ -313,7 +313,7 @@ function NoteEditor(props) {
 
       <div
         id={props.id}
-        className="note-editor"
+        className="editor"
         contentEditable
         suppressContentEditableWarning
         role="textbox"

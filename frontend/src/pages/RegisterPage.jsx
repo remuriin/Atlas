@@ -108,9 +108,9 @@ function RegisterPage() {
 
   return (
     <div className="page-form">
-      <img className="page-form-logo" src="/logo.png" alt="" width="48" height="48" />
+      <img className="form-logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Create an account" />
-      <p className="page-intro">
+      <p className="intro">
         An account lets you upvote and share study reviewers. Browsing is always free and open.
       </p>
 
@@ -172,7 +172,7 @@ function RegisterPage() {
         />
 
         <div className="form-actions">
-          <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
+          <button type="submit" className="button-green" aria-disabled={isSubmitting}>
             {submitText}
           </button>
         </div>

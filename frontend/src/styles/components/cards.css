@@ -2,47 +2,64 @@
 
 /* Cards sit on the slightly raised "subtle" surface, so inputs and buttons
    inside them (on the plain canvas color) stand out. */
-.card {
+.panel,
+.panel-narrow,
+.panel-stack,
+.file-missing,
+.flash-start,
+.review,
+.preview,
+.file-box,
+.compact-list {
   background-color: var(--color-subtle);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-large);
 }
 
-.card-padded {
+.panel,
+.panel-narrow,
+.panel-stack,
+.file-missing,
+.flash-start {
   padding: var(--space-5);
 }
 
-.card-narrow {
+.panel-narrow,
+.panel-stack {
   max-width: 32rem;
 }
 
-.reviewer-grid {
+.review-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
-.reviewer-grid > li {
+.review-grid > li {
   display: flex;
 }
 
-.reviewer-card {
+.review,
+.preview {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
 }
 
-.reviewer-card {
+.review,
+.preview {
   transition: border-color var(--motion-fast) var(--motion-ease);
 }
 
 /* A stronger outline while the pointer is over the card. */
-.reviewer-card:hover {
+.review:hover,
+.preview:hover {
   border-color: var(--color-border-control);
 }
 
-.reviewer-card-body {
+.review-body,
+.skeleton-body {
   /* The stretched title link below is positioned against this box. */
   position: relative;
   display: flex;
@@ -53,13 +70,13 @@
   padding: var(--space-1) var(--space-4) var(--space-4);
 }
 
-.reviewer-card-title {
+.review-title {
   /* Tucks the title up under the strand row's built-in space. */
   margin-top: calc(var(--space-2) * -1);
   font-size: var(--font-size-md);
 }
 
-.reviewer-card-title a {
+.review-title a {
   display: flex;
   align-items: center;
   min-height: var(--touch-target);
@@ -67,13 +84,14 @@
 
 /* Makes the whole upper part of the card open the reviewer. It is still one
    link: this invisible layer belongs to the title link and covers the card body. */
-.reviewer-card-title a::after {
+.review-title a::after {
   content: "";
   position: absolute;
   inset: 0;
 }
 
-.reviewer-card-body .meta {
+.review-body .meta,
+.skeleton-body .meta {
   margin-top: var(--space-1);
 }
 
@@ -90,23 +108,23 @@
   text-decoration: none;
 }
 
-.chip-link:hover .label,
+.chip-link:hover .pill,
 .chip-link:hover .tag {
   text-decoration: underline;
 }
 
-.chip-link:hover .label {
+.chip-link:hover .pill {
   background-color: var(--color-button-hover);
 }
 
 /* Subject, grade, quarter, and material type on one line, under the title. */
-.reviewer-card-category {
+.review-category {
   margin-bottom: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
 
-.reviewer-card-description {
+.review-text {
   /* Shows up to three lines. The full text is on the reviewer's own page. */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -117,7 +135,7 @@
   font-size: var(--font-size-sm);
 }
 
-.reviewer-card-footer {
+.review-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -144,7 +162,7 @@
   gap: var(--space-1);
 }
 
-.label {
+.pill {
   display: inline-block;
   padding: 0 var(--space-2);
   color: var(--color-text);
@@ -174,13 +192,13 @@
 }
 
 @media (min-width: 40rem) {
-  .reviewer-grid {
+  .review-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 64rem) {
-  .reviewer-grid {
+  .review-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

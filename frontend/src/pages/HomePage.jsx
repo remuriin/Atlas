@@ -394,7 +394,7 @@ function HomePage() {
   return (
     <div className="feed-page">
       <PageHeading title="Study reviewers" />
-      <p className="page-intro">
+      <p className="intro">
         Reviewers, notes, and practice tests made by Senior High students. Upvote the ones that
         help you.
       </p>
@@ -409,7 +409,7 @@ function HomePage() {
             <label className="field-label" htmlFor="feed-search">
               Search study reviewers
             </label>
-            <div className="search-form-row">
+            <div className="search-row">
               <input
                 id="feed-search"
                 className="input"
@@ -428,7 +428,7 @@ function HomePage() {
 
         </div>
 
-        <div className="feed-filters">
+        <div className="filters">
           <FormField
             id="feed-strand"
             label="Strand"
@@ -456,7 +456,7 @@ function HomePage() {
             options={QUARTERS}
             placeholderOption="Any quarter"
           />
-          <div className="feed-filters-subject">
+          <div className="filter-subject">
             <FormField
               id="feed-subject"
               label="Subject"
@@ -523,7 +523,7 @@ function HomePage() {
             title="No study reviewers yet"
             message="Be the first to share your notes or study guide."
           >
-            <Link className="button button-primary" to="/upload">
+            <Link className="button-green" to="/upload">
               <Icon name="upload" />
               Share a study reviewer
             </Link>

@@ -197,7 +197,7 @@ function ReviewerPage() {
   }
 
   return (
-    <div className="page-narrow stack">
+    <div className="narrow">
       <div>
         <Link className="back-link" to="/browse" onClick={handleBackClick}>
           <Icon name="arrow-left" />
@@ -245,7 +245,7 @@ function ReviewerPage() {
             <p>
               <StrandLink strand={reviewer.strand} />
             </p>
-            <p className="reviewer-card-category">{describeCategory(reviewer)}</p>
+            <p className="review-category">{describeCategory(reviewer)}</p>
             <p className="meta">
               <span className="meta-item">
                 <Icon name="user" />
@@ -284,7 +284,7 @@ function ReviewerPage() {
               {reviewer.isOwner && (
                 <button
                   type="button"
-                  className="button button-danger-outline"
+                  className="button-outline"
                   onClick={() => setIsDeleteOpen(true)}
                 >
                   <Icon name="trash" />
@@ -299,22 +299,22 @@ function ReviewerPage() {
               )}
             </div>
             {/* Always on the page, so screen readers announce the text when it appears. */}
-            <p className="text-small" role="status">
+            <p className="small" role="status">
               {reportMessage}
             </p>
           </div>
 
           <section className="stack" aria-labelledby="about-heading">
             <h2 id="about-heading">About this study reviewer</h2>
-            <p className="detail-description">{reviewer.description}</p>
+            <p className="detail-text">{reviewer.description}</p>
             <TagList tags={reviewer.tags} />
           </section>
 
           <section className="stack" aria-labelledby="file-heading">
             <h2 id="file-heading">File</h2>
-            <div className="card file-box">
+            <div className="file-box">
               <div>
-                <p className="file-box-name">{reviewer.fileName}</p>
+                <p className="file-name">{reviewer.fileName}</p>
                 <p className="meta">
                   {describeFileType(reviewer.fileName)}, {formatFileSize(reviewer.fileSize)}
                 </p>
@@ -323,7 +323,7 @@ function ReviewerPage() {
               {reviewer.isHidden ? (
                 <button
                   type="button"
-                  className="button button-primary"
+                  className="button-green"
                   onClick={() => openFileInNewTab(reviewer.id).catch((err) => setFileError(err.message))}
                 >
                   <Icon name="external" />
@@ -332,7 +332,7 @@ function ReviewerPage() {
                 </button>
               ) : (
                 <a
-                  className="button button-primary"
+                  className="button-green"
                   href={getFileUrl(reviewer.id)}
                   target="_blank"
                   rel="noopener noreferrer"

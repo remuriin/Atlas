@@ -24,7 +24,7 @@ function Alert(props) {
   }
 
   return (
-    <div className={`alert alert-${props.type}`} role={role}>
+    <div className={`alert ${props.type}`} role={role}>
       <Icon name={iconName} />
       <div className="alert-body">
         <span className="alert-title">{title}</span> {props.children}
@@ -32,7 +32,7 @@ function Alert(props) {
       {props.onDismiss && (
         <button
           type="button"
-          className="button button-quiet alert-dismiss"
+          className="alert-close"
           aria-label="Dismiss message"
           onClick={props.onDismiss}
         >
