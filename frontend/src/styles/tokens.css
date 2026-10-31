@@ -8,14 +8,21 @@
 
 :root {
   /* Type scale (rem, so it follows the visitor's browser text size) */
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Schibsted Grotesk and JetBrains Mono are bundled with the app (see main.jsx);
+     the system fonts after them show while they load. */
+  --font-family: "Schibsted Grotesk Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Monospace is only for real data: file types, page counts, upvote counts. */
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Consolas, monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.5rem;
   --font-size-xxl: 2rem;
+  /* The landing page headline: grows with the screen, from 2.25rem to 3.75rem. */
+  --font-size-display: clamp(2.25rem, 1.5rem + 3vw, 3.75rem);
+  --line-height-display: 1.08;
   --line-height-tight: 1.3;
   --line-height-base: 1.5;
   --font-weight-normal: 400;
@@ -49,6 +56,7 @@
   --motion-fast: 120ms;
   --motion-base: 200ms;
   --motion-ease: cubic-bezier(0.3, 0, 0.5, 1);
+  --motion-slow: 500ms; /* the landing page's one entrance, nothing else */
 }
 
 /* Light theme (also the fallback if the theme attribute is ever missing) */
@@ -260,5 +268,6 @@
   :root {
     --motion-fast: 0.01ms;
     --motion-base: 0.01ms;
+    --motion-slow: 0.01ms;
   }
 }

@@ -34,6 +34,7 @@ h3 {
   margin: 0;
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
@@ -225,6 +226,11 @@ html {
 
 .text-small {
   font-size: var(--font-size-sm);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
 }
 
 @media (min-width: 40rem) {

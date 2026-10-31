@@ -161,6 +161,15 @@
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
+/* Where the browser can blur what scrolls underneath, the header turns slightly
+   see-through. Text on it still sits on 90% of the frame color. */
+@supports (backdrop-filter: blur(1px)) {
+  .site-header {
+    background-color: color-mix(in srgb, var(--color-inset) 90%, transparent);
+    backdrop-filter: blur(12px);
+  }
+}
+
 /* On very short screens (a phone on its side, or a page zoomed to 400%) a stuck
    header would cover too much of the content, so there it scrolls away as usual. */
 @media (max-height: 30rem) {
@@ -327,9 +336,47 @@
 .site-footer {
   background-color: var(--color-inset);
   border-top: var(--border-width) solid var(--color-border);
-  padding-block: var(--space-5);
+  padding-block: var(--space-6);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.site-footer__brand {
+  max-width: 28rem;
+}
+
+.site-footer__brand strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-text-muted);
+}
+
+.site-footer__links a:hover {
+  color: var(--color-accent);
 }
 
 /* ---------- Page heading ---------- */
@@ -614,62 +661,162 @@
 
 /* ---------- Landing page (/) ---------- */
 
-.landing__hero {
-  padding: var(--space-6) var(--space-5);
-  background-color: var(--color-subtle);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius);
+/* The landing page is a set of full-width bands. App.jsx drops the usual
+   .container on <main> for this page, and each band adds its own. */
+.main--bleed {
+  display: flex;
+  flex-direction: column;
+  padding-block: 0;
 }
 
-.landing__hero .page-heading {
+/* On screens taller than the page, the closing band stretches down to the footer. */
+.landing {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.landing__closing {
+  flex: 1;
+}
+
+.landing__band {
+  padding-block: var(--space-7);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.landing__band-heading {
+  margin-bottom: var(--space-5);
   font-size: var(--font-size-xl);
 }
 
 .landing__lead {
-  max-width: 40rem;
-  margin: var(--space-3) 0 var(--space-5);
+  max-width: 38rem;
+  margin: var(--space-4) 0 var(--space-5);
   color: var(--color-text-muted);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
 }
 
 .landing__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
-/* One column on phones, two from tablet width, four strand cards per row on wide screens. */
-.landing__grid {
+.button--large {
+  min-height: 3rem;
+  padding-inline: var(--space-5);
+  font-size: var(--font-size-md);
+}
+
+/* Hero: the headline on the left, a drawing of the feed on the right.
+   A faint grid behind it fades out towards the edges. */
+.landing__hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-subtle);
+}
+
+.landing__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: 2.5rem 2.5rem;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse at 70% 40%, #000 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.landing__hero-inner {
+  position: relative;
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+.landing__hero .page-heading {
+  max-width: 14ch;
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+  letter-spacing: -0.03em;
+}
+
+/* The three example cards sit in a loose, overlapping stack. */
+.landing__preview {
   display: grid;
   gap: var(--space-3);
+}
+
+.landing__preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-dialog);
+  animation: landing-settle var(--motion-slow) var(--motion-ease) both;
+}
+
+.landing__preview-card:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.landing__preview-card:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes landing-settle {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing__preview-card {
+    animation: none;
+  }
+}
+
+.landing__preview-title {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-tight);
+}
+
+.landing__preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  width: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.landing__preview-votes {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  color: var(--color-success-text);
+}
+
+.landing__preview-votes .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Strands: a grid of links, each led by its strand's colored stripe. */
+.landing__strand-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.landing__point {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-
-.landing__point .icon {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  color: var(--color-accent);
-}
-
-.landing__point-title {
-  display: block;
-  margin-bottom: var(--space-1);
-}
-
-.landing__steps {
-  display: grid;
-  gap: var(--space-3);
-  padding-left: var(--space-5);
-}
-
-/* Each strand card carries its strand's color as a stripe, like the reviewer cards. */
 .landing__strand {
   display: flex;
   flex-direction: column;
@@ -677,8 +824,16 @@
   min-height: var(--touch-target);
   height: 100%;
   padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
   border-left: 4px solid var(--strand-color);
+  border-radius: var(--radius);
   color: var(--color-text);
+  text-decoration: none;
+  transition: background-color var(--motion-fast) var(--motion-ease);
+}
+
+.landing__strand:hover {
+  background-color: var(--color-subtle);
   text-decoration: none;
 }
 
@@ -691,26 +846,181 @@
   font-size: var(--font-size-sm);
 }
 
-.landing__closing {
+/* Features: each tile shows a small drawing of that part of Atlas. */
+.landing__features {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing__feature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   padding: var(--space-5);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: calc(var(--radius) * 2);
+}
+
+.landing__feature-title {
+  display: block;
+  font-size: var(--font-size-md);
+}
+
+.landing__feature-text {
+  color: var(--color-text-muted);
+}
+
+.landing__picture {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 6rem;
+  margin-bottom: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-canvas);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius);
 }
 
-.landing__closing p {
-  margin-bottom: var(--space-4);
+.landing__chip {
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.landing__chip--on {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.landing__vote {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+}
+
+.landing__vote--on {
+  background-color: var(--color-success-subtle);
+  border-color: var(--color-success-text);
+  color: var(--color-success-text);
+}
+
+.landing__picture--notes {
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.landing__page,
+.landing__note {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+}
+
+.landing__page {
+  flex: 2;
+  border: var(--border-width) solid var(--color-border);
+}
+
+.landing__note {
+  flex: 1;
+  background-color: var(--note-hl-yellow);
+}
+
+.landing__line {
+  display: block;
+  height: 0.375rem;
+  background-color: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+.landing__line--short {
+  width: 60%;
+}
+
+.landing__line--mark {
+  background-color: var(--color-accent);
+}
+
+.landing__flashcard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.landing__flashcard .mono {
+  color: var(--color-accent);
+}
+
+/* How it works: a real sequence, so the steps keep their numbers. */
+.landing__steps {
+  display: grid;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.landing__step {
+  counter-increment: step;
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--color-text);
+  color: var(--color-text-muted);
+}
+
+.landing__step::before {
+  content: counter(step);
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xxl);
+  line-height: 1;
+}
+
+.landing__step .landing__feature-title {
+  margin-bottom: var(--space-1);
+  color: var(--color-text);
+}
+
+/* Closing: the page's frame color, so the page ends on a clear call to act. */
+.landing__closing {
+  background-color: var(--color-inset);
+  border-bottom: 0;
+}
+
+.landing__closing-heading {
+  max-width: 18ch;
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+  letter-spacing: -0.03em;
 }
 
 @media (min-width: 40rem) {
-  .landing__hero {
-    padding: var(--space-7) var(--space-6);
-  }
-
-  .landing__hero .page-heading {
-    font-size: 2rem;
-  }
-
-  .landing__grid {
+  .landing__strand-list,
+  .landing__features {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -720,7 +1030,30 @@
 }
 
 @media (min-width: 64rem) {
-  .landing__grid--strands {
+  .landing__hero {
+    padding-block: 6rem;
+  }
+
+  .landing__hero-inner {
+    grid-template-columns: 1.1fr 1fr;
+  }
+
+  /* On wide screens the cards fan out a little, like a pile on a desk. */
+  .landing__preview-card:nth-child(1) {
+    margin-right: var(--space-7);
+  }
+
+  .landing__preview-card:nth-child(2) {
+    margin-left: var(--space-6);
+    margin-right: var(--space-3);
+  }
+
+  .landing__preview-card:nth-child(3) {
+    margin-left: var(--space-3);
+    margin-right: var(--space-6);
+  }
+
+  .landing__strand-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
