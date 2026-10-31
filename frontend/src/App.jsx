@@ -1,6 +1,6 @@
 // The page frame (skip link, header, main area, footer) and the list of routes.
 import { useContext } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import Footer from './components/Footer';
 import Header from './components/Header';
@@ -30,13 +30,20 @@ function App() {
     userKey = auth.firebaseUser.uid;
   }
 
+  // The landing page runs its bands edge to edge, so it sets its own widths.
+  const location = useLocation();
+  let mainClass = 'container main';
+  if (location.pathname === '/') {
+    mainClass = 'main main--bleed';
+  }
+
   return (
     <div className="app">
       <SkipLink />
       <Header />
 
       {/* tabIndex -1 lets the skip link move focus here without adding a Tab stop. */}
-      <main id="main-content" className="container main" tabIndex="-1">
+      <main id="main-content" className={mainClass} tabIndex="-1">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/browse" element={<HomePage key={userKey} />} />

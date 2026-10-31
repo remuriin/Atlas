@@ -5,6 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
+import '@fontsource-variable/schibsted-grotesk';
+import '@fontsource-variable/jetbrains-mono';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
