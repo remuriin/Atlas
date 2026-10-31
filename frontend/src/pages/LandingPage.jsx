@@ -255,8 +255,12 @@ function LandingPage() {
             How it works
           </h2>
           <ol className="landing__steps">
-            {STEPS.map((step) => (
+            {STEPS.map((step, index) => (
               <li key={step.title} className="landing__step">
+                {/* The list itself already tells screen readers the step number. */}
+                <span className="landing__step-number mono" aria-hidden="true">
+                  {index + 1}
+                </span>
                 <strong className="landing__feature-title">{step.title}</strong>
                 {step.text}
               </li>

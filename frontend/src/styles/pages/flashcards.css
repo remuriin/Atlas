@@ -1,0 +1,210 @@
+/* ---------- Flashcards ---------- */
+
+.flashcards-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+  text-align: center;
+}
+
+.flashcards-start__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-3);
+  text-align: left;
+}
+
+.progress-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: var(--reading-width);
+}
+
+/* Each tile has a colored bar on top as well as its written label. */
+.progress-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3) var(--space-2);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius-large);
+  text-align: center;
+}
+
+.progress-tile--learning {
+  border-top-color: var(--color-attention);
+}
+
+.progress-tile--learned {
+  border-top-color: var(--color-success-text);
+}
+
+.progress-tile__count {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-tight);
+}
+
+.progress-tile__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.flashcards-options .button[aria-pressed="true"] {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.flashcard-study {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+}
+
+.flashcard-study__position {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.flashcard-study__progress {
+  width: 100%;
+  height: 0.5rem;
+  accent-color: var(--color-success);
+}
+
+/* The card is one button. Its two faces sit in the same grid cell, so the card
+   is as tall as the longer side, and turning it over never changes its size. */
+.flashcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text);
+  text-align: center;
+  cursor: pointer;
+  perspective: 80rem;
+}
+
+.flashcard__inner {
+  display: grid;
+  transition: transform var(--motion-base) var(--motion-ease);
+  transform-style: preserve-3d;
+}
+
+.flashcard--flipped .flashcard__inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard__face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 16rem;
+  padding: var(--space-6) var(--space-5);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12);
+  backface-visibility: hidden;
+}
+
+.flashcard__face--back {
+  background-color: var(--color-subtle);
+  transform: rotateY(180deg);
+}
+
+.flashcard:hover .flashcard__face {
+  border-color: var(--color-accent);
+}
+
+.flashcard__side {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flashcard__text {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  white-space: pre-wrap;
+}
+
+.flashcard__hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.flashcard-study__nav,
+.flashcard-study__rate {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.flashcards-manage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: var(--reading-width);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.flashcards-manage .flashcards-start__form {
+  justify-content: flex-start;
+}
+
+/* The hint under the number box is long, so the field gets a readable width,
+   and the box itself only needs room for three digits. */
+.flashcards-start__form .field {
+  flex: 1 1 18rem;
+  max-width: 32rem;
+}
+
+.flashcards-start__form input[type="number"] {
+  width: 8rem;
+}
+
+@media (min-width: 40rem) {
+  .viewer-toolbar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .flashcard__face {
+    min-height: 20rem;
+  }
+
+  .flashcard__text {
+    font-size: var(--font-size-xl);
+  }
+}

@@ -1,0 +1,40 @@
+/* ---------- Reviewer detail page ---------- */
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.detail-description {
+  /* Keeps the line breaks the author typed. */
+  white-space: pre-wrap;
+}
+
+.file-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-subtle);
+}
+
+.file-box__name {
+  font-weight: var(--font-weight-bold);
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .file-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

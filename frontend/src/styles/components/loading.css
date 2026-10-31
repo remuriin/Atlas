@@ -1,0 +1,86 @@
+/* ---------- Spinner ---------- */
+
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* A spinner is the one animation that would normally keep running, so for
+   reduced-motion users it becomes a still ring. The "Loading" text is always there. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* ---------- Loading placeholders ---------- */
+
+.skeleton-card__body {
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+.skeleton {
+  display: block;
+  height: 0.875rem;
+  background-color: var(--color-button-hover);
+  border-radius: var(--radius);
+  animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.skeleton--chip {
+  width: 6rem;
+  height: 1.25rem;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton--title {
+  width: 80%;
+  height: 1.375rem;
+}
+
+.skeleton--short {
+  width: 50%;
+}
+
+.skeleton--button {
+  width: 6.5rem;
+  height: var(--touch-target);
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* For reduced-motion users the placeholders are simply still. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

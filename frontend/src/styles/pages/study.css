@@ -1,0 +1,297 @@
+/* ---------- Study page ---------- */
+
+.study-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  padding-top: var(--space-5);
+}
+
+.study-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.study-section .section-heading {
+  margin-bottom: 0;
+}
+
+.flashcards-panel {
+  padding-top: var(--space-5);
+}
+
+.viewer-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.file-frame {
+  width: 100%;
+  height: 75vh;
+  min-height: 24rem;
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
+}
+
+.file-image-wrap {
+  padding: var(--space-2);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
+}
+
+.file-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.file-text {
+  margin: 0;
+  padding: var(--space-4);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  /* Keeps the author's line breaks but wraps long lines instead of scrolling sideways. */
+  white-space: pre-wrap;
+}
+
+.file-unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Notes editor: a toolbar on top of a box you type in. */
+
+.note-editor-wrap {
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-large);
+}
+
+.note-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background-color: var(--color-subtle);
+  border-bottom: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.note-toolbar__button {
+  padding-inline: var(--space-3);
+}
+
+/* A pressed button (bold is on, this is a heading...) looks pressed, not only colored. */
+.note-toolbar__button[aria-pressed="true"],
+.note-toolbar__button[aria-expanded="true"] {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.note-toolbar__menu-area {
+  position: relative;
+}
+
+.note-toolbar__menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 20;
+  min-width: 10rem;
+  padding: var(--space-1);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-dialog);
+}
+
+.note-toolbar__swatch-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  background: none;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-toolbar__swatch-button:hover {
+  background-color: var(--color-button-hover);
+}
+
+.note-swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: 0.25rem;
+}
+
+.note-swatch--color-default { background-color: var(--color-text); }
+.note-swatch--color-red { background-color: var(--note-red); }
+.note-swatch--color-orange { background-color: var(--note-orange); }
+.note-swatch--color-green { background-color: var(--note-green); }
+.note-swatch--color-blue { background-color: var(--note-blue); }
+.note-swatch--color-purple { background-color: var(--note-purple); }
+.note-swatch--highlight-yellow { background-color: var(--note-hl-yellow); }
+.note-swatch--highlight-green { background-color: var(--note-hl-green); }
+.note-swatch--highlight-blue { background-color: var(--note-hl-blue); }
+.note-swatch--highlight-pink { background-color: var(--note-hl-pink); }
+.note-swatch--highlight-orange { background-color: var(--note-hl-orange); }
+
+/* "None": an empty box with a slash through it. */
+.note-swatch--highlight-none {
+  background: linear-gradient(
+      to top right,
+      transparent 45%,
+      var(--color-danger) 45%,
+      var(--color-danger) 55%,
+      transparent 55%
+    ),
+    var(--color-canvas);
+}
+
+.note-editor {
+  position: relative;
+  min-height: 16rem;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0 0 var(--radius) var(--radius);
+  line-height: var(--line-height-base);
+}
+
+/* The ring sits inside the box, so the toolbar above does not hide it. */
+.note-editor:focus-visible {
+  outline-offset: -3px;
+}
+
+.note-editor[data-empty="true"]::before {
+  content: attr(aria-placeholder);
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.note-editor p,
+.note-editor ul,
+.note-editor blockquote {
+  margin: 0 0 var(--space-2);
+}
+
+.note-editor h1,
+.note-editor h2,
+.note-editor h3 {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.note-editor > :first-child {
+  margin-top: 0;
+}
+
+.note-editor h1 {
+  font-size: var(--font-size-xl);
+}
+
+.note-editor h2 {
+  font-size: var(--font-size-lg);
+}
+
+.note-editor h3 {
+  font-size: var(--font-size-md);
+}
+
+.note-editor ul {
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.note-editor ul ul {
+  margin-bottom: 0;
+  list-style: circle;
+}
+
+.note-editor ul ul ul {
+  list-style: square;
+}
+
+/* An indented paragraph: just moved in, with no bar or quote styling. */
+.note-editor blockquote {
+  margin-left: var(--space-6);
+  padding: 0;
+  border: 0;
+}
+
+/* The editor marks colors with fixed "marker" values (see services/noteHtml.js);
+   these rules swap each marker for its real color in the current theme. Text
+   marked "default" goes back to the normal text color. */
+.note-editor font[color="#fe0000" i] { color: var(--color-text); }
+.note-editor font[color="#fe0001" i] { color: var(--note-red); }
+.note-editor font[color="#fe0002" i] { color: var(--note-orange); }
+.note-editor font[color="#fe0003" i] { color: var(--note-green); }
+.note-editor font[color="#fe0004" i] { color: var(--note-blue); }
+.note-editor font[color="#fe0005" i] { color: var(--note-purple); }
+/* Highlights are written as inline styles by the browser, so !important is the
+   only way to replace them. */
+.note-editor [style*="background-color: rgb(253, 0, 0)"] { background-color: transparent !important; }
+.note-editor [style*="background-color: rgb(253, 0, 1)"] { background-color: var(--note-hl-yellow) !important; }
+.note-editor [style*="background-color: rgb(253, 0, 2)"] { background-color: var(--note-hl-green) !important; }
+.note-editor [style*="background-color: rgb(253, 0, 3)"] { background-color: var(--note-hl-blue) !important; }
+.note-editor [style*="background-color: rgb(253, 0, 4)"] { background-color: var(--note-hl-pink) !important; }
+.note-editor [style*="background-color: rgb(253, 0, 5)"] { background-color: var(--note-hl-orange) !important; }
+
+.notes-panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.notes-panel__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 1.5em;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.notes-panel__status .icon {
+  color: var(--color-success-text);
+}
+
+/* Wide screens: the file on the left, the notes beside it and in view while scrolling. */
+@media (min-width: 64rem) {
+  .study-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+
+  .notes-panel {
+    position: sticky;
+    top: var(--header-clearance);
+  }
+}

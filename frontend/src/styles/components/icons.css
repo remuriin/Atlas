@@ -1,0 +1,21 @@
+/* ---------- Icons ---------- */
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon--filled {
+  fill: currentColor;
+}
+
+.icon--large {
+  width: 2rem;
+  height: 2rem;
+  stroke-width: 1.5;
+}

@@ -1,0 +1,176 @@
+/* ---------- Header ---------- */
+
+.site-header {
+  /* Sticky: the header scrolls with the page until it reaches the top, then
+     stays there, so the menu is always one step away on a long list. */
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* If the open phone menu is taller than the screen, it scrolls on its own. */
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  background-color: var(--color-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* On very short screens (a phone on its side, or a page zoomed to 400%) a stuck
+   header would cover too much of the content, so there it scrolls away as usual. */
+@media (max-height: 30rem) {
+  .site-header {
+    position: static;
+  }
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  /* Pushes everything after the logo to the right-hand side. */
+  margin-right: auto;
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+/* "Sign up" in the header bar: phones only. On the narrowest screens there is
+   no room beside the logo and the Menu button, so there it stays in the menu. */
+.site-header__cta {
+  display: none;
+}
+
+@media (min-width: 22.5rem) and (max-width: 47.99rem) {
+  .site-header__cta {
+    display: inline-flex;
+  }
+
+  .site-nav__signup {
+    display: none;
+  }
+}
+
+.site-logo__mark {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* The menu is one <nav>. On small screens it is a panel that the Menu button
+   opens and closes; on wide screens it is always shown as a row. */
+.site-nav {
+  display: none;
+  flex-basis: 100%;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.site-nav--open {
+  display: flex;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius);
+  /* The current page is marked with a bar and bold text, not only with color. */
+  border-left: 3px solid transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.site-nav__link:hover {
+  background-color: var(--color-button-hover);
+}
+
+.site-nav__link[aria-current="page"] {
+  border-left-color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.site-nav__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.site-nav__user {
+  flex-basis: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.theme-toggle__state {
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 48rem) {
+  .menu-button {
+    display: none;
+  }
+
+  .site-nav,
+  .site-nav--open {
+    display: flex;
+    flex: 1;
+    flex-basis: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: 0;
+    border-top: 0;
+  }
+
+  .site-nav__list {
+    flex-direction: row;
+    gap: var(--space-1);
+    margin-left: var(--space-4);
+  }
+
+  .site-nav__link {
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    border-top: 3px solid transparent;
+    border-radius: 0;
+  }
+
+  .site-nav__link[aria-current="page"] {
+    border-bottom-color: var(--color-text);
+  }
+
+  .site-nav__actions {
+    flex-wrap: nowrap;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .site-nav__user {
+    flex-basis: auto;
+    /* Room for the picture and a typical name on one line. */
+    max-width: 16rem;
+  }
+}
