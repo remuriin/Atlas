@@ -91,7 +91,7 @@
   padding: var(--space-2);
   background-color: var(--color-subtle);
   border-bottom: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
 }
 
 .tool-button {
@@ -182,7 +182,7 @@
   max-height: 65vh;
   overflow-y: auto;
   padding: var(--space-3) var(--space-4);
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
   line-height: var(--line-height-base);
 }
 
