@@ -17,13 +17,6 @@
 .reviewer-card {
   border-left: 4px solid var(--strand-color, var(--color-border));
 }
-
-/* The strand's pale color washes the top of the card and fades out by 6rem.
-   Text over it stays readable: it is the same background the strand pills use. */
-.reviewer-card[class*="strand-"] {
-  background-image: linear-gradient(var(--strand-bg), transparent 6rem);
-}
-
 .label-strand {
   background-color: var(--strand-bg);
   border-color: var(--strand-color);
