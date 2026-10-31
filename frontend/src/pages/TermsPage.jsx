@@ -10,9 +10,9 @@ const TAKEDOWN_DAYS = 7;
 
 function TermsPage() {
   return (
-    <div className="page-narrow stack">
+    <div className="narrow">
       <PageHeading title="Terms of use and copyright" />
-      <p className="page-intro">
+      <p className="intro">
         Atlas is a place for Senior High School students to share study reviewers they made
         themselves. By uploading, you agree to these rules.
       </p>

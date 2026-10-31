@@ -75,7 +75,7 @@ function SaveButton(props) {
     <>
       <button
         type="button"
-        className="button save-button"
+        className="save"
         aria-pressed={isSaved}
         aria-label={`${visibleText} ${props.title} study reviewer`}
         aria-disabled={isWorking}

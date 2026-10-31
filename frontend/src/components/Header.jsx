@@ -70,10 +70,10 @@ function Header() {
     setLogoutError('');
   };
 
-  let navClassName = 'site-nav';
+  let navClassName = 'nav';
   let menuIcon = 'menu';
   if (isMenuOpen) {
-    navClassName = 'site-nav site-nav-open';
+    navClassName = 'nav-open';
     menuIcon = 'close';
   }
 
@@ -83,11 +83,11 @@ function Header() {
   }
 
   return (
-    <header className="site-header">
-      <div className="container site-header-inner">
-        <Link className="site-logo" to="/">
+    <header className="header">
+      <div className="header-inner">
+        <Link className="logo" to="/">
           {/* Empty alt: the word "Atlas" beside it already names the link. */}
-          <img className="site-logo-mark" src="/logo.png" alt="" width="32" height="32" />
+          <img className="logo-mark" src="/logo.png" alt="" width="32" height="32" />
           Atlas
         </Link>
 
@@ -95,7 +95,7 @@ function Header() {
             in the header bar where new visitors can see it straight away.
             CSS shows only one of the two Sign up links at a time. */}
         {!auth.firebaseUser && !auth.isLoading && (
-          <Link className="button button-primary site-header-cta" to="/register">
+          <Link className="header-signup" to="/register">
             Sign up
           </Link>
         )}
@@ -103,7 +103,7 @@ function Header() {
         <button
           type="button"
           id="menu-button"
-          className="button menu-button"
+          className="menu-button"
           aria-expanded={isMenuOpen}
           aria-controls="main-menu"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -113,30 +113,30 @@ function Header() {
         </button>
 
         <nav id="main-menu" className={navClassName} aria-label="Main">
-          <ul className="site-nav-list">
+          <ul className="nav-list">
             <li>
-              <NavLink className="site-nav-link" to="/browse">
+              <NavLink className="nav-link" to="/browse">
                 <Icon name="home" />
                 Browse
               </NavLink>
             </li>
             {auth.firebaseUser && (
               <li>
-                <NavLink className="site-nav-link" to="/saved">
+                <NavLink className="nav-link" to="/saved">
                   <Icon name="bookmark" />
                   Saved
                 </NavLink>
               </li>
             )}
             <li>
-              <NavLink className="site-nav-link" to="/upload">
+              <NavLink className="nav-link" to="/upload">
                 <Icon name="upload" />
                 Upload
               </NavLink>
             </li>
             {auth.firebaseUser && (
               <li>
-                <NavLink className="site-nav-link" to="/profile">
+                <NavLink className="nav-link" to="/profile">
                   <Icon name="user" />
                   Profile
                 </NavLink>
@@ -144,7 +144,7 @@ function Header() {
             )}
             {auth.profile && auth.profile.role === 'admin' && (
               <li>
-                <NavLink className="site-nav-link" to="/admin">
+                <NavLink className="nav-link" to="/admin">
                   <Icon name="alert" />
                   Reports
                 </NavLink>
@@ -152,9 +152,9 @@ function Header() {
             )}
           </ul>
 
-          <div className="site-nav-actions">
+          <div className="nav-actions">
             {auth.firebaseUser && displayName !== '' && (
-              <span className="site-nav-user">
+              <span className="nav-user">
                 <Avatar photoUrl={auth.firebaseUser.photoURL} name={displayName} size="small" />
                 <span>Logged in as {displayName}</span>
               </span>
@@ -176,7 +176,7 @@ function Header() {
               </Link>
             )}
             {!auth.firebaseUser && !auth.isLoading && (
-              <Link className="button button-primary site-nav-signup" to="/register">
+              <Link className="nav-signup" to="/register">
                 Sign up
               </Link>
             )}

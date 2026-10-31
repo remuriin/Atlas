@@ -9,23 +9,23 @@ function Flashcard(props) {
   let className = 'flashcard';
   let actionText = 'Show answer';
   if (props.isFlipped) {
-    className = 'flashcard flashcard-flipped';
+    className = 'flashcard-flipped';
     actionText = 'Show question';
   }
 
   return (
     <button type="button" className={className} onClick={props.onFlip}>
-      <span className="flashcard-inner">
-        <span className="flashcard-face flashcard-face-front" aria-hidden={props.isFlipped}>
-          <span className="flashcard-side">Question</span>
-          <span className="flashcard-text">{props.card.front}</span>
+      <span className="flash-inner">
+        <span className="face-front" aria-hidden={props.isFlipped}>
+          <span className="flash-side">Question</span>
+          <span className="flash-text">{props.card.front}</span>
         </span>
-        <span className="flashcard-face flashcard-face-back" aria-hidden={!props.isFlipped}>
-          <span className="flashcard-side">Answer</span>
-          <span className="flashcard-text">{props.card.back}</span>
+        <span className="face-back" aria-hidden={!props.isFlipped}>
+          <span className="flash-side">Answer</span>
+          <span className="flash-text">{props.card.back}</span>
         </span>
       </span>
-      <span className="flashcard-hint">
+      <span className="flip-hint">
         <Icon name="flip" />
         {actionText}
       </span>

@@ -83,7 +83,7 @@ function ReportDialog(props) {
         <h2 className="dialog-title" id={`${DIALOG_ID}-title`}>
           Report “{props.title}”
         </h2>
-        <p className="text-small">
+        <p className="small">
           An admin will look at it. After 3 reports it is hidden until then. Your name is not shown
           to anyone.
         </p>
@@ -134,7 +134,7 @@ function ReportDialog(props) {
           <button type="button" className="button" onClick={handleCancelClick} aria-disabled={props.isBusy}>
             Cancel
           </button>
-          <button type="submit" className="button button-primary" aria-disabled={props.isBusy}>
+          <button type="submit" className="button-green" aria-disabled={props.isBusy}>
             {submitText}
           </button>
         </div>

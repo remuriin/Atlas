@@ -57,7 +57,7 @@ function EditReviewerPage() {
   }, [params.id, retryCount]);
 
   return (
-    <div className="page-form stack">
+    <div className="edit-form">
       <PageHeading title="Edit study reviewer" />
 
       {status === 'loading' && <Spinner label="Loading study reviewer…" />}

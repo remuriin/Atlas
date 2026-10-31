@@ -390,9 +390,9 @@ function ReviewerForm(props) {
         {file && !errors.file && (
           <div className="file-summary">
             <Icon name="check" />
-            <p className="file-summary-text">
-              <span className="file-summary-name">Selected: {file.name}</span>
-              <span className="text-muted">
+            <p className="summary-text">
+              <span className="summary-name">Selected: {file.name}</span>
+              <span className="muted">
                 {describeFileType(file.name)}, {formatFileSize(file.size)}
               </span>
             </p>
@@ -455,7 +455,7 @@ function ReviewerForm(props) {
       </p>
 
       <div className="form-actions">
-        <button type="submit" className="button button-primary" aria-disabled={isSubmitting}>
+        <button type="submit" className="button-green" aria-disabled={isSubmitting}>
           {submitText}
         </button>
         <Link className="button" to={cancelPath}>

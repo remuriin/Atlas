@@ -4,9 +4,9 @@ import Icon from './Icon';
 
 function EmptyState(props) {
   return (
-    <div className="empty-state">
+    <div className="empty">
       <Icon name={props.icon || 'file'} large />
-      <p className="empty-state-title">{props.title}</p>
+      <p className="empty-title">{props.title}</p>
       <p>{props.message}</p>
       {props.children}
     </div>

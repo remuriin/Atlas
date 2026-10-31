@@ -93,10 +93,10 @@ function FileViewer(props) {
   if (viewKind === 'removed') {
     return (
       <section className="study-section" aria-labelledby="material-heading">
-        <h2 id="material-heading" className="section-heading">
+        <h2 id="material-heading" className="section-title">
           Material
         </h2>
-        <div className="card card-padded file-unavailable">
+        <div className="file-missing">
           <Icon name="file" large />
           <p>The original file was removed by its uploader.</p>
         </div>
@@ -108,7 +108,7 @@ function FileViewer(props) {
 
   return (
     <section className="study-section" aria-labelledby="material-heading">
-      <h2 id="material-heading" className="section-heading">
+      <h2 id="material-heading" className="section-title">
         Material
       </h2>
 
@@ -124,7 +124,7 @@ function FileViewer(props) {
         </p>
         <div className="row">
           {/* Saves the file to the device, so it can be read without internet. */}
-          <a className="button button-primary" href={getFileUrl(reviewer.id, true)}>
+          <a className="button-green" href={getFileUrl(reviewer.id, true)}>
             <Icon name="download" />
             Download file
           </a>
@@ -144,7 +144,7 @@ function FileViewer(props) {
       </div>
 
       {viewKind === 'download-only' && (
-        <div className="card card-padded file-unavailable">
+        <div className="file-missing">
           <Icon name="file" large />
           <p>
             {fileType} files cannot be shown inside the browser. Download it to read it, then
@@ -173,7 +173,7 @@ function FileViewer(props) {
       )}
 
       {viewKind === 'image' && status === 'ready' && (
-        <div className="file-image-wrap">
+        <div className="image-wrap">
           <img className="file-image" src={objectUrl} alt={`${props.item.title} (image file)`} />
         </div>
       )}

@@ -1,6 +1,6 @@
 /* ---------- Footer ---------- */
 
-.site-footer {
+.footer {
   background-color: var(--color-inset);
   border-top: var(--border-width) solid var(--color-border);
   padding-block: var(--space-6);
@@ -8,25 +8,25 @@
   font-size: var(--font-size-sm);
 }
 
-.site-footer-inner {
+.footer-inner {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-4);
 }
 
-.site-footer-brand {
+.footer-brand {
   max-width: 28rem;
 }
 
-.site-footer-brand strong {
+.footer-brand strong {
   display: block;
   margin-bottom: var(--space-1);
   color: var(--color-text);
   font-size: var(--font-size-md);
 }
 
-.site-footer-links {
+.footer-links {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
@@ -35,13 +35,13 @@
   list-style: none;
 }
 
-.site-footer-links a {
+.footer-links a {
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-target);
   color: var(--color-text-muted);
 }
 
-.site-footer-links a:hover {
+.footer-links a:hover {
   color: var(--color-accent);
 }

@@ -1,6 +1,8 @@
 /* ---------- Icons ---------- */
 
-.icon {
+.icon,
+.icon-filled,
+.icon-large {
   width: 1rem;
   height: 1rem;
   fill: none;

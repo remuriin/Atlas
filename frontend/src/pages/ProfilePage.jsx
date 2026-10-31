@@ -273,16 +273,16 @@ function ProfilePage() {
   }
 
   return (
-    <div className="stack stack-loose">
+    <div className="stack-loose">
       <div>
         <PageHeading title="Your profile" />
-        <p className="text-muted">Manage your account and the study reviewers you have shared.</p>
+        <p className="muted">Manage your account and the study reviewers you have shared.</p>
       </div>
 
       <FlashMessage />
 
       <section aria-labelledby="account-heading">
-        <h2 id="account-heading" className="section-heading">
+        <h2 id="account-heading" className="section-title">
           Account
         </h2>
 
@@ -300,15 +300,15 @@ function ProfilePage() {
         {profileError === '' && !auth.profile && <Spinner label="Loading your account…" />}
 
         {auth.profile && (
-          <div className="card card-padded card-narrow">
-            <div className="profile-identity">
+          <div className="panel-narrow">
+            <div className="identity">
               <Avatar photoUrl={photoUrl} name={auth.profile.displayName} size="large" />
               <div>
-                <p className="profile-identity-name">{auth.profile.displayName}</p>
-                <p className="text-muted text-small">{signInText}</p>
+                <p className="identity-name">{auth.profile.displayName}</p>
+                <p className="hint">{signInText}</p>
               </div>
             </div>
-            <dl className="profile-details">
+            <dl className="details">
               <dt>Email (only you can see this)</dt>
               <dd>{email}</dd>
               <dt>Member since</dt>
@@ -347,7 +347,7 @@ function ProfilePage() {
       </section>
 
       <section aria-labelledby="recent-heading">
-        <h2 id="recent-heading" className="section-heading">
+        <h2 id="recent-heading" className="section-title">
           Recently viewed
         </h2>
 
@@ -367,7 +367,7 @@ function ProfilePage() {
         )}
 
         {recentStatus === 'ready' && recent.length > 0 && (
-          <ul className="card compact-list">
+          <ul className="compact-list">
             {recent.map((reviewer) => (
               <li key={reviewer.id}>
                 <Link to={`/reviewers/${reviewer.id}`} state={{ fromPath: '/profile' }}>
@@ -384,7 +384,7 @@ function ProfilePage() {
       </section>
 
       <section aria-labelledby="uploads-heading">
-        <h2 id="uploads-heading" className="section-heading" tabIndex="-1">
+        <h2 id="uploads-heading" className="section-title" tabIndex="-1">
           My uploads
         </h2>
 
@@ -420,7 +420,7 @@ function ProfilePage() {
               title="You have not shared anything yet"
               message="Have notes or a study guide you made? Share it so other learners can use it."
             >
-              <Link className="button button-primary" to="/upload">
+              <Link className="button-green" to="/upload">
                 <Icon name="upload" />
                 Share a study reviewer
               </Link>
@@ -439,10 +439,10 @@ function ProfilePage() {
       </section>
 
       <section aria-labelledby="delete-account-heading">
-        <h2 id="delete-account-heading" className="section-heading">
+        <h2 id="delete-account-heading" className="section-title">
           Delete account
         </h2>
-        <div className="card card-padded card-narrow stack">
+        <div className="panel-stack">
           <p>
             This deletes your profile, every study reviewer you shared (and its file), your upvotes,
             saved list, notes, flashcards, and reports, and your login. It cannot be undone.
@@ -454,7 +454,7 @@ function ProfilePage() {
                 For your safety, log in again, then delete your account within 5 minutes.
               </Alert>
               <div>
-                <button type="button" className="button button-primary" onClick={handleFreshLogin}>
+                <button type="button" className="button-green" onClick={handleFreshLogin}>
                   Log in again
                 </button>
               </div>
@@ -463,7 +463,7 @@ function ProfilePage() {
           <div>
             <button
               type="button"
-              className="button button-danger-outline"
+              className="button-outline"
               onClick={() => setIsAccountDeleteOpen(true)}
             >
               <Icon name="trash" />

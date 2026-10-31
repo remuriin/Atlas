@@ -9,13 +9,13 @@
 }
 
 /* Every page opens with a large, tightly set heading and a muted intro line. */
-.page-heading {
+.page-title {
   margin-bottom: var(--space-2);
   font-size: 1.75rem;
   letter-spacing: -0.02em;
 }
 
-.page-intro {
+.intro {
   max-width: var(--reading-width);
   margin-bottom: var(--space-5);
   color: var(--color-text-muted);
@@ -23,11 +23,11 @@
 }
 
 @media (min-width: 40rem) {
-  .page-heading {
+  .page-title {
     font-size: 2.5rem;
   }
 }
 
-.section-heading {
+.section-title {
   margin-bottom: var(--space-3);
 }

@@ -2,11 +2,25 @@
 
 @media (forced-colors: active) {
   /* Colored backgrounds are removed in this mode, so states use borders instead. */
-  .upvote-button[aria-pressed="true"],
-  .save-button[aria-pressed="true"],
-  .flashcards-options .button[aria-pressed="true"],
+  .upvote[aria-pressed="true"],
+  .save[aria-pressed="true"],
+  .flash-options .button[aria-pressed="true"],
+  .flash-options .button-green[aria-pressed="true"],
+  .flash-options .button-red[aria-pressed="true"],
+  .flash-options .button-outline[aria-pressed="true"],
+  .flash-options .cta[aria-pressed="true"],
+  .flash-options .button-big[aria-pressed="true"],
+  .flash-options .google-button[aria-pressed="true"],
+  .flash-options .theme-toggle[aria-pressed="true"],
+  .flash-options .alert-close[aria-pressed="true"],
+  .flash-options .nav-signup[aria-pressed="true"],
+  .flash-options .header-signup[aria-pressed="true"],
+  .flash-options .upvote[aria-pressed="true"],
+  .flash-options .save[aria-pressed="true"],
+  .flash-options .menu-button[aria-pressed="true"],
+  .flash-options .tool-button[aria-pressed="true"],
   .tab[aria-selected="true"],
-  .site-nav-link[aria-current="page"] {
+  .nav-link[aria-current="page"] {
     border-color: Highlight;
   }
 
@@ -14,17 +28,22 @@
     border: var(--border-width) solid CanvasText;
   }
 
-  .skeleton {
+  .skeleton-short,
+  .skeleton-line,
+  .skeleton-title,
+  .skeleton-chip,
+  .skeleton-button {
     border: var(--border-width) solid GrayText;
   }
 
   /* Strand colors are replaced by system colors here; the written strand
      names still say which is which. */
-  .strand-legend-swatch {
+  .legend-swatch {
     border: var(--border-width) solid CanvasText;
   }
 
-  .flashcard-face {
+  .face-front,
+  .face-back {
     border-color: ButtonText;
   }
 

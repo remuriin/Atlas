@@ -25,9 +25,11 @@ function Avatar(props) {
   // Remembers which address failed, so a new photo gets its own chance to load.
   const [failedUrl, setFailedUrl] = useState('');
 
-  let className = 'avatar avatar-small';
+  let className = 'avatar-small';
+  let initialsClassName = 'initials-small';
   if (props.size === 'large') {
-    className = 'avatar avatar-large';
+    className = 'avatar-large';
+    initialsClassName = 'initials-large';
   }
 
   if (props.photoUrl && props.photoUrl !== failedUrl) {
@@ -44,7 +46,7 @@ function Avatar(props) {
   }
 
   return (
-    <span className={`${className} avatar-initials`} aria-hidden="true">
+    <span className={initialsClassName} aria-hidden="true">
       {toInitials(props.name)}
     </span>
   );

@@ -2,7 +2,7 @@
 
 /* The close button is a full 44px target, pulled into the box's padding so
    the message box does not grow much taller because of it. */
-.alert-dismiss {
+.alert-close {
   margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1) calc(var(--space-2) * -1) 0;
   padding: 0;
 }
@@ -18,7 +18,9 @@
   font-size: var(--font-size-sm);
 }
 
-.alert .icon {
+.alert .icon,
+.alert .icon-filled,
+.alert .icon-large {
   margin-top: 0.2em;
 }
 
@@ -27,33 +29,39 @@
   min-width: 0;
 }
 
-.alert-error {
+.alert.error {
   background-color: var(--color-danger-subtle);
   border-color: var(--color-danger);
 }
 
-.alert-error .icon,
-.alert-error .alert-title {
+.alert.error .icon,
+.alert.error .icon-filled,
+.alert.error .icon-large,
+.alert.error .alert-title {
   color: var(--color-danger);
 }
 
-.alert-success {
+.alert.success {
   background-color: var(--color-success-subtle);
   border-color: var(--color-success-text);
 }
 
-.alert-success .icon,
-.alert-success .alert-title {
+.alert.success .icon,
+.alert.success .icon-filled,
+.alert.success .icon-large,
+.alert.success .alert-title {
   color: var(--color-success-text);
 }
 
-.alert-info {
+.alert.info {
   background-color: var(--color-accent-subtle);
   border-color: var(--color-accent);
 }
 
-.alert-info .icon,
-.alert-info .alert-title {
+.alert.info .icon,
+.alert.info .icon-filled,
+.alert.info .icon-large,
+.alert.info .alert-title {
   color: var(--color-accent);
 }
 
@@ -61,18 +69,18 @@
   font-weight: var(--font-weight-bold);
 }
 
-.error-summary-heading {
+.errors-title {
   font-size: var(--font-size-md);
   color: var(--color-danger);
 }
 
-.error-summary-list {
+.errors-list {
   margin-top: var(--space-1);
   padding-left: var(--space-5);
   list-style: disc;
 }
 
-.error-summary-list a {
+.errors-list a {
   display: inline-block;
   padding-block: var(--space-1);
   color: var(--color-text);

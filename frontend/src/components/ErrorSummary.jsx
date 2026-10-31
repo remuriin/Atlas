@@ -23,10 +23,10 @@ function ErrorSummary(props) {
 
   // role="alert" makes screen readers announce the summary as soon as it appears.
   return (
-    <div className="alert alert-error" role="alert">
+    <div className="alert error" role="alert">
       <div className="alert-body">
-        <h2 className="error-summary-heading">{heading}</h2>
-        <ul className="error-summary-list">
+        <h2 className="errors-title">{heading}</h2>
+        <ul className="errors-list">
           {props.errors.map((error) => (
             <li key={error.fieldId}>
               <a href={`#${error.fieldId}`} onClick={(event) => handleLinkClick(event, error.fieldId)}>

@@ -1,6 +1,20 @@
 /* ---------- Buttons ---------- */
 
-.button {
+.button,
+.button-green,
+.button-red,
+.button-outline,
+.cta,
+.button-big,
+.google-button,
+.theme-toggle,
+.alert-close,
+.nav-signup,
+.header-signup,
+.upvote,
+.save,
+.menu-button,
+.tool-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -22,12 +36,29 @@
     border-color var(--motion-fast) var(--motion-ease);
 }
 
-.button:hover {
+.button:hover,
+.button-green:hover,
+.button-red:hover,
+.button-outline:hover,
+.cta:hover,
+.button-big:hover,
+.google-button:hover,
+.theme-toggle:hover,
+.alert-close:hover,
+.nav-signup:hover,
+.header-signup:hover,
+.upvote:hover,
+.save:hover,
+.menu-button:hover,
+.tool-button:hover {
   background-color: var(--color-button-hover);
   text-decoration: none;
 }
 
-.button-primary {
+.button-green,
+.cta,
+.nav-signup,
+.header-signup {
   background-color: var(--color-success);
   /* A transparent border keeps the size equal to other buttons and
      becomes a visible outline in Windows High Contrast mode. */
@@ -35,49 +66,82 @@
   color: var(--color-on-emphasis);
 }
 
-.button-primary:hover {
+.button-green:hover,
+.cta:hover,
+.nav-signup:hover,
+.header-signup:hover {
   background-color: var(--color-success-hover);
 }
 
-.button-danger {
+.button-red {
   background-color: var(--color-danger-emphasis);
   border-color: transparent;
   color: var(--color-on-emphasis);
 }
 
-.button-danger:hover {
+.button-red:hover {
   background-color: var(--color-danger-hover);
 }
 
 /* Red text needs the plain page background behind it to stay readable (4.5:1)
    in both themes. On hover it turns into a solid danger button. */
-.button-danger-outline {
+.button-outline {
   background-color: var(--color-canvas);
   color: var(--color-danger);
 }
 
-.button-danger-outline:hover {
+.button-outline:hover {
   background-color: var(--color-danger-emphasis);
   border-color: transparent;
   color: var(--color-on-emphasis);
 }
 
-.button-quiet {
+.theme-toggle,
+.alert-close {
   background-color: transparent;
   border-color: transparent;
 }
 
-.button-quiet:hover {
+.theme-toggle:hover,
+.alert-close:hover {
   background-color: var(--color-button-hover);
 }
 
-.button-block {
+.google-button {
   width: 100%;
 }
 
 /* Busy buttons stay focusable (so keyboard focus is not lost) but look inactive. */
 .button[aria-disabled="true"],
-.button:disabled {
+.button-green[aria-disabled="true"],
+.button-red[aria-disabled="true"],
+.button-outline[aria-disabled="true"],
+.cta[aria-disabled="true"],
+.button-big[aria-disabled="true"],
+.google-button[aria-disabled="true"],
+.theme-toggle[aria-disabled="true"],
+.alert-close[aria-disabled="true"],
+.nav-signup[aria-disabled="true"],
+.header-signup[aria-disabled="true"],
+.upvote[aria-disabled="true"],
+.save[aria-disabled="true"],
+.menu-button[aria-disabled="true"],
+.tool-button[aria-disabled="true"],
+.button:disabled,
+.button-green:disabled,
+.button-red:disabled,
+.button-outline:disabled,
+.cta:disabled,
+.button-big:disabled,
+.google-button:disabled,
+.theme-toggle:disabled,
+.alert-close:disabled,
+.nav-signup:disabled,
+.header-signup:disabled,
+.upvote:disabled,
+.save:disabled,
+.menu-button:disabled,
+.tool-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

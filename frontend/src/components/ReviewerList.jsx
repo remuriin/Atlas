@@ -5,7 +5,7 @@ import ReviewerCard from './ReviewerCard';
 
 function ReviewerList(props) {
   return (
-    <ul className="reviewer-grid">
+    <ul className="review-grid">
       {props.items.map((reviewer) => (
         <li key={reviewer.id}>
           <ReviewerCard

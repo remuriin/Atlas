@@ -8,6 +8,8 @@
   font-size: var(--font-size-sm);
 }
 
-.status-note .icon {
+.status-note .icon,
+.status-note .icon-filled,
+.status-note .icon-large {
   margin-top: 0.2em;
 }
