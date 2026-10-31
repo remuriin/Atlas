@@ -7,9 +7,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
 import '@fontsource-variable/schibsted-grotesk';
 import '@fontsource-variable/jetbrains-mono';
-import './styles/tokens.css';
-import './styles/base.css';
-import './styles/components.css';
+import './styles/index.css';
 
 // React Router prints upgrade notices in the console unless these two future
 // options are answered. v7_startTransition stays off on purpose: with it on,

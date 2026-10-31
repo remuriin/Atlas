@@ -1,0 +1,88 @@
+/* ---------- Alerts ---------- */
+
+/* The close button is a full 44px target, pulled into the box's padding so
+   the message box does not grow much taller because of it. */
+.alert__dismiss {
+  margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1) calc(var(--space-2) * -1) 0;
+  padding: 0;
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-control);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+}
+
+.alert .icon {
+  margin-top: 0.2em;
+}
+
+.alert__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert--error {
+  background-color: var(--color-danger-subtle);
+  border-color: var(--color-danger);
+}
+
+.alert--error .icon,
+.alert--error .alert__title {
+  color: var(--color-danger);
+}
+
+.alert--success {
+  background-color: var(--color-success-subtle);
+  border-color: var(--color-success-text);
+}
+
+.alert--success .icon,
+.alert--success .alert__title {
+  color: var(--color-success-text);
+}
+
+.alert--info {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+
+.alert--info .icon,
+.alert--info .alert__title {
+  color: var(--color-accent);
+}
+
+.alert__title {
+  font-weight: var(--font-weight-bold);
+}
+
+.error-summary__heading {
+  font-size: var(--font-size-md);
+  color: var(--color-danger);
+}
+
+.error-summary__list {
+  margin-top: var(--space-1);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.error-summary__list a {
+  display: inline-block;
+  padding-block: var(--space-1);
+  color: var(--color-text);
+}
+
+/* Holds a one-time message on the feed. Takes up no room when there is none. */
+.flash-slot {
+  margin-bottom: var(--space-4);
+}
+
+.flash-slot:empty {
+  display: none;
+}

@@ -403,7 +403,7 @@ function HomePage() {
         <FlashMessage />
       </div>
 
-      <div id="feed-controls">
+      <div id="feed-controls" className="feed-controls">
         <div className="feed-toolbar">
           <form className="search-form" role="search" onSubmit={handleSearchSubmit}>
             <label className="field__label" htmlFor="feed-search">

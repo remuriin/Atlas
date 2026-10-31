@@ -1,0 +1,33 @@
+/* ---------- Page heading ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-target);
+  font-size: var(--font-size-sm);
+}
+
+/* Every page opens with a large, tightly set heading and a muted intro line. */
+.page-heading {
+  margin-bottom: var(--space-2);
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+.page-intro {
+  max-width: var(--reading-width);
+  margin-bottom: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}
+
+@media (min-width: 40rem) {
+  .page-heading {
+    font-size: 2.5rem;
+  }
+}
+
+.section-heading {
+  margin-bottom: var(--space-3);
+}

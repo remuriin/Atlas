@@ -1,0 +1,186 @@
+/* ---------- Cards ---------- */
+
+/* Cards sit on the slightly raised "subtle" surface, so inputs and buttons
+   inside them (on the plain canvas color) stand out. */
+.card {
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
+}
+
+.card--padded {
+  padding: var(--space-5);
+}
+
+.card--narrow {
+  max-width: 32rem;
+}
+
+.reviewer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.reviewer-grid > li {
+  display: flex;
+}
+
+.reviewer-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reviewer-card {
+  transition: border-color var(--motion-fast) var(--motion-ease);
+}
+
+/* A stronger outline while the pointer is over the card. */
+.reviewer-card:hover {
+  border-color: var(--color-border-control);
+}
+
+.reviewer-card__body {
+  /* The stretched title link below is positioned against this box. */
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* The strand and tag rows are 44px tall for easy tapping and already carry
+     their own breathing room, so the padding and gaps here are kept small. */
+  padding: var(--space-1) var(--space-4) var(--space-4);
+}
+
+.reviewer-card__title {
+  /* Tucks the title up under the strand row's built-in space. */
+  margin-top: calc(var(--space-2) * -1);
+  font-size: var(--font-size-md);
+}
+
+.reviewer-card__title a {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target);
+}
+
+/* Makes the whole upper part of the card open the reviewer. It is still one
+   link: this invisible layer belongs to the title link and covers the card body. */
+.reviewer-card__title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.reviewer-card__body .meta {
+  margin-top: var(--space-1);
+}
+
+/* A small pill (strand or tag) inside a taller, easier-to-tap link.
+   It sits above the stretched title link so it can be chosen on its own. */
+.chip-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  text-decoration: none;
+}
+
+.chip-link:hover .label,
+.chip-link:hover .tag {
+  text-decoration: underline;
+}
+
+.chip-link:hover .label {
+  background-color: var(--color-button-hover);
+}
+
+/* Subject, grade, quarter, and material type on one line, under the title. */
+.reviewer-card__category {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reviewer-card__description {
+  /* Shows up to three lines. The full text is on the reviewer's own page. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.reviewer-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-subtle);
+  border-top: var(--border-width) solid var(--color-border);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.meta__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.label {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* Each tag link is already 44px tall, so rows need no extra space between them. */
+  gap: 0 var(--space-1);
+}
+
+.tag {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  background-color: var(--color-accent-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.8;
+}
+
+@media (min-width: 40rem) {
+  .reviewer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .reviewer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

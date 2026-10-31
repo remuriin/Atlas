@@ -1,0 +1,38 @@
+/* ---------- Profile ---------- */
+
+.profile-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.profile-details dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.profile-details dd {
+  margin: 0 0 var(--space-3);
+}
+
+.compact-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.compact-list > li:last-child {
+  border-bottom: 0;
+}
+
+.compact-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  font-weight: var(--font-weight-medium);
+}

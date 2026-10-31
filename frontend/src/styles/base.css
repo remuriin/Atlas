@@ -198,9 +198,30 @@ html {
   margin-inline: auto;
 }
 
+/* Forms (log in, sign up, upload, edit) sit in one raised panel. */
 .page-form {
   max-width: 32rem;
   margin-inline: auto;
+  padding: var(--space-5);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-large);
+}
+
+.page-form .page-heading {
+  font-size: var(--font-size-xxl);
+}
+
+.page-form__logo {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 40rem) {
+  .page-form {
+    margin-top: var(--space-4);
+    padding: var(--space-6);
+  }
 }
 
 .stack {

@@ -108,6 +108,7 @@ function RegisterPage() {
 
   return (
     <div className="page-form">
+      <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Create an account" />
       <p className="page-intro">
         An account lets you upvote and share study reviewers. Browsing is always free and open.

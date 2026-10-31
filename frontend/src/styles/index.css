@@ -1,0 +1,50 @@
+/*
+  All of the app's styles, in the order they apply. Later files win when two
+  rules match the same element equally, so keep this order when adding a file.
+
+  Mobile first: the base rules are for small screens, and the min-width media
+  queries add to them for tablets and desktops.
+
+  tokens.css      colors, sizes, fonts (both themes)
+  base.css        the page itself, headings, links, layout helpers
+  components/     pieces used on more than one page
+  pages/          rules for one page only
+*/
+
+@import "./tokens.css";
+@import "./base.css";
+
+@import "./components/skip-link.css";
+@import "./components/icons.css";
+@import "./components/buttons.css";
+@import "./components/header.css";
+@import "./components/footer.css";
+@import "./components/page-heading.css";
+@import "./components/cards.css";
+@import "./components/upvote.css";
+@import "./components/tabs.css";
+
+@import "./pages/browse.css";
+@import "./pages/landing.css";
+
+@import "./components/forms.css";
+@import "./components/alerts.css";
+@import "./components/loading.css";
+@import "./components/empty-state.css";
+@import "./components/dialogs.css";
+
+@import "./pages/admin.css";
+@import "./pages/reviewer.css";
+@import "./pages/profile.css";
+
+@import "./components/avatar.css";
+@import "./components/google-sign-in.css";
+@import "./components/strands.css";
+@import "./components/save-button.css";
+
+@import "./pages/saved.css";
+@import "./pages/study.css";
+@import "./pages/flashcards.css";
+
+/* Last, so it overrides everything above in Windows High Contrast mode. */
+@import "./high-contrast.css";

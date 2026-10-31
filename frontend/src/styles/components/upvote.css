@@ -1,0 +1,24 @@
+/* ---------- Upvote button ---------- */
+
+.upvote-button {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The upvoted state changes the icon (outline to solid), the word, and the
+   border weight, so it never depends on color alone. */
+.upvote-button[aria-pressed="true"] {
+  background-color: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.upvote-button__count {
+  font-weight: var(--font-weight-bold);
+}
+
+.upvote-error {
+  flex-basis: 100%;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}

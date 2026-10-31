@@ -1,0 +1,88 @@
+/* ---------- Strand colors ---------- */
+
+/* A "strand--X" class picks that strand's three colors from the --subject-* tokens in
+   tokens.css (their contrast is checked there). The pieces below (card stripe, pill,
+   legend swatch) only use the short names. */
+.strand--all { --strand-color: var(--subject-other); --strand-bg: var(--subject-other-bg); --strand-text: var(--subject-other-text); }
+.strand--stem { --strand-color: var(--subject-science); --strand-bg: var(--subject-science-bg); --strand-text: var(--subject-science-text); }
+.strand--abm { --strand-color: var(--subject-business); --strand-bg: var(--subject-business-bg); --strand-text: var(--subject-business-text); }
+.strand--humss { --strand-color: var(--subject-history); --strand-bg: var(--subject-history-bg); --strand-text: var(--subject-history-text); }
+.strand--gas { --strand-color: var(--subject-social); --strand-bg: var(--subject-social-bg); --strand-text: var(--subject-social-text); }
+.strand--tvl { --strand-color: var(--subject-engineering); --strand-bg: var(--subject-engineering-bg); --strand-text: var(--subject-engineering-text); }
+.strand--arts { --strand-color: var(--subject-arts); --strand-bg: var(--subject-arts-bg); --strand-text: var(--subject-arts-text); }
+.strand--sports { --strand-color: var(--subject-health); --strand-bg: var(--subject-health-bg); --strand-text: var(--subject-health-text); }
+
+/* A thick stripe down the left edge of a card. Cards without a strand
+   (the grey loading placeholders) keep the plain border color. */
+.reviewer-card {
+  border-left: 4px solid var(--strand-color, var(--color-border));
+}
+
+.label--strand {
+  background-color: var(--strand-bg);
+  border-color: var(--strand-color);
+  color: var(--strand-text);
+}
+
+.chip-link:hover .label--strand {
+  background-color: var(--strand-bg);
+}
+
+/* ---------- Strand legend ---------- */
+
+.strand-legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.strand-legend__summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.strand-legend__summary:hover {
+  text-decoration: underline;
+}
+
+.strand-legend__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.strand-legend__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.strand-legend__link:hover {
+  text-decoration: underline;
+}
+
+/* The strand the feed is showing: bold text and a ring round its swatch. */
+.strand-legend__link[aria-current="true"] {
+  font-weight: var(--font-weight-bold);
+}
+
+.strand-legend__link[aria-current="true"] .strand-legend__swatch {
+  box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--strand-color);
+}
+
+.strand-legend__swatch {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background-color: var(--strand-color);
+  border-radius: 0.25rem;
+}

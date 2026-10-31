@@ -1,0 +1,151 @@
+/* ---------- Forms ---------- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.field__required {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.field__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.field__success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-success-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.field__success .icon,
+.field__error .icon {
+  margin-top: 0.2em;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-canvas);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius);
+  /* 1rem (16px) stops iPhones from zooming in when an input is tapped. */
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+}
+
+textarea.input {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+/* Drop-down menus: the browser's own arrow sits hard against the right edge
+   and cannot be moved, so it is replaced with one that has room around it. */
+select.input {
+  appearance: none;
+  padding-right: calc(var(--space-3) * 2 + 1rem);
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+
+input[type="file"].input {
+  padding: var(--space-2);
+}
+
+/* Invalid inputs get a thicker border as well as the red color and the message. */
+.input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+
+.field__control-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.field__control-row .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.form__footer {
+  font-size: var(--font-size-sm);
+}
+
+.upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 0.75rem;
+  accent-color: var(--color-success);
+}
+
+/* The "Selected: notes.pdf" line under the file picker. */
+.file-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-subtle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+}
+
+.file-summary > .icon {
+  color: var(--color-success-text);
+}
+
+.file-summary__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 10rem;
+}
+
+.file-summary__name {
+  font-weight: var(--font-weight-bold);
+}

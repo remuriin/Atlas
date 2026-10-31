@@ -1,0 +1,43 @@
+/* ---------- Windows High Contrast (forced colors) ---------- */
+
+@media (forced-colors: active) {
+  /* Colored backgrounds are removed in this mode, so states use borders instead. */
+  .upvote-button[aria-pressed="true"],
+  .save-button[aria-pressed="true"],
+  .flashcards-options .button[aria-pressed="true"],
+  .tab[aria-selected="true"],
+  .site-nav__link[aria-current="page"] {
+    border-color: Highlight;
+  }
+
+  .tag {
+    border: var(--border-width) solid CanvasText;
+  }
+
+  .skeleton {
+    border: var(--border-width) solid GrayText;
+  }
+
+  /* Strand colors are replaced by system colors here; the written strand
+     names still say which is which. */
+  .strand-legend__swatch {
+    border: var(--border-width) solid CanvasText;
+  }
+
+  .flashcard__face {
+    border-color: ButtonText;
+  }
+
+  /* The drawn arrow uses a fixed color that may vanish here, so the
+     browser's own arrow is used instead. */
+  select.input {
+    appearance: auto;
+    padding-right: var(--space-3);
+    background-image: none;
+  }
+
+  .spinner {
+    border-color: GrayText;
+    border-top-color: Highlight;
+  }
+}

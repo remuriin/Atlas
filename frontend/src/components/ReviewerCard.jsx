@@ -74,7 +74,9 @@ function ReviewerCard(props) {
           <span className="meta__item">
             <Icon name="file" />
             <span className="visually-hidden">File:</span>
-            {describeFileType(reviewer.fileName)}, {formatFileSize(reviewer.fileSize)}
+            <span className="mono">
+              {describeFileType(reviewer.fileName)}, {formatFileSize(reviewer.fileSize)}
+            </span>
           </span>
         </p>
       </div>

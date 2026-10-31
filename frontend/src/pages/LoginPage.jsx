@@ -176,6 +176,7 @@ function LoginPage() {
 
     return (
       <div className="page-form">
+        <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
         <PageHeading title="Reset your password" />
         <p className="page-intro">
           Enter the email address you signed up with. We will email you a link for choosing a new
@@ -223,6 +224,7 @@ function LoginPage() {
 
   return (
     <div className="page-form">
+      <img className="page-form__logo" src="/logo.png" alt="" width="48" height="48" />
       <PageHeading title="Log in" />
       <p className="page-intro">Log in to upvote, share, and manage your study reviewers.</p>
 

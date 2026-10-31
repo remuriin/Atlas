@@ -86,7 +86,8 @@ function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <Link className="site-logo" to="/">
-          <Icon name="book" />
+          {/* Empty alt: the word "Atlas" beside it already names the link. */}
+          <img className="site-logo__mark" src="/logo.png" alt="" width="32" height="32" />
           Atlas
         </Link>
 
