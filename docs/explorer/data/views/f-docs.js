@@ -10,7 +10,7 @@ AX.addView({
   title: 'Docs to Rem to chat',
   eyebrow: 'DATA FLOW',
   purpose: 'The same Markdown files feed two things: the Explorer page you are reading, and Rem, which splits them into pieces, finds the pieces that match a question and has Gemini answer from them only.',
-  desc: 'Data flow in four lanes (developer, build scripts, Rem RaaS, visitor) and six steps: the developer writes docs/knowledge, the build makes one HTML file, the ingest sends each Markdown file to Rem RaaS, which splits it at headings and stores Gemini embeddings in pgvector, then a visitor asks the chat bubble and gets an answer with links to its sources.',
+  desc: 'Data flow in four lanes (developer, build scripts, Rem RaaS, visitor) and six steps: the developer writes docs/knowledge, the build makes one HTML file, the ingest sends each Markdown file to Rem RaaS, which splits it at headings and stores Gemini embeddings in pgvector, then a visitor asks the chat bubble, which goes through the Atlas API (POST /api/ask) to Rem, and gets an answer with links to its sources.',
   laneH: 140,
   nodeH: 100,
   lanes: [
@@ -38,7 +38,7 @@ AX.addView({
       id: 'build', lane: 'build', step: 1,
       name: 'Build the Explorer', sub: 'docs/build-explorer.js',
       opens: 'system',
-      lines: ['Diagrams, docs, glossary, chat', 'All in one standalone HTML file', 'Holds the chat key; not in git'],
+      lines: ['Diagrams, docs, glossary, chat', 'All in one standalone HTML file', 'No key inside: safe to share'],
     },
     {
       id: 'ingest', lane: 'build', step: 2,
@@ -67,8 +67,8 @@ AX.addView({
     {
       id: 'ask', lane: 'visitor', step: 4, treat: 'input',
       name: 'Ask Rem', sub: 'chat bubble, chat.js',
-      term: 'rem-raas',
-      lines: ['POST /query with the chat key', 'Question up to 2,000 chars', 'Plus the last 6 messages'],
+      piece: 'ep:post-ask', opens: 'ep.post-ask', term: 'rem-raas',
+      lines: ['POST /api/ask to the Atlas API', 'which adds the key for Rem', 'Question up to 2,000 chars', 'Plus the last 6 messages'],
     },
     {
       id: 'answer', lane: 'visitor', step: 5,
@@ -84,7 +84,7 @@ AX.addView({
     { from: 'ingest', to: 'chunk', label: 'EACH .MD FILE', style: 'link' },
     { from: 'chunk', to: 'search', style: 'accent' },
     { from: 'explorer', to: 'ask', label: 'IN THE PAGE', style: 'muted' },
-    { from: 'ask', to: 'search', label: 'POST /QUERY', style: 'link' },
+    { from: 'ask', to: 'search', label: 'VIA ATLAS API', style: 'link' },
     { from: 'search', to: 'answer', label: 'WITH SOURCES', style: 'link' },
   ],
 });

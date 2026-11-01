@@ -14,7 +14,7 @@ cd frontend && npm ci && cd ..      # once: the build embeds the website's fonts
 node docs/build-explorer.js
 ```
 
-The result is `docs/dist/atlas-explorer.html` (about 1.5 MB). Open it in any browser, even offline: everything except the chat works without a connection. The build first checks the docs, every diagram's layout, the colour contrast and the safety rules, and writes nothing when one of them fails.
+The result is `docs/dist/atlas-explorer.html` (about 2.2 MB). Open it in any browser, even offline: everything except the chat works without a connection. The build first checks the docs, every diagram's layout, the colour contrast and the safety rules, and writes nothing when one of them fails.
 
 Options:
 
@@ -22,11 +22,11 @@ Options:
 - `--private` also writes `atlas-explorer-private.html`, which adds the notes in `docs/private/`. Keep that file on your own computer.
 - `--snapshots` also writes one static page per diagram and zoom level to `docs/dist/snapshots`, for the diagram-design `self_check.py`.
 
-## The chat key: read this before sharing the page
+## The chat and sharing the page
 
-The chat needs `docs/.env` (copy `docs/.env.example`): the address and a key of the "Atlas docs" service in the Rem RaaS dashboard. **The built page contains that key.** Anyone who has the file can read it and use it on the service directly: ask questions, but also delete or replace the Atlas docs in Rem, and spend the free Gemini quota that the other Rem services share. That is why `docs/dist/` is ignored by git and the page is shared as a file, never committed.
+The chat asks the Atlas API (`POST /api/ask`), which passes the question to the "Atlas docs" service in Rem RaaS. The build takes the API address from `VITE_API_URL` in `frontend/.env.production`, or from `ATLAS_API_URL` in `docs/.env` if set. **The built page contains no key**: the Rem key stays on the server, in `backend/.env` (`RAAS_URL`, `RAAS_KEY`), so the page can be shared freely. The API allows 30 questions per 15 minutes per visitor. `docs/dist/` is ignored by git only because it is build output.
 
-If the key leaks: make a new key in the dashboard, put it in `docs/.env`, run `node docs/build-explorer.js`, and run `node docs/ingest-docs.js --all` in case the docs were changed.
+The ingest script below still needs `docs/.env` (copy `docs/.env.example`) with `RAAS_URL` and a key of the service. That key can delete or replace the Atlas docs in Rem and spends the free Gemini quota that the other Rem services share, so keep it private. If it leaks: make a new key in the dashboard, put it in `docs/.env` and in the server's `backend/.env`, restart the API, and run `node docs/ingest-docs.js --all` in case the docs were changed.
 
 ## Send the docs to Rem
 

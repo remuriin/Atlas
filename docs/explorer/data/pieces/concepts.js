@@ -20,7 +20,7 @@ module.exports = [
     id: 'app:backend', kind: 'app', name: 'Atlas API',
     plain: 'The part of Atlas that runs on the server. It checks who you are, stores and reads study reviewers, and guards every upload.',
     tech: 'An Express 5 app on Node 20+ (CommonJS) with raw SQL through pg, firebase-admin for token checks, multer for uploads and express-rate-limit. pm2 keeps it running on the VPS; Envoy Gateway forwards HTTPS traffic to it.',
-    facts: [['Code', '`backend/src`'], ['Address', 'https://api.140-245-60-8.sslip.io'], ['Endpoints', '30, counting GET /api/health']],
+    facts: [['Code', '`backend/src`'], ['Address', 'https://api.140-245-60-8.sslip.io'], ['Endpoints', '31, counting GET /api/health']],
     docs: ['backend-architecture'], opens: 'backend', term: 'rest-api',
   },
   {
@@ -56,7 +56,7 @@ module.exports = [
   {
     id: 'layer:routes', kind: 'layer', name: 'Routes',
     plain: 'The list of addresses the API answers, and which checks each one runs, in order.',
-    tech: 'Four Express routers in `backend/src/routes`, mounted under /api/reviewers, /api/me, /api/saved and /api/admin.',
+    tech: 'Five Express routers in `backend/src/routes`, mounted under /api/reviewers, /api/me, /api/saved, /api/admin and /api/ask.',
     docs: ['api-endpoints'], opens: 'endpoints', term: 'endpoint',
   },
   {
@@ -68,7 +68,7 @@ module.exports = [
   {
     id: 'layer:controllers', kind: 'layer', name: 'Controllers',
     plain: 'The code that does the actual work of each address once every check has passed.',
-    tech: 'Four files in `backend/src/controllers`, one per router; they validate input, call models and shape the JSON reply.',
+    tech: 'Five files in `backend/src/controllers`, one per router; they validate input, call models and shape the JSON reply.',
     docs: ['backend-architecture'], opens: 'backend', term: 'controller',
   },
   {
@@ -112,6 +112,13 @@ module.exports = [
     plain: 'Google’s AI. Atlas sends it a saved study reviewer and asks for flashcards.',
     tech: 'The Gemini REST API (GEMINI_MODEL, default gemini-3.5-flash-lite) called from `backend/src/utils/gemini.js` with a JSON schema for the cards, a 120 s timeout, and the key GEMINI_API_KEY kept on the server.',
     docs: ['flashcards'], opens: 'p-flashcards', term: 'gemini',
+  },
+  {
+    id: 'ext:rem', kind: 'ext', name: 'Rem RaaS',
+    plain: 'The chat service behind the Explorer’s Rem bubble. It finds the parts of the Atlas docs that match a question and has Gemini answer from them.',
+    tech: 'The "Atlas docs" service on Rem RaaS (RAAS_URL), called by `backend/src/utils/rem.js` with POST /query, topK 6, markdown on and a 60 s timeout. The key RAAS_KEY stays in backend/.env on the server; the Explorer page holds none.',
+    facts: [['Called by', '`POST /api/ask`'], ['Settings', '`RAAS_URL`, `RAAS_KEY` (backend/.env)']],
+    docs: ['atlas-explorer-and-rem'], opens: 'f-docs', term: 'rem-raas',
   },
   {
     id: 'ext:clamav', kind: 'ext', name: 'ClamAV virus scan',

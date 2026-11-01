@@ -120,8 +120,8 @@ The Atlas backend in `backend/` is an Express 5 API that runs on Node.js 20 or n
 
 A request to the Atlas API passes through layers that each live in their own folder in `backend/src/`:
 
-1. `app.js`: security headers (helmet), CORS for the website's address only, the general rate limit, JSON body reading, and then the four route groups.
-2. `routes/`: which address and method go to which handler, and which middleware runs first: `reviewersRoutes.js` (`/api/reviewers`), `meRoutes.js` (`/api/me`), `savedRoutes.js` (`/api/saved`), and `adminRoutes.js` (`/api/admin`).
+1. `app.js`: security headers (helmet), CORS for the website's address only (except `/api/ask`, which any page may call), the general rate limit, JSON body reading, and then the five route groups.
+2. `routes/`: which address and method go to which handler, and which middleware runs first: `reviewersRoutes.js` (`/api/reviewers`), `meRoutes.js` (`/api/me`), `savedRoutes.js` (`/api/saved`), `adminRoutes.js` (`/api/admin`), and `askRoutes.js` (`/api/ask`).
 3. `middleware/`: shared steps such as the Firebase login check (`auth.js`), rate limits, file uploads (`upload.js` and `checkUpload.js`), loading and access checks for `:id` and `:savedId`, and the final error handler.
 4. `controllers/`: one handler per endpoint. A handler checks the input with `utils/validate.js`, calls models, and builds the JSON answer. Controllers contain no SQL.
 5. `models/`: one file per table, holding all of that table's SQL.
@@ -189,7 +189,7 @@ More on the category lists is in [How do the category lists stay the same in the
 - `README.md` is the main reference for Atlas: setup, settings, deployment, the API summary, code rules, accessibility, feed behaviour, and known limitations. It is updated in the same pull request as the change it describes.
 - `docs/knowledge/` holds topic files like this one. The Atlas Explorer's chat, Rem, answers questions from them by retrieval (RAG): the files are split at their headings into chunks, so each section must make sense on its own and stay between 120 and 1700 characters.
 - After a change to code that a knowledge file describes, update that file, then build the Atlas Explorer again and run the ingest again, so Rem answers from the new text. The commands are in [How do I build the Atlas Explorer and ingest the docs?](local-development.md#how-do-i-build-the-atlas-explorer-and-ingest-the-docs).
-- Some files stay out of git on purpose: `docs/dist/` (the built Explorer page holds the Rem chat key), `docs/private/` (private server notes), and `docs/.ingest-state.json` (the ingest's own record). All three are listed in `.gitignore`.
+- Some files stay out of git on purpose: `docs/dist/` (the built Explorer page, which is build output), `docs/private/` (private server notes), and `docs/.ingest-state.json` (the ingest's own record). All three are listed in `.gitignore`.
 - The repository is public, so knowledge files never hold secrets, passwords, private addresses, or private server paths. The public API address `api.140-245-60-8.sslip.io` is fine to mention.
 
 ## What does a typical Atlas change look like from start to finish?

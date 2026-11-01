@@ -30,11 +30,11 @@ The Atlas API uses these HTTP status codes:
 - 422: the virus scan flagged the file, or flashcards cannot be made from the material.
 - 429: a rate limit was reached.
 - 500: an unexpected error; the message is always `Something went wrong on our side. Please try again.`
-- 502 and 503: the flashcard service (Gemini) failed, is busy, or is not set up; 503 also when the virus scanner is not working.
+- 502 and 503: the flashcard service (Gemini) or the docs chat service (Rem) failed, is busy, or is not set up; 503 also when the virus scanner is not working.
 
 ## Which endpoints does the Atlas API have?
 
-The Atlas API has 30 endpoints. In brackets: "anyone" needs no login, "optional" works for anyone and adds details for logged-in users, "user" needs a login, "owner" means only the uploader, "mine" means the saved item must be the user's own, and "admin" means only admins.
+The Atlas API has 31 endpoints. In brackets: "anyone" needs no login, "optional" works for anyone and adds details for logged-in users, "user" needs a login, "owner" means only the uploader, "mine" means the saved item must be the user's own, and "admin" means only admins.
 
 - `GET /api/health` (anyone)
 - `GET /api/reviewers`, `GET /api/reviewers/:id`, `GET /api/reviewers/:id/file` (optional)
@@ -51,8 +51,9 @@ The Atlas API has 30 endpoints. In brackets: "anyone" needs no login, "optional"
 - `PUT /api/saved/:savedId/flashcards/:cardId` (mine)
 - `GET /api/admin/reports` (admin)
 - `POST /api/admin/reviewers/:id/restore`, `PUT /api/admin/reviewers/:id/category`, `DELETE /api/admin/reviewers/:id` (admin)
+- `POST /api/ask` (anyone)
 
-The routes are defined in `backend/src/routes/reviewersRoutes.js`, `meRoutes.js`, `savedRoutes.js`, and `adminRoutes.js`; the health check is in `backend/src/app.js`.
+The routes are defined in `backend/src/routes/reviewersRoutes.js`, `meRoutes.js`, `savedRoutes.js`, `adminRoutes.js`, and `askRoutes.js`; the health check is in `backend/src/app.js`.
 
 ## What does a study reviewer object contain in the Atlas API?
 
@@ -288,3 +289,7 @@ More detail: [AI flashcards in Atlas](flashcards.md).
 ## What does DELETE /api/admin/reviewers/:id do?
 
 `DELETE /api/admin/reviewers/:id` is the admin's Delete choice: the reports were right, so the study reviewer is removed for everyone. Only admins can call it. The chain is `requireAuth`, `requireAdmin`, `writeLimiter`, `loadReviewer`, `deleteReviewer`. There is no body. Like the uploader's own delete, it deletes the database row first and the file second. The study reviewer's upvotes, views, and reports, resolved ones included, are deleted with it. Other people's saved copies stay with their notes and flashcards and show as removed. The server log records which admin deleted which study reviewer. The reply is `{ "deleted": true, "id": 42 }`. Errors: 400 bad id, 401, 403 `Only admins can do that.`, 404 `That study reviewer could not be found.`, and 429 when the write limit is reached.
+
+## What does POST /api/ask do?
+
+`POST /api/ask` answers a question about Atlas for the chat (Rem) in the Atlas Explorer. Anyone can call it, without a login, from any web page: it is the one Atlas API address whose CORS rule allows every origin (POST only, header `Content-Type`). The chain is `askLimiter` (30 questions per 15 minutes per IP address), then `ask` in `backend/src/controllers/askController.js`. The body is JSON: `{ "question": "How do upvotes work?", "history": [...] }`. `question` is required and trimmed, up to 2,000 characters. `history` is optional: the API keeps the last 6 turns with the role `user` or `assistant` and cuts each to 500 characters. `backend/src/utils/rem.js` passes the question to the Atlas docs service on Rem RaaS (`POST /query` with `topK` 6, `markdown` true, and the secret `RAAS_KEY` as a Bearer key) and waits up to 60 seconds. The reply is `{ "answer": "...", "sources": [{ "source": "...", "heading": "..." }], "answered": true }`; `answered` is false when the docs did not cover the question. Errors: 400 `Type a question first.` or `Keep the question under 2000 characters.`; 429 `You have asked a lot of questions. Please wait a few minutes and try again.`; 503 `The docs chat is not set up on this server yet.` when `RAAS_URL` or `RAAS_KEY` is empty; 503 `Rem is busy right now. Please try again in a moment.` when Rem answers 429 or 503; 502 `Rem did not answer. Please try again in a moment.` for any other Rem failure.

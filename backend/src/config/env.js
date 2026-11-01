@@ -88,6 +88,11 @@ if (geminiModel === '') {
   geminiModel = 'gemini-3.5-flash-lite';
 }
 
+// Rem, the docs chat service behind the Atlas Explorer, is optional too: without these
+// two settings only /api/ask answers that it is not set up yet.
+const raasUrl = (process.env.RAAS_URL || '').trim().replace(/\/+$/, '');
+const raasKey = (process.env.RAAS_KEY || '').trim();
+
 // How uploads are virus-scanned (see src/utils/virusScan.js): off, daemon, or command.
 let clamavMode = (process.env.CLAMAV_MODE || 'off').trim();
 if (['off', 'daemon', 'command'].indexOf(clamavMode) === -1) {
@@ -122,6 +127,8 @@ module.exports = {
   trustProxy: process.env.TRUST_PROXY === 'true',
   geminiApiKey: (process.env.GEMINI_API_KEY || '').trim(),
   geminiModel: geminiModel,
+  raasUrl: raasUrl,
+  raasKey: raasKey,
   clamavMode: clamavMode,
   // The Ubuntu/Debian ClamAV service listens here by default.
   clamavSocket: (process.env.CLAMAV_SOCKET || '/var/run/clamav/clamd.ctl').trim(),

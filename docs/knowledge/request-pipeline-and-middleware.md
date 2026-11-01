@@ -40,6 +40,8 @@ CORS (cross-origin resource sharing) is the browser rule that decides whether a 
 - `methods`: GET, POST, PUT, and DELETE.
 - `allowedHeaders`: Authorization and Content-Type.
 
+The one exception is `/api/ask`, the Atlas Explorer chat: there `cors` allows any origin, only the method POST, and only the header Content-Type, because the Explorer is a file opened from disk or shared around. It needs no login and changes nothing.
+
 Browser preflight requests (OPTIONS) are answered by `cors` with status 204 before any rate limiter runs. Atlas uses no cookies and does not allow credentials in the CORS sense: the login travels in the `Authorization` header. No extra reply headers are exposed to the website's JavaScript. CORS is enforced only by browsers: a script or a tool such as curl can still call the API, so the real protection is the login, owner, and admin checks on each route.
 
 ## How does the Atlas API read request bodies?
@@ -167,12 +169,13 @@ Every refused file is deleted from disk at once, and every refusal carries `fiel
 
 ## Which rate limiters run in the Atlas API pipeline?
 
-`backend/src/middleware/rateLimit.js` defines four limiters, and each runs at a fixed place in the Atlas API pipeline:
+`backend/src/middleware/rateLimit.js` defines five limiters, and each runs at a fixed place in the Atlas API pipeline:
 
 - `generalLimiter` (600 requests per 15 minutes per visitor) runs for every request, in `backend/src/app.js`, right after cors.
 - `writeLimiter` (120 per 15 minutes per visitor) runs on every route that changes data, except notes and flashcard marks. Under `/api/reviewers` it runs before the login check; under `/api/me`, `/api/saved`, and `/api/admin` it runs after it.
 - `studyLimiter` (600 per 15 minutes per visitor) runs on `PUT /api/saved/:savedId/notes` and `PUT /api/saved/:savedId/flashcards/:cardId`.
 - `flashcardLimiter` (10 per 24 hours per account) runs on `POST /api/saved/:savedId/flashcards`, after `writeLimiter` and `loadSavedItem`.
+- `askLimiter` (30 questions per 15 minutes per visitor) runs on `POST /api/ask`, the Atlas Explorer chat, before its controller.
 
 A refused request gets 429 with the standard error shape and never reaches its controller. The windows, the stores, the messages, and the side effects are explained in [Rate limits in Atlas](rate-limits.md#which-rate-limits-does-atlas-use).
 

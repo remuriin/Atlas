@@ -126,7 +126,7 @@ While the emulator is on, the frontend's VITE_FIREBASE_PROJECT_ID does not chang
 
 ## How do I build the Atlas Explorer and ingest the docs?
 
-The Atlas Explorer is a single HTML page with zoomable diagrams of the Atlas system, the pages of `docs/knowledge/` to read, a glossary, and Rem, a chat that answers questions from those pages. Its tools live in `docs/` and need Node.js plus a `docs/.env` file with two values, which you get from the project owner. Never commit that file:
+The Atlas Explorer is a single HTML page with zoomable diagrams of the Atlas system, the pages of `docs/knowledge/` to read, a glossary, and Rem, a chat that answers questions from those pages. Its tools live in `docs/` and need Node.js. The build needs no secret; only the ingest script needs a `docs/.env` file with two values, which you get from the project owner. Never commit that file:
 
 ```
 RAAS_URL=ADDRESS-OF-THE-REM-RAAS-SERVICE
@@ -140,7 +140,7 @@ node docs/build-explorer.js
 node docs/ingest-docs.js
 ```
 
-`build-explorer.js` writes `docs/dist/atlas-explorer.html`, which you open in a browser. The page contains RAAS_KEY, so `docs/dist/` is ignored by git and the page should only be shared with people allowed to use the key. `ingest-docs.js` sends the Markdown files in `docs/knowledge/` to the Rem RaaS service, which splits them at their headings so the chat can answer from them. Run it again after changing a page in `docs/knowledge/`.
+`build-explorer.js` writes `docs/dist/atlas-explorer.html`, which you open in a browser. Its chat asks the Atlas API at VITE_API_URL from `frontend/.env.production` (or `ATLAS_API_URL` in `docs/.env`), and the API keeps the Rem key, so the page holds no key and can be shared freely. `docs/dist/` is ignored by git because it is build output. `ingest-docs.js` sends the Markdown files in `docs/knowledge/` to the Rem RaaS service, which splits them at their headings so the chat can answer from them. Run it again after changing a page in `docs/knowledge/`.
 
 ## What do common Atlas start-up errors mean in local development?
 

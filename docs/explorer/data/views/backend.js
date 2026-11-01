@@ -8,25 +8,25 @@ AX.addView({
   title: 'Backend structure',
   eyebrow: 'LAYERS',
   purpose: 'How the Atlas API code is split into layers. A request comes in at the top, passes its route’s checks, reaches a controller, and only the models talk to the database. Zoom in to see every file of each layer.',
-  desc: 'Layer diagram of the Atlas API: the entry point (server.js and app.js) hands each request to one of four routers, which run route middleware, then one of four controllers, which call seven models. Middleware and controllers also use Firebase Admin, ClamAV, the uploads folder and Gemini; models use PostgreSQL. Errors from middleware and controllers go to the error handler.',
+  desc: 'Layer diagram of the Atlas API: the entry point (server.js and app.js) hands each request to one of five routers, which run route middleware, then one of five controllers, which call seven models. Middleware and controllers also use Firebase Admin, ClamAV, the uploads folder, Gemini and Rem RaaS; models use PostgreSQL. Errors from middleware and controllers go to the error handler.',
   piece: 'app:backend',
-  grid: { x: 40, y: 72, col: 208, row: 44, gapX: 104, gapY: 4 },
+  grid: { x: 40, y: 72, col: 208, row: 52, gapX: 104, gapY: 4 },
   nodes: [
     {
       id: 'entry', at: [1, 0], span: [3, 2], tag: 'START',
       name: 'Entry point', sub: 'server.js starts the API, app.js builds it', subLod: 1,
       piece: 'file:app.js', opens: 'pipeline',
       lines: [
-        'Every request: helmet, CORS for one origin, then the general limit of 600 per 15 minutes',
+        'Every request: helmet, CORS for one origin (any page for /api/ask), then the general limit of 600 per 15 minutes',
         'express.json reads bodies up to 512 KB; GET /api/health answers here, before any router',
       ],
     },
     {
       id: 'routers', at: [1, 3], span: [3, 2], tag: 'ROUTES',
-      name: 'Routers', sub: 'routes/ · 4 routers, 29 endpoints (plus /api/health)',
+      name: 'Routers', sub: 'routes/ · 5 routers, 30 endpoints (plus /api/health)',
       piece: 'layer:routes', opens: 'endpoints', term: 'endpoint',
       kids: {
-        cols: 4, h: 50,
+        cols: 5, h: 64,
         items: [
           { id: 'r-reviewers', name: 'Study reviewers', sub: 'reviewersRoutes.js · /api/reviewers', subLod: 2, piece: 'route:reviewersRoutes', opens: 'endpoints', term: 'study-reviewer',
             lines: ['12 endpoints: browse, upload, edit,', 'upvote, save, view, report'] },
@@ -36,6 +36,8 @@ AX.addView({
             lines: ['7 endpoints: one saved item,', 'its notes and its flashcards'] },
           { id: 'r-admin', name: 'Admin', sub: 'adminRoutes.js · /api/admin', subLod: 2, piece: 'route:adminRoutes', opens: 'endpoints',
             lines: ['4 endpoints: reports, restore,', 'fix category, delete'] },
+          { id: 'r-ask', name: 'Docs chat', sub: 'askRoutes.js · /api/ask', subLod: 2, piece: 'route:askRoutes', opens: 'ep.post-ask', term: 'rem-raas',
+            lines: ['1 endpoint: a question', 'for Rem, no login'] },
         ],
       },
     },
@@ -57,7 +59,7 @@ AX.addView({
           { id: 'm-check', name: 'File check', sub: 'checkUpload.js', subLod: 2, piece: 'mwfile:checkUpload', opens: 'l-upload-checks', term: 'magic-bytes',
             lines: ['bytes match the type,', 'ClamAV scan, SHA-256'] },
           { id: 'm-rate', name: 'Rate limits', sub: 'rateLimit.js', subLod: 2, piece: 'mwfile:rateLimit', opens: 'l-rate', term: 'rate-limit',
-            lines: ['writes 120 per 15 min,', 'flashcards 10 a day: 429'] },
+            lines: ['writes 120, questions 30,', 'cards 10 a day: 429'] },
         ],
       },
     },
@@ -66,7 +68,7 @@ AX.addView({
       name: 'Controllers', sub: 'controllers/ · one per router: do the work, reply',
       piece: 'layer:controllers', term: 'controller',
       kids: {
-        cols: 4, h: 50,
+        cols: 5, h: 64,
         items: [
           { id: 'c-reviewers', name: 'Study reviewers', sub: 'reviewersController.js', subLod: 2, piece: 'ctl:reviewersController', opens: 'p-upload',
             lines: ['list and search, upload, edit, delete,', 'upvote, save, record a view, report'] },
@@ -76,6 +78,8 @@ AX.addView({
             lines: ['notes, and flashcards that', 'Google Gemini writes'] },
           { id: 'c-admin', name: 'Admin', sub: 'adminController.js', subLod: 2, piece: 'ctl:adminController', opens: 'p-report',
             lines: ['reported list, restore,', 'fix category, delete'] },
+          { id: 'c-ask', name: 'Docs chat', sub: 'askController.js', subLod: 2, piece: 'ctl:askController', opens: 'f-docs',
+            lines: ['checks the question,', 'passes it on to Rem'] },
         ],
       },
     },
@@ -98,7 +102,7 @@ AX.addView({
     },
     {
       id: 'stores', at: [4, 6], span: [1, 8], tag: 'OUTSIDE THE CODE', treat: 'store',
-      name: 'Stores and services', sub: 'PostgreSQL, the uploads folder, Firebase Admin, Gemini, ClamAV',
+      name: 'Stores and services', sub: 'PostgreSQL, the uploads folder, Firebase Admin, Gemini, Rem, ClamAV',
       opens: 'system',
       kids: {
         cols: 1, h: 60,
@@ -111,6 +115,8 @@ AX.addView({
             lines: ['random hex file names,', 'at most 10 MB each'] },
           { id: 's-gemini', name: 'Google Gemini', sub: 'utils/gemini.js', subLod: 2, treat: 'external', piece: 'ext:gemini', opens: 'p-flashcards', term: 'gemini',
             lines: ['writes flashcards'] },
+          { id: 's-rem', name: 'Rem RaaS', sub: 'utils/rem.js', subLod: 2, treat: 'external', piece: 'ext:rem', opens: 'f-docs', term: 'rem-raas',
+            lines: ['answers Explorer questions', 'from the Atlas docs'] },
           { id: 's-postgres', name: 'PostgreSQL', sub: 'pool from config/db.js', subLod: 2, treat: 'store', piece: 'store:postgres', opens: 'data', term: 'postgresql',
             lines: ['pool of at most 10 connections', '8 tables'] },
         ],
@@ -139,7 +145,7 @@ AX.addView({
     { from: 'controllers', to: 'errors', label: 'NEXT(ERR)', dash: true },
   ],
   notes: [
-    { at: [0, 0], w: 208, text: 'Left out: the helpers in utils/ (10 files) and config/ (4 files), except those that reach a store or service.' },
+    { at: [0, 0], w: 208, text: 'Left out: the helpers in utils/ (11 files) and config/ (4 files), except those that reach a store or service.' },
     { at: [0, 12], w: 208, text: 'Middleware reads rows through the models too: req.user, req.reviewer and req.saved.' },
   ],
 });

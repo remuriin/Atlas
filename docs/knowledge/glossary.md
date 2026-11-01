@@ -20,7 +20,7 @@ Also called: whitelist, allow list
 
 ## API key
 
-Technical: API key is a string a program sends to show which project is calling a service. Atlas has three: `GEMINI_API_KEY`, a secret kept only in the server's `backend/.env` and sent to Gemini in the `x-goog-api-key` header; `VITE_FIREBASE_API_KEY`, a public Firebase identifier built into the website, not a password; and `RAAS_KEY` from `docs/.env`, which is built into the Atlas Explorer page for the Rem chat, so `docs/dist/` is never committed.
+Technical: API key is a string a program sends to show which project is calling a service. Atlas has three: `GEMINI_API_KEY`, a secret kept only in the server's `backend/.env` and sent to Gemini in the `x-goog-api-key` header; `VITE_FIREBASE_API_KEY`, a public Firebase identifier built into the website, not a password; and `RAAS_KEY`, a secret for Rem RaaS kept in the server's `backend/.env` (for the Explorer chat through `POST /api/ask`) and in `docs/.env` (for the ingest script), never in the Atlas Explorer page.
 
 In plain words: API key is like a library card number that a program shows to a service. Some Atlas keys are secret, like the one for Gemini, while the Firebase one is public on purpose.
 
@@ -34,7 +34,7 @@ Also called: WAI-ARIA
 
 ## Atlas Explorer
 
-Technical: Atlas Explorer is one standalone HTML file, built by `node docs/build-explorer.js` into `docs/dist/atlas-explorer.html`, that holds zoomable diagrams of every part of Atlas, a detail sheet per part, the `docs/knowledge` documents, this glossary and the Rem chat. Everything but the chat works offline, it never connects to the live site, the database or anyone's account, and git ignores the built file because it contains the Rem RaaS key.
+Technical: Atlas Explorer is one standalone HTML file, built by `node docs/build-explorer.js` into `docs/dist/atlas-explorer.html`, that holds zoomable diagrams of every part of Atlas, a detail sheet per part, the `docs/knowledge` documents, this glossary and the Rem chat. Everything but the chat works offline; the chat asks the live Atlas API's `POST /api/ask`, and the page never touches the database or anyone's account. The page holds no key, so it can be shared freely; git ignores it only because it is build output.
 
 In plain words: Atlas Explorer is an interactive map of the whole Atlas project in a single file you open in your browser. You can zoom into any part, read the docs, and ask Rem questions.
 
@@ -180,15 +180,15 @@ In plain words: Contrast ratio measures how clearly text stands out from its bac
 
 ## Controller
 
-Technical: Controller is the backend layer that does the work of one endpoint once its middleware has passed. Atlas has four files in `backend/src/controllers` (`reviewersController.js`, `meController.js`, `savedController.js` and `adminController.js`), one per router; each handler checks input with `utils/validate.js`, calls model functions, shapes the JSON reply and never contains SQL.
+Technical: Controller is the backend layer that does the work of one endpoint once its middleware has passed. Atlas has five files in `backend/src/controllers` (`reviewersController.js`, `meController.js`, `savedController.js`, `adminController.js` and `askController.js`), one per router; each handler checks input with `utils/validate.js`, calls model functions, shapes the JSON reply and never contains SQL.
 
 In plain words: Controller is the part of the Atlas server that actually handles a request after every check has passed, like the clerk who processes your form after the guard lets you in.
 
 ## CORS
 
-Technical: CORS (cross-origin resource sharing) is the browser rule that decides whether a page from one origin may read replies from another. The `cors` package in `backend/src/app.js` allows exactly one origin, `FRONTEND_ORIGIN` (https://atlas-f2757.web.app on the live server), with GET, POST, PUT and DELETE and the Authorization and Content-Type headers, and answers OPTIONS preflights with 204; tools such as curl ignore CORS, so the login, owner and admin checks are the real protection.
+Technical: CORS (cross-origin resource sharing) is the browser rule that decides whether a page from one origin may read replies from another. The `cors` package in `backend/src/app.js` allows exactly one origin, `FRONTEND_ORIGIN` (https://atlas-f2757.web.app on the live server), with GET, POST, PUT and DELETE and the Authorization and Content-Type headers, and answers OPTIONS preflights with 204; the one exception is `POST /api/ask`, the Explorer chat, which any origin may call because it needs no login and changes nothing; tools such as curl ignore CORS, so the login, owner and admin checks are the real protection.
 
-In plain words: CORS is the browser's rule about which websites may read answers from the Atlas server. Only the real Atlas website is allowed, so a stranger's page cannot quietly use your login.
+In plain words: CORS is the browser's rule about which websites may read answers from the Atlas server. Only the real Atlas website is allowed, so a stranger's page cannot quietly use your login. The Explorer chat is the one door open to every page, and it needs no login.
 
 Also called: cross-origin resource sharing
 
@@ -274,7 +274,7 @@ Also called: vector embedding
 
 ## Endpoint
 
-Technical: Endpoint is one HTTP method plus address that the API answers, such as `PUT /api/reviewers/:id/upvote`. The Atlas API has 30: 29 routes in the four router files in `backend/src/routes`, each with its own middleware chain before a controller, plus `GET /api/health` in `backend/src/app.js`; the Explorer's Endpoints view lists them all with who may call each one.
+Technical: Endpoint is one HTTP method plus address that the API answers, such as `PUT /api/reviewers/:id/upvote`. The Atlas API has 31: 30 routes in the five router files in `backend/src/routes`, each with its own middleware chain before a controller, plus `GET /api/health` in `backend/src/app.js`; the Explorer's Endpoints view lists them all with who may call each one.
 
 In plain words: Endpoint is one specific door into the Atlas server, such as "upvote this study reviewer"; the website knocks on a different door for each action.
 
@@ -314,7 +314,7 @@ Also called: lint, linter
 
 ## Express
 
-Technical: Express is the Node.js web framework of the Atlas API, version 5 (`express` ^5.2.1). `backend/src/app.js` builds the app in a fixed order (trust proxy, helmet, cors, the general rate limit, `express.json` with a 512 KB limit, `/api/health`, four routers, then the 404 and error handlers), and `backend/src/server.js` starts it and shuts it down gracefully on SIGINT or SIGTERM.
+Technical: Express is the Node.js web framework of the Atlas API, version 5 (`express` ^5.2.1). `backend/src/app.js` builds the app in a fixed order (trust proxy, helmet, cors, the general rate limit, `express.json` with a 512 KB limit, `/api/health`, five routers, then the 404 and error handlers), and `backend/src/server.js` starts it and shuts it down gracefully on SIGINT or SIGTERM.
 
 In plain words: Express is the toolkit the Atlas server is built with: it receives each request from the website, runs the right checks and sends back an answer.
 
@@ -470,7 +470,7 @@ Also called: HTML sanitizing, HTML sanitization
 
 ## HTTP method
 
-Technical: HTTP method is the verb at the start of a request that says what kind of action it is. The Atlas API uses GET to read, POST to create (a study reviewer, a report, a view, a flashcard set), PUT to set or replace (an edit, an upvote, a save, notes, a display name) and DELETE to remove; CORS allows only these four, OPTIONS appears only as a browser preflight, and any other method, such as PATCH, gets 404.
+Technical: HTTP method is the verb at the start of a request that says what kind of action it is. The Atlas API uses GET to read, POST to create (a study reviewer, a report, a view, a flashcard set) or to ask the Explorer chat a question, PUT to set or replace (an edit, an upvote, a save, notes, a display name) and DELETE to remove; CORS allows only these four, OPTIONS appears only as a browser preflight, and any other method, such as PATCH, gets 404.
 
 In plain words: HTTP method is the kind of request the website makes: GET means "show me", POST "add this", PUT "set this" and DELETE "remove this".
 
@@ -806,7 +806,7 @@ In plain words: Quarter is the part of the school year the material is for, Q1 t
 
 ## RAG
 
-Technical: RAG (retrieval-augmented generation) means first retrieving the passages that match a question and then letting an AI model write the answer only from them. Rem works this way: Rem RaaS finds the chunks of the ingested `docs/knowledge` files closest in meaning to the question (the Explorer asks for the top 6) and has Gemini answer from them, so an out-of-date doc gives an out-of-date answer.
+Technical: RAG (retrieval-augmented generation) means first retrieving the passages that match a question and then letting an AI model write the answer only from them. Rem works this way: Rem RaaS finds the chunks of the ingested `docs/knowledge` files closest in meaning to the question (the Atlas API asks for the top 6) and has Gemini answer from them, so an out-of-date doc gives an out-of-date answer.
 
 In plain words: RAG means "look it up, then answer": the AI first finds the right pages in the Atlas docs and then writes its reply from those pages only, like an open-book exam.
 
@@ -814,7 +814,7 @@ Also called: retrieval-augmented generation
 
 ## Rate limit
 
-Technical: Rate limit is a cap on how many requests one visitor or account may send in a time window. `backend/src/middleware/rateLimit.js` defines four `express-rate-limit` limiters: general, 600 per 15 minutes per IP address (in memory); write, 120 per 15 minutes per IP (in the PostgreSQL `rate_limits` table); study, 600 per 15 minutes per IP (in memory); and flashcards, 10 per 24 hours per account (in PostgreSQL), and a blocked request gets 429.
+Technical: Rate limit is a cap on how many requests one visitor or account may send in a time window. `backend/src/middleware/rateLimit.js` defines five `express-rate-limit` limiters: general, 600 per 15 minutes per IP address (in memory); write, 120 per 15 minutes per IP (in the PostgreSQL `rate_limits` table); study, 600 per 15 minutes per IP (in memory); ask, 30 Explorer chat questions per 15 minutes per IP (in memory); and flashcards, 10 per 24 hours per account (in PostgreSQL), and a blocked request gets 429.
 
 In plain words: Rate limit is a speed limit for requests, so one person or script cannot flood Atlas; going over it means waiting a few minutes.
 
@@ -856,13 +856,13 @@ Also called: prefers-reduced-motion
 
 ## Rem
 
-Technical: Rem is the chat bubble in the Atlas Explorer (`docs/explorer/ui/chat.js`) that answers questions from the Atlas docs by RAG. It sends each question (up to 2,000 characters) with the last 6 messages, each cut to 500 characters, to Rem RaaS with a Bearer key, waits up to 60 seconds, keeps the conversation only in the tab's sessionStorage, and knows only the ingested docs, not the code or the live site.
+Technical: Rem is the chat bubble in the Atlas Explorer (`docs/explorer/ui/chat.js`) that answers questions from the Atlas docs by RAG. It sends each question (up to 2,000 characters) with the last 6 messages, each cut to 500 characters, to the Atlas API's `POST /api/ask`, which passes it to Rem RaaS with the server's own key; it waits up to 60 seconds, keeps the conversation only in the tab's sessionStorage, and knows only the ingested docs, not the code or the live site.
 
 In plain words: Rem is the Atlas Explorer's chat helper: ask it about Atlas in plain words and it answers from the Atlas docs, though AI answers can contain mistakes.
 
 ## Rem RaaS
 
-Technical: Rem RaaS is the Atlas author's own RAG-as-a-service platform, which runs on the same server as the Atlas API and powers the Rem chat. The Explorer reaches it with `RAAS_URL` and the secret `RAAS_KEY` from `docs/.env`; it splits ingested docs into chunks, stores Gemini embeddings, retrieves the closest chunks for each question, has Gemini write the answer, keeps no conversations and accepts about 5 requests per second from one network address.
+Technical: Rem RaaS is the Atlas author's own RAG-as-a-service platform, which runs on the same server as the Atlas API and powers the Rem chat. The Explorer chat reaches it through the Atlas API's `POST /api/ask`, which calls Rem's `/query` with `RAAS_URL` and the secret `RAAS_KEY` from the server's `backend/.env`, while `node docs/ingest-docs.js` uses the same two values from `docs/.env`; it splits ingested docs into chunks, stores Gemini embeddings, retrieves the closest chunks for each question, has Gemini write the answer, keeps no conversations and accepts about 5 requests per second from one network address.
 
 In plain words: Rem RaaS is the service behind Rem: it stores the Atlas docs in searchable pieces and uses AI to answer questions from them.
 
@@ -900,7 +900,7 @@ Also called: breadcrumb
 
 ## Router
 
-Technical: Router in the Atlas backend is an Express router that groups the routes under one address. `backend/src/routes` has four, mounted in `backend/src/app.js` at `/api/reviewers`, `/api/me`, `/api/saved` and `/api/admin`; each route lists its middleware and controller left to right, and the `/api/me`, `/api/saved` and `/api/admin` routers run `requireAuth` (plus `requireAdmin` for admin) with `router.use` before any of their routes.
+Technical: Router in the Atlas backend is an Express router that groups the routes under one address. `backend/src/routes` has five, mounted in `backend/src/app.js` at `/api/reviewers`, `/api/me`, `/api/saved`, `/api/admin` and `/api/ask`; each route lists its middleware and controller left to right, and the `/api/me`, `/api/saved` and `/api/admin` routers run `requireAuth` (plus `requireAdmin` for admin) with `router.use` before any of their routes.
 
 In plain words: Router is the switchboard of the Atlas server: it looks at each request's address and sends it down the right line of checks to the right handler.
 
@@ -1096,7 +1096,7 @@ Also called: input validation
 
 ## Vector search
 
-Technical: Vector search finds items whose embeddings, lists of numbers that capture meaning, are closest to the embedding of a query. Rem RaaS uses it for the Explorer chat: the question's embedding is compared with those of every ingested chunk of the Atlas docs, and the closest few (the Explorer asks for 6) go to Gemini; the Atlas feed search is plain word matching, not vector search.
+Technical: Vector search finds items whose embeddings, lists of numbers that capture meaning, are closest to the embedding of a query. Rem RaaS uses it for the Explorer chat: the question's embedding is compared with those of every ingested chunk of the Atlas docs, and the closest few (the Atlas API asks for 6) go to Gemini; the Atlas feed search is plain word matching, not vector search.
 
 In plain words: Vector search finds text by meaning instead of exact words, so a question about "logging in" can find a section about "sign-in".
 

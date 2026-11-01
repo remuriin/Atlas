@@ -1,4 +1,4 @@
-// The four rate limiters in backend/src/middleware/rateLimit.js. They are values made with
+// The five rate limiters in backend/src/middleware/rateLimit.js. They are values made with
 // express-rate-limit, not functions, so lib/extract.js does not see them. The build links
 // each one to the endpoints whose chain names it.
 module.exports = [
@@ -34,6 +34,14 @@ module.exports = [
     path: 'backend/src/middleware/rateLimit.js#L49', usedBy: ['mwfile:rateLimit'], uses: ['util:rateLimitStore', 'table:rate_limits'],
     docs: ['rate-limits#how-does-the-atlas-flashcard-limit-work'], opens: 'l-flashcards', term: 'rate-limit',
   },
-  { id: 'mwfile:rateLimit', uses: ['mw:generalLimiter', 'mw:writeLimiter', 'mw:studyLimiter', 'mw:flashcardLimiter'] },
+  {
+    id: 'mw:askLimiter', kind: 'mw', name: 'askLimiter', title: 'askLimiter',
+    plain: 'A limit on questions to Rem, the Explorer’s chat: one visitor can ask up to 30 questions in 15 minutes, because every answer uses the shared Gemini allowance.',
+    tech: 'express-rate-limit, 30 requests per 15 minutes per IP address, counted in memory. Used only by POST /api/ask, which needs no login.',
+    facts: [['Limit', '30 questions per 15 minutes'], ['Counted per', 'IP address'], ['Count kept in', 'Memory'], ['Runs on', '`POST /api/ask`']],
+    path: 'backend/src/middleware/rateLimit.js#L66', usedBy: ['mwfile:rateLimit'],
+    docs: ['rate-limits#which-rate-limits-does-atlas-use'], opens: 'l-rate', term: 'rate-limit',
+  },
+  { id: 'mwfile:rateLimit', uses: ['mw:generalLimiter', 'mw:writeLimiter', 'mw:studyLimiter', 'mw:flashcardLimiter', 'mw:askLimiter'] },
   { id: 'file:app.js', uses: ['mw:generalLimiter'] },
 ];

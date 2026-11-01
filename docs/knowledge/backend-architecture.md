@@ -13,11 +13,11 @@ The Atlas backend is plain JavaScript on Node.js 20 or newer (the `engines` fiel
 | `firebase-admin` | ^14.5.0 | Checking Firebase login tokens, nothing else |
 | `multer` | ^2.4.0 | Receiving uploaded files |
 | `helmet` | ^8.3.0 | Protective HTTP response headers |
-| `cors` | ^2.8.6 | Letting only the Atlas website call the API from a browser |
+| `cors` | ^2.8.6 | Letting only the Atlas website call the API from a browser (any page for `/api/ask`) |
 | `express-rate-limit` | ^8.7.1 | Limiting how many requests one visitor can make |
 | `dotenv` | ^18.0.6 | Reading settings from `backend/.env` |
 
-Google Gemini is called with Node's built-in `fetch`, Word and PowerPoint files are opened with Node's built-in `zlib`, and ClamAV is reached through a socket or the `clamscan` program, so none of these need an extra package.
+Google Gemini and Rem RaaS are called with Node's built-in `fetch`, Word and PowerPoint files are opened with Node's built-in `zlib`, and ClamAV is reached through a socket or the `clamscan` program, so none of these need an extra package.
 
 ## Which npm scripts does the Atlas backend have?
 
@@ -36,9 +36,9 @@ The Atlas backend sends every request down one path: routes, then middleware, th
 
 - `server.js` starts the HTTP server and handles start-up errors and shutdown.
 - `app.js` builds the Express app: security settings, limits, body reading, routers, and error handling.
-- `routes/` (4 files) says which middleware and which controller handle each method and address.
+- `routes/` (5 files) says which middleware and which controller handle each method and address.
 - `middleware/` (7 files) holds the checks that run before a controller: login, permissions, uploads, rate limits, and the final error handler.
-- `controllers/` (4 files) decides what should happen for each request.
+- `controllers/` (5 files) decides what should happen for each request.
 - `models/` (7 files) holds all the SQL, one file per table.
 - `utils/` holds shared helpers such as input checks and file checks.
 - `config/` reads the settings and builds the database pool and the Firebase Admin connection.
@@ -69,6 +69,7 @@ The Atlas backend keeps shared helpers in `backend/src/utils/` and settings in `
 - `utils/zipReader.js`: opens Word and PowerPoint files, which are ZIP archives.
 - `utils/materialContent.js`: turns a stored file into material Gemini can read.
 - `utils/gemini.js`: asks Google Gemini to write flashcards.
+- `utils/rem.js`: passes a question from the Atlas Explorer chat to Rem RaaS and returns its answer.
 - `utils/rateLimitStore.js`: keeps some rate limit counts in Postgres.
 - `config/env.js`: reads `backend/.env`, checks it, and refuses to start on bad settings.
 - `config/db.js`: the one shared database pool of the API.
@@ -77,13 +78,14 @@ The Atlas backend keeps shared helpers in `backend/src/utils/` and settings in `
 
 ## Which outside systems does the Atlas backend talk to?
 
-The Atlas backend talks to five things outside its own code:
+The Atlas backend talks to six things outside its own code:
 
 1. **PostgreSQL** holds all data: users, study reviewers, upvotes, views, saved items with their notes, flashcards, reports, and some rate limit counts.
 2. **The uploads folder on disk** (`UPLOAD_DIR`, by default `backend/uploads/`) holds the uploaded files under random names. A study reviewer is a database row plus one file, and the folder is created at start-up if it is missing.
 3. **Firebase Authentication** is used only to check login tokens with Google's public keys. Atlas never receives or stores passwords.
 4. **Google Gemini** is called only when a student makes flashcards. Without `GEMINI_API_KEY`, that one feature answers that it is not set up, and everything else keeps working.
 5. **ClamAV**, the antivirus, is used only when `CLAMAV_MODE` is `daemon` or `command`.
+6. **Rem RaaS**, the docs chat service, is called only for `POST /api/ask`, the Atlas Explorer chat. Without `RAAS_URL` and `RAAS_KEY`, that one address answers that it is not set up, and everything else keeps working.
 
 The Atlas backend does not use Firestore, Firebase Storage, or any email service.
 
@@ -94,11 +96,11 @@ The Atlas backend does not use Firestore, Firebase Storage, or any email service
 1. **Trust proxy**: when `TRUST_PROXY=true`, Express trusts exactly one proxy (`app.set('trust proxy', 1)`), so `req.ip` is the visitor's address, not the proxy's.
 2. **No X-Powered-By**: `app.disable('x-powered-by')` stops the API from saying it runs Express.
 3. **helmet()**: adds protective response headers.
-4. **cors**: allows browser calls only from `FRONTEND_ORIGIN`, with the methods GET, POST, PUT, DELETE and the headers Authorization and Content-Type. Browser preflight (OPTIONS) requests are answered here.
+4. **cors**: allows browser calls only from `FRONTEND_ORIGIN`, with the methods GET, POST, PUT, DELETE and the headers Authorization and Content-Type. The one exception is `/api/ask`, which allows any origin, POST only, with the header Content-Type. Browser preflight (OPTIONS) requests are answered here.
 5. **generalLimiter**: at most 600 requests per 15 minutes per visitor.
 6. **express.json**: reads JSON bodies of up to 512 KB.
 7. **GET /api/health**: answers `{ "status": "ok" }`.
-8. **Routers**: `/api/reviewers`, `/api/me`, `/api/saved`, and `/api/admin`, each with its own middleware chain.
+8. **Routers**: `/api/reviewers`, `/api/me`, `/api/saved`, `/api/admin`, and `/api/ask`, each with its own middleware chain.
 9. **notFoundHandler**: a 404 for any address no route matched.
 10. **errorHandler**: turns every error into the standard error reply.
 
@@ -165,6 +167,7 @@ One more check only warns: with `NODE_ENV=production` and `CLAMAV_MODE=off`, it 
 - `GEMINI_MODEL`: by default `gemini-3.5-flash-lite`.
 - `CLAMAV_MODE`: `off` (the default), `daemon`, or `command`.
 - `CLAMAV_SOCKET`: where the ClamAV service listens, for `daemon` mode.
+- `RAAS_URL` and `RAAS_KEY`: the Rem RaaS docs service and its secret key, for the Explorer chat; empty turns the chat off.
 
 `NODE_ENV=production` is set by whatever starts the API on the server; it hides error details from replies.
 

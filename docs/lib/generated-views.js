@@ -212,10 +212,19 @@ function endpointView(AX, ep, fnById, summaries) {
       },
     });
   }
+  if (calls.indexOf('util:rem') !== -1) {
+    deps.push({
+      place: 'right', label: 'ASK REM', style: 'link',
+      node: {
+        id: 'rem', tag: 'EXT', name: 'Rem RaaS', sub: 'answers from the Atlas docs', treat: 'external',
+        piece: 'ext:rem', term: 'rem-raas', opens: 'f-docs',
+      },
+    });
+  }
   // at most 9 boxes at level 1: when the chain is long, the files box and then the
-  // database appear from level 2 (Gemini, when used, stays: it is why the endpoint exists)
+  // database appear from level 2 (Gemini or Rem, when used, stays: it is why the endpoint exists)
   let room = 9 - (ep.chain.length + 3);
-  const keepOrder = ['gemini', 'db', 'files'];
+  const keepOrder = ['gemini', 'rem', 'db', 'files'];
   for (let k = 0; k < keepOrder.length; k++) {
     for (let d = 0; d < deps.length; d++) {
       if (deps[d].node.id === keepOrder[k]) {
