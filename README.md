@@ -85,22 +85,6 @@ Logged-in users also get private study tools:
 - If an uploader deletes a study reviewer, people who saved it keep their notes and flashcards;
   only the file is gone.
 
-## Documentation and the Atlas Explorer
-
-`docs/knowledge/` explains every part of Atlas in plain Markdown, one topic per file: the
-website, the API and each endpoint, the database, uploads and file safety, search, flashcards,
-reports, rate limits, hosting, the server, deployment, local development, troubleshooting, and a
-glossary. The same files feed **Rem**, the chat assistant of the Atlas Explorer.
-
-The **Atlas Explorer** is one standalone HTML file that teaches the whole project: zoomable
-diagrams of the architecture, the request pipeline, the data model and database schema, the
-processes and data flows, every endpoint and every page, plus all the docs, the glossary, search
-and the Rem chat. Build it with `node docs/build-explorer.js`. It lands in `docs/dist/`, which git
-ignores because it is build output. The page holds no key: its chat asks the Atlas API
-(`POST /api/ask`), which keeps the Rem key on the server, so the file can be shared freely.
-`docs/README.md` explains building it, sending
-the docs to Rem, and writing docs and diagrams.
-
 ## Architecture
 
 ```
@@ -415,9 +399,8 @@ website (`FRONTEND_ORIGIN`), so a frontend running on `localhost` must use a loc
 **Recommended: run the backend on the same VPS as Postgres** and connect through `localhost`. The
 database port then never needs to be open to the internet.
 
-The live server has used Envoy Gateway in k3s as its front door since 2026-10-16 (see
-`docs/knowledge/hosting-and-traffic-path.md`). The steps below use nginx, which still works for
-a plain VPS without Kubernetes.
+The live server has used Envoy Gateway in k3s as its front door since 2026-10-16. The steps
+below use nginx, which still works for a plain VPS without Kubernetes.
 
 1. **Copy the project** to the server and install: `cd backend && npm ci --omit=dev`.
 2. **Backend settings** in `backend/.env`:
