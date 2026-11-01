@@ -85,6 +85,20 @@ Logged-in users also get private study tools:
 - If an uploader deletes a study reviewer, people who saved it keep their notes and flashcards;
   only the file is gone.
 
+## Documentation and the Atlas Explorer
+
+`docs/knowledge/` explains every part of Atlas in plain Markdown, one topic per file: the
+website, the API and each endpoint, the database, uploads and file safety, search, flashcards,
+reports, rate limits, hosting, the server, deployment, local development, troubleshooting, and a
+glossary. The same files feed **Rem**, the chat assistant of the Atlas Explorer.
+
+The **Atlas Explorer** is one standalone HTML file that teaches the whole project: zoomable
+diagrams of the architecture, the request pipeline, the data model and database schema, the
+processes and data flows, every endpoint and every page, plus all the docs, the glossary, search
+and the Rem chat. Build it with `node docs/build-explorer.js`. It lands in `docs/dist/`, which git
+ignores because the page contains the chat key. `docs/README.md` explains building it, sending
+the docs to Rem, and writing docs and diagrams.
+
 ## Architecture
 
 ```
@@ -211,7 +225,7 @@ placeholder database URL.
 | `UPLOAD_DIR` | Folder for uploaded files. Default `./uploads`. |
 | `MAX_FILE_SIZE_MB` | Largest upload allowed. Default `10`. |
 | `MAX_UPLOADS_PER_USER` | How many study reviewers one person may have at a time. Default `50`. Deleting one frees a place; replacing a file does not count. |
-| `TRUST_PROXY` | `true` when the API is behind nginx, so rate limiting sees each visitor's real IP. |
+| `TRUST_PROXY` | `true` when the API is behind one reverse proxy (Envoy Gateway on the live server, or nginx), so rate limiting sees each visitor's real IP. |
 | `GEMINI_API_KEY` | Google Gemini key for making flashcards (from https://aistudio.google.com/apikey). **Secret: server only, never in `frontend/.env`.** Leave empty to turn flashcards off; everything else keeps working. |
 | `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
 | `CLAMAV_MODE` | Virus scan for uploads: `off` (default, development only), `daemon` (the ClamAV service; fast, keeps about 1-1.5 GB of RAM in use), or `command` (runs `clamscan` per upload; low RAM, 10-30 s per upload). In production, `off` logs a warning at start. |
@@ -367,7 +381,8 @@ The free **Spark** plan is enough.
 - **Old address:** https://learnhub-ea4291.web.app (the project's default site, target `old`)
   sends every page to the same page on the new address. Firebase cannot delete a default site.
 - **API:** https://api.140-245-60-8.sslip.io (the backend on the VPS under pm2 as `learnhub-api`,
-  behind nginx with a Let's Encrypt certificate). `sslip.io` is a free service that turns the
+  behind Envoy Gateway in the server's k3s cluster, with a Let's Encrypt certificate from
+  cert-manager; nginx did this job until 2026-10-16). `sslip.io` is a free service that turns the
   name into the server's IP address; swap it for a real domain when you have one.
 - `frontend/.env.production` holds the live API address and the sign-in domain, and is used only
   by `npm run build`. `frontend/.env` keeps pointing at your local backend for development.
@@ -395,6 +410,10 @@ website (`FRONTEND_ORIGIN`), so a frontend running on `localhost` must use a loc
 
 **Recommended: run the backend on the same VPS as Postgres** and connect through `localhost`. The
 database port then never needs to be open to the internet.
+
+The live server has used Envoy Gateway in k3s as its front door since 2026-10-16 (see
+`docs/knowledge/hosting-and-traffic-path.md`). The steps below use nginx, which still works for
+a plain VPS without Kubernetes.
 
 1. **Copy the project** to the server and install: `cd backend && npm ci --omit=dev`.
 2. **Backend settings** in `backend/.env`:

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Atlas Explorer: the whole Atlas project in one page, with zoomable diagrams, the docs, a glossary and Rem, a chat that answers from the docs.">
+<meta name="color-scheme" content="light dark">
+<title>Atlas Explorer</title>
+<link rel="icon" type="image/png" href="{{ICON}}">
+<script>
+  // Picks the theme before the page is drawn: a saved choice, else the device setting.
+  (function () {
+    var theme = null;
+    try {
+      theme = window.localStorage.getItem('atlas-theme');
+    } catch (err) {
+      theme = null;
+    }
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+{{STYLES}}
+</style>
+</head>
+<body data-page="view-page">
+<a class="skip" href="#main">Skip to the content</a>
+
+<header class="top">
+  <a class="brand" href="#/" aria-label="Atlas Explorer, the overview">
+    <img class="brand-mark" src="{{ICON}}" alt="" width="28" height="28">
+    <span class="brand-name">Atlas</span>
+    <span class="brand-sub">Explorer</span>
+  </a>
+  <nav class="top-nav" aria-label="Explorer">
+    <button class="nav-btn" id="explore-btn" type="button" aria-expanded="false" aria-controls="explore-menu">Explore</button>
+    <a class="nav-btn" href="#/docs">Docs</a>
+    <a class="nav-btn" href="#/terms">Glossary</a>
+    <button class="nav-btn" id="find-btn" type="button" aria-keyshortcuts="/ Control+K">Search <kbd>/</kbd></button>
+  </nav>
+  <div class="top-tools">
+    <button class="nav-btn" id="theme-btn" type="button" aria-pressed="false">Dark mode <span id="theme-state" class="muted">Off</span></button>
+    <button class="nav-btn" id="help-btn" type="button" aria-keyshortcuts="?">Keys <kbd>?</kbd></button>
+  </div>
+  <div class="explore-menu" id="explore-menu" hidden></div>
+</header>
+
+<nav class="track" aria-label="Where you are">
+  <button class="track-btn" id="back-btn" type="button">&larr; Back</button>
+  <button class="track-btn" id="up-btn" type="button">&uarr; Up a level</button>
+  <ol class="crumbs" id="crumbs"></ol>
+</nav>
+
+<main id="main" tabindex="-1">
+  <section id="view-page" class="view-page" aria-labelledby="view-title">
+    <div class="view-head">
+      <p class="eyebrow-text" id="view-eyebrow"></p>
+      <h1 class="view-title" id="view-title" tabindex="-1"></h1>
+      <p class="view-purpose" id="view-purpose"></p>
+      <div class="view-actions" id="view-actions"></div>
+    </div>
+    <div class="stage-wrap">
+      <div class="stage" id="stage" role="region" aria-label="Diagram. Drag to move, scroll or pinch to zoom, Tab to move between parts."></div>
+      <div class="toolbar" role="toolbar" aria-label="Zoom">
+        <button class="tool" id="zoom-out" type="button" aria-label="Zoom out" aria-keyshortcuts="-">&minus;</button>
+        <span class="tool-text" id="zoom-text" aria-live="off">100%</span>
+        <button class="tool" id="zoom-in" type="button" aria-label="Zoom in" aria-keyshortcuts="+">+</button>
+        <button class="tool wide" id="zoom-fit" type="button" aria-keyshortcuts="0">Fit</button>
+        <button class="tool wide" id="details-btn" type="button" aria-pressed="false" aria-keyshortcuts="D">All details</button>
+        <button class="tool wide" id="outline-btn" type="button" aria-expanded="false" aria-controls="outline" aria-keyshortcuts="O">Outline</button>
+        <span class="tool-text level" id="level-text">Detail 1 of 3</span>
+      </div>
+      <section class="outline" id="outline" hidden aria-labelledby="outline-heading">
+        <div class="panel-head">
+          <h2 class="panel-title" id="outline-heading" tabindex="-1">This diagram as a list</h2>
+          <button class="close" id="outline-close" type="button" aria-label="Close the outline">&times;</button>
+        </div>
+        <div id="outline-body"></div>
+      </section>
+      <div class="hint" id="hint" hidden>
+        <p><strong>New here?</strong> Scroll or pinch to zoom: more details appear as you get closer. Click any box to open its full picture. Rest on a dotted term to see what it means. The Up and Back buttons above always take you back.</p>
+        <button class="button" id="hint-close" type="button">Got it</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="doc-page" class="doc-page" hidden>
+    <nav class="doc-index" id="doc-index" aria-label="Docs"></nav>
+    <article class="doc-body" id="doc-body" data-stem=""></article>
+    <nav class="doc-outline" id="doc-outline" aria-label="On this page"></nav>
+  </section>
+
+  <section id="hub-page" class="hub-page" hidden aria-labelledby="hub-title">
+    <p class="eyebrow-text" id="hub-eyebrow"></p>
+    <h1 class="view-title" id="hub-title" tabindex="-1"></h1>
+    <p class="view-purpose" id="hub-purpose"></p>
+    <div id="hub-body"></div>
+  </section>
+</main>
+
+<aside class="sheet" id="sheet" hidden aria-labelledby="sheet-name">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow-text" id="sheet-kind"></p>
+      <h2 class="panel-title" id="sheet-name" tabindex="-1"></h2>
+      <p class="code" id="sheet-code"></p>
+    </div>
+    <button class="close" id="sheet-close" type="button" aria-label="Close the details">&times;</button>
+  </div>
+  <div id="sheet-body"></div>
+</aside>
+
+<div class="tip" id="tip" role="dialog" hidden></div>
+
+<button class="bubble" id="bubble" type="button" aria-expanded="false" aria-controls="chat" aria-keyshortcuts="C">
+  <span class="bubble-mark" aria-hidden="true">R</span>
+  <span>Ask Rem</span>
+</button>
+<section class="chat" id="chat" role="dialog" aria-labelledby="chat-title" hidden>
+  <div class="panel-head">
+    <div>
+      <h2 class="panel-title" id="chat-title">Rem</h2>
+      <p class="muted small">Answers from the Atlas docs</p>
+    </div>
+    <div class="chat-tools">
+      <button class="button-plain" id="chat-new" type="button">New chat</button>
+      <button class="close" id="chat-close" type="button" aria-label="Close the chat">&times;</button>
+    </div>
+  </div>
+  <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+  <form class="chat-form" id="chat-form">
+    <label class="sr-only" for="chat-input">Your question for Rem</label>
+    <textarea class="chat-input" id="chat-input" rows="2" maxlength="2000" placeholder="Ask about any part of Atlas"></textarea>
+    <div class="chat-row">
+      <span class="muted small" id="chat-count">0 / 2000</span>
+      <button class="button-green" id="chat-send" type="submit">Ask</button>
+    </div>
+    <p class="muted small" id="chat-note">Enter sends, Shift+Enter adds a line. Questions go to the Rem service and Google Gemini.</p>
+  </form>
+</section>
+
+<div class="find" id="find" hidden>
+  <div class="find-box" role="dialog" aria-label="Search the explorer">
+    <label class="sr-only" for="find-input">Search diagrams, parts, terms and docs</label>
+    <input class="find-input" id="find-input" type="text" role="combobox" aria-expanded="true" aria-controls="find-list" aria-autocomplete="list" autocomplete="off" placeholder="Search diagrams, parts, terms and docs">
+    <p class="muted small" id="find-status" aria-live="polite"></p>
+    <ul class="find-list" id="find-list" role="listbox" aria-label="Results"></ul>
+  </div>
+</div>
+
+<dialog class="help" id="help" aria-labelledby="help-title">
+  <div class="panel-head">
+    <h2 class="panel-title" id="help-title">Keys and tips</h2>
+    <button class="close" id="help-close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <dl class="keys">
+    <dt><kbd>+</kbd> <kbd>&minus;</kbd> <kbd>0</kbd></dt><dd>Zoom in, out, and fit the whole diagram</dd>
+    <dt>Arrows</dt><dd>Move around (hold Shift to move faster)</dd>
+    <dt><kbd>D</kbd></dt><dd>Show every detail at once</dd>
+    <dt><kbd>O</kbd></dt><dd>The diagram as a list (outline)</dd>
+    <dt><kbd>Tab</kbd> <kbd>Enter</kbd></dt><dd>Move between parts and open one</dd>
+    <dt><kbd>I</kbd></dt><dd>Details of the focused part</dd>
+    <dt><kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd></dt><dd>Search</dd>
+    <dt><kbd>C</kbd></dt><dd>Open or close the Rem chat</dd>
+    <dt><kbd>T</kbd></dt><dd>Light or dark theme</dd>
+    <dt><kbd>Esc</kbd></dt><dd>Close what is open, or go up a level</dd>
+  </dl>
+  <p class="muted small">Built {{BUILT}} from Atlas commit {{COMMIT}}.</p>
+</dialog>
+
+<div class="sr-only" id="announce" aria-live="polite"></div>
+
+<script type="application/json" id="atlas-data">{{DATA}}</script>
+<script>
+{{SCRIPTS}}
+</script>
+</body>
+</html>
