@@ -69,7 +69,8 @@ const listReviewers = async (req, res, next) => {
       grade: validate.parseFilter(req.query.grade, categories.GRADES),
       quarter: validate.parseFilter(req.query.quarter, categories.QUARTERS),
       subject: validate.parseFilter(req.query.subject, categories.ALL_SUBJECTS),
-      searchPattern: validate.buildSearchPattern(searchText),
+      searchWords: validate.buildSearchWords(searchText),
+      searchStart: validate.buildSearchStart(searchText),
     };
 
     // Ask for one extra row. If it comes back, there is at least one more page.

@@ -16,44 +16,68 @@ const SELECT_REVIEWERS = `
   INNER JOIN users u ON u.id = r.author_id
   LEFT JOIN upvotes up ON up.reviewer_id = r.id`;
 
-// An empty string for any of $1 to $5 means "do not filter by this".
-// "filters" is { strand, grade, quarter, subject, searchPattern }.
+// An empty string for any of $1 to $4, or an empty list for $5, means "do not filter by this".
+// "filters" is { strand, grade, quarter, subject, searchWords, searchStart }.
 // A strand also shows the "All strands" reviewers, since every strand takes those subjects.
 // Reviewers hidden by reports never appear in the feed.
+// Search: $5 is a list of word patterns (see buildSearchWords in utils/validate.js).
+// A reviewer matches when no word is missing from its title, description, tags,
+// subject, strand, material type, and author name taken together. ~* ignores case.
 const FILTER_BY_CATEGORY_AND_SEARCH = `
   r.is_hidden = false
   AND ($1 = '' OR r.strand = $1 OR r.strand = 'All strands')
   AND ($2 = '' OR r.grade = $2)
   AND ($3 = '' OR r.quarter = $3)
   AND ($4 = '' OR r.subject = $4)
-  AND ($5 = '' OR r.title ILIKE $5 OR r.description ILIKE $5 OR r.tags ILIKE $5)`;
+  AND NOT EXISTS (
+    SELECT 1 FROM unnest($5::text[]) AS word
+    WHERE NOT concat_ws(' ', r.title, r.description, r.tags, r.subject, r.strand,
+                        r.material_type, u.display_name) ~* word
+  )`;
+
+// How well a reviewer matches the search, used to put the best matches first.
+//   - A title that starts with the whole search ($8, see buildSearchStart) gets
+//     100 points, so it always comes before every other match.
+//   - Then each word earns points for the best place it was found: 3 in the title,
+//     2 in the tags or subject, 1 anywhere else (the filter above already made sure
+//     every word is somewhere).
+// With no search, every reviewer scores 0.
+const SEARCH_SCORE = `
+  (CASE WHEN $8 <> '' AND r.title ~* $8 THEN 100 ELSE 0 END
+   + (SELECT COALESCE(SUM(
+        CASE
+          WHEN r.title ~* word THEN 3
+          WHEN concat_ws(' ', r.tags, r.subject) ~* word THEN 2
+          ELSE 1
+        END), 0)
+      FROM unnest($5::text[]) AS word))`;
 
 const filterValues = (filters) => {
-  return [filters.strand, filters.grade, filters.quarter, filters.subject, filters.searchPattern];
+  return [filters.strand, filters.grade, filters.quarter, filters.subject, filters.searchWords];
 };
 
 const listNewReviewers = async (filters, limit, offset) => {
-  // List reviewers, newest first.
+  // List reviewers, newest first (best search matches first while searching).
   const result = await pool.query(
     `${SELECT_REVIEWERS}
      WHERE ${FILTER_BY_CATEGORY_AND_SEARCH}
      GROUP BY r.id, u.id
-     ORDER BY r.created_at DESC, r.id DESC
+     ORDER BY ${SEARCH_SCORE} DESC, r.created_at DESC, r.id DESC
      LIMIT $6 OFFSET $7`,
-    filterValues(filters).concat([limit, offset])
+    filterValues(filters).concat([limit, offset, filters.searchStart])
   );
   return result.rows;
 };
 
 const listTopReviewers = async (filters, limit, offset) => {
-  // List reviewers with the most upvotes first.
+  // List reviewers with the most upvotes first (best search matches first while searching).
   const result = await pool.query(
     `${SELECT_REVIEWERS}
      WHERE ${FILTER_BY_CATEGORY_AND_SEARCH}
      GROUP BY r.id, u.id
-     ORDER BY upvote_count DESC, r.created_at DESC, r.id DESC
+     ORDER BY ${SEARCH_SCORE} DESC, upvote_count DESC, r.created_at DESC, r.id DESC
      LIMIT $6 OFFSET $7`,
-    filterValues(filters).concat([limit, offset])
+    filterValues(filters).concat([limit, offset, filters.searchStart])
   );
   return result.rows;
 };
