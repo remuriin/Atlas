@@ -23,5 +23,5 @@ AX.addView({
 AX.addView({
   id: 'endpoints', parent: 'backend', type: 'catalogue', group: 'Backend',
   title: 'Every API endpoint', eyebrow: 'ENDPOINT CATALOGUE',
-  purpose: 'All 30 addresses the Atlas API answers, who may call each one, and the checks each request passes, in order. Click a path for its own diagram.',
+  purpose: 'All 31 addresses the Atlas API answers, who may call each one, and the checks each request passes, in order. Click a path for its own diagram.',
 });

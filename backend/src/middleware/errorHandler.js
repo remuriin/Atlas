@@ -4,7 +4,7 @@ const multer = require('multer');
 const env = require('../config/env');
 
 // Statuses whose message we wrote ourselves: every 4xx, plus 502 and 503, which are
-// used when the flashcard service (Gemini) fails or is not set up.
+// used when the flashcard service (Gemini) or the docs chat (Rem) fails or is not set up.
 const SAFE_STATUSES = [502, 503];
 for (let status = 400; status < 500; status += 1) {
   SAFE_STATUSES.push(status);

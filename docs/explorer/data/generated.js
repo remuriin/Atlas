@@ -35,6 +35,11 @@ module.exports = {
       exits: [['429', '10 sets a day used']],
       lines: ['10 per 24 h per account', 'Failed tries are given back'],
     },
+    askLimiter: {
+      ask: 'Questions left?', piece: 'mw:askLimiter', term: 'rate-limit',
+      exits: [['429', '30 in 15 min used']],
+      lines: ['30 per 15 min per IP'],
+    },
     loadReviewer: {
       ask: 'Reviewer exists?', piece: 'mw:loadReviewer', term: 'study-reviewer',
       exits: [['400', 'bad id'], ['404', 'not found']],
@@ -84,6 +89,7 @@ module.exports = {
     'ep:post-admin-reviewers-id-restore': ['p-report', 's-reviewer'],
     'ep:put-admin-reviewers-id-category': ['p-report', 's-reviewer'],
     'ep:delete-admin-reviewers-id': ['p-report', 's-reviewer'],
+    'ep:post-ask': ['f-docs'],
   },
   pages: {
     HomePage: ['l-search'],

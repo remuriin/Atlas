@@ -154,13 +154,14 @@ The first and third limits are counted in memory and reset when the API restarts
 
 ## Why does the Atlas Explorer chat say it is busy or offline?
 
-The chat in the Atlas Explorer page is called Rem (`docs/explorer/ui/chat.js`). It sends each question to the Rem RaaS service at RAAS_URL, using the RAAS_KEY that was built into the page, and the service has Google Gemini answer from the Atlas docs. Its messages:
+The chat in the Atlas Explorer page is called Rem (`docs/explorer/ui/chat.js`). It sends each question to the Atlas API's `POST /api/ask`, which passes it to the Rem RaaS service with the RAAS_KEY in the server's `backend/.env`, and the service has Google Gemini answer from the Atlas docs. Its messages:
 
-- "Rem is busy answering others. Wait a few seconds and ask again.": the service answered 429.
-- "Rem is restarting or the AI is busy. Try again in a moment.": the service answered 503.
-- "Could not reach Rem. It may be busy (too many questions at once) or offline. Try again in a moment.": no answer arrived although the computer is online, so the service is down or RAAS_URL was wrong when the page was built.
+- "You have asked a lot of questions. Please wait a few minutes and try again.": the Atlas API's limit of 30 questions per 15 minutes per IP address (`askLimiter`) was reached.
+- "The docs chat is not set up on this server yet.": RAAS_URL or RAAS_KEY is empty in the server's `backend/.env`; fill both in and restart the API.
+- "Rem is busy right now. Please try again in a moment.": the Rem service answered 429 or 503.
+- "Rem could not answer just now (error 502). Try again in a moment.": the Rem service failed in another way, for example a wrong RAAS_URL or an old RAAS_KEY on the server; the API log shows Rem's status.
+- "Could not reach Rem. It may be busy (too many questions at once) or offline. Try again in a moment.": no answer arrived although the computer is online, so the Atlas API is down or the API address was wrong when the page was built.
 - "You are offline. The diagrams and docs still work; the chat needs the internet."
 - "Rem took too long to answer. Try a shorter question.": no answer within 60 seconds.
-- "This copy of the explorer has an old chat key. Ask whoever gave you the file for a fresh one.": the key was changed; update `docs/.env` and run `node docs/build-explorer.js` again.
 
-A page built without RAAS settings shows "The chat is not set up in this copy of the explorer." The answer "The Atlas docs do not cover this." means the docs have nothing on it; after changing `docs/knowledge/`, run `node docs/ingest-docs.js`.
+A page built without an Atlas API address shows "The chat is not set up in this copy of the explorer." The answer "The Atlas docs do not cover this." means the docs have nothing on it; after changing `docs/knowledge/`, run `node docs/ingest-docs.js`.

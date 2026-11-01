@@ -86,10 +86,11 @@ The front-door objects for the Atlas API are files in the author's private Fleet
 
 ## What does the Atlas API contact on the internet?
 
-The Atlas API makes only two kinds of outgoing calls, both over HTTPS:
+The Atlas API makes only three kinds of outgoing calls, all over HTTPS:
 
 - Google's public keys. `firebase-admin` (set up in `backend/src/config/firebaseAdmin.js`) downloads Google's public signing keys and checks every Firebase ID token against them. Only the project id is configured, and no service-account key file is stored on the server. The keys are cached, so this is not one download per request.
 - Google Gemini. Making flashcards sends the study material from the server to the Gemini API (`backend/src/utils/gemini.js`): PDFs and images as the file itself, text files as text, and Word or PowerPoint files as their extracted text. `GEMINI_API_KEY` exists only in the server's `backend/.env`, never in the website. Without a key, only flashcards stop working.
+- Rem RaaS. A question to the Atlas Explorer chat (`POST /api/ask`) is passed from the server to the Atlas docs service at `RAAS_URL` (`backend/src/utils/rem.js`), with up to 6 earlier chat turns. `RAAS_KEY` exists only in the server's `backend/.env`, never in the Explorer page. Without these settings, only the chat stops working.
 
 Firebase Authentication works between the browser and Firebase: sign-up, login, Google sign-in and password-reset emails never pass through the Atlas API, and the API never sees a password. The API receives only the signed ID token that the browser sends with each request.
 

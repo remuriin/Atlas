@@ -9,6 +9,7 @@ const reviewersRoutes = require('./routes/reviewersRoutes');
 const meRoutes = require('./routes/meRoutes');
 const savedRoutes = require('./routes/savedRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const askRoutes = require('./routes/askRoutes');
 
 const app = express();
 
@@ -25,13 +26,27 @@ app.disable('x-powered-by');
 app.use(helmet());
 
 // Only our own frontend may call this API from a browser.
-app.use(
-  cors({
-    origin: env.frontendOrigin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Authorization', 'Content-Type'],
-  })
-);
+const siteCors = cors({
+  origin: env.frontendOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+});
+
+// Except /api/ask: the Atlas Explorer is a file opened from disk or shared around, so any
+// page may ask there. It takes no login and changes nothing, so this opens nothing else.
+const askCors = cors({
+  origin: '*',
+  methods: ['POST'],
+  allowedHeaders: ['Content-Type'],
+});
+
+app.use((req, res, next) => {
+  if (req.path === '/api/ask') {
+    askCors(req, res, next);
+  } else {
+    siteCors(req, res, next);
+  }
+});
 
 app.use(rateLimit.generalLimiter);
 
@@ -48,6 +63,7 @@ app.use('/api/reviewers', reviewersRoutes);
 app.use('/api/me', meRoutes);
 app.use('/api/saved', savedRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ask', askRoutes);
 
 app.use(errorHandler.notFoundHandler);
 app.use(errorHandler.errorHandler);

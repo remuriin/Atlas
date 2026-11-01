@@ -1,6 +1,6 @@
-// Rem, the chat bubble in the corner of every page. It sends your question to the
-// Atlas docs service on Rem RaaS, which finds the matching parts of the Atlas docs and
-// has Google Gemini write the answer from them. Answers list the doc sections they
+// Rem, the chat bubble in the corner of every page. It sends your question to the Atlas
+// API (POST /api/ask), which passes it on to the Atlas docs service on Rem RaaS. Rem finds
+// the matching parts of the Atlas docs and has Google Gemini write the answer from them. Answers list the doc sections they
 // came from; click one to read it here.
 (function () {
   var STORE_KEY = 'atlas-explorer-chat';
@@ -197,14 +197,12 @@
   }
 
   function errorFor(status, body) {
-    if (status === 400 && body && body.error) {
-      return body.error;
-    }
-    if (status === 401) {
-      return 'This copy of the explorer has an old chat key. Ask whoever gave you the file for a fresh one.';
+    // the Atlas API's own messages are written for visitors
+    if ((status === 400 || status === 429 || status === 503) && body && body.error && body.error.message) {
+      return body.error.message;
     }
     if (status === 429) {
-      return 'Rem is busy answering others. Wait a few seconds and ask again.';
+      return 'You have asked a lot of questions. Wait a few minutes and ask again.';
     }
     if (status === 503) {
       return 'Rem is restarting or the AI is busy. Try again in a moment.';
@@ -238,10 +236,10 @@
     var timeout = window.setTimeout(function () {
       controller.abort();
     }, TIMEOUT);
-    fetch(cfg.url + '/query', {
+    fetch(cfg.url + '/api/ask', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + cfg.key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: text, topK: 6, markdown: true, history: past }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: text, history: past }),
       signal: controller.signal,
     }).then(function (response) {
       return response.json().catch(function () {

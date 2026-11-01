@@ -6,10 +6,11 @@
 //                                               (adds docs/private/*.md, never for sharing)
 //   node docs/build-explorer.js --snapshots  -> also one static page per diagram and zoom
 //                                               level in docs/dist/snapshots (for self_check.py)
-//   node docs/build-explorer.js --no-chat    -> leaves the chat key out
+//   node docs/build-explorer.js --no-chat    -> leaves the chat out
 //
-// The chat key comes from docs/.env (RAAS_URL, RAAS_KEY), which git ignores. The built
-// page contains the key, so docs/dist is ignored too: share the file, never commit it.
+// The chat asks the Atlas API (POST /api/ask), which passes the question on to Rem with a
+// key that stays on the server. The page holds no secret, so it can be shared freely.
+// The API address is VITE_API_URL from frontend/.env.production, or ATLAS_API_URL in docs/.env.
 const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
@@ -59,15 +60,16 @@ function chatConfig() {
     return null;
   }
   const settings = envFile.read(path.join(DOCS, '.env'));
-  if (!settings.RAAS_URL || !settings.RAAS_KEY) {
-    warn('docs/.env has no RAAS_URL and RAAS_KEY: the chat is off in this build (everything else works)');
+  const site = envFile.read(path.join(ROOT, 'frontend', '.env.production'));
+  const url = (settings.ATLAS_API_URL || site.VITE_API_URL || '').replace(/\/+$/, '');
+  if (url === '') {
+    warn('no Atlas API address (VITE_API_URL in frontend/.env.production): the chat is off in this build');
     return null;
   }
-  const url = settings.RAAS_URL.replace(/\/+$/, '');
-  if (!/^https:\/\/.+\/i\/[0-9a-f-]{36}$/.test(url)) {
-    fail('RAAS_URL in docs/.env must look like https://rag.remservers.me/i/<service id>');
+  if (!/^https?:\/\/[^/]+$/.test(url)) {
+    fail('the Atlas API address must look like https://api.example.com, not ' + url);
   }
-  return { url: url, key: settings.RAAS_KEY };
+  return { url: url };
 }
 
 // ---------- docs and glossary ----------
@@ -593,11 +595,8 @@ function main() {
     return id + '  |  ' + piece.kind + '  |  ' + (piece.title || piece.name);
   });
   fs.writeFileSync(path.join(DIST, 'pieces-index.txt'), index.join(String.fromCharCode(10)) + String.fromCharCode(10));
-  // the public page must not carry private server details (the chat key is allowed)
+  // the public page must not carry private server details or a key
   let scanned = result.scanHtml;
-  if (result.data.chat) {
-    scanned = scanned.split(result.data.chat.key).join('');
-  }
   // the fonts and the icon are base64 data, where short strings turn up by chance
   scanned = scanned.replace(/data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+/g, 'data:,');
   const leaks = safety.scan(scanned, 'built page', safety.privateStrings(DOCS));

@@ -96,7 +96,9 @@ The **Atlas Explorer** is one standalone HTML file that teaches the whole projec
 diagrams of the architecture, the request pipeline, the data model and database schema, the
 processes and data flows, every endpoint and every page, plus all the docs, the glossary, search
 and the Rem chat. Build it with `node docs/build-explorer.js`. It lands in `docs/dist/`, which git
-ignores because the page contains the chat key. `docs/README.md` explains building it, sending
+ignores because it is build output. The page holds no key: its chat asks the Atlas API
+(`POST /api/ask`), which keeps the Rem key on the server, so the file can be shared freely.
+`docs/README.md` explains building it, sending
 the docs to Rem, and writing docs and diagrams.
 
 ## Architecture
@@ -230,6 +232,8 @@ placeholder database URL.
 | `GEMINI_MODEL` | The Gemini model that writes flashcards. Default `gemini-3.5-flash-lite`. |
 | `CLAMAV_MODE` | Virus scan for uploads: `off` (default, development only), `daemon` (the ClamAV service; fast, keeps about 1-1.5 GB of RAM in use), or `command` (runs `clamscan` per upload; low RAM, 10-30 s per upload). In production, `off` logs a warning at start. |
 | `CLAMAV_SOCKET` | `daemon` mode only: the ClamAV service's socket. Default `/var/run/clamav/clamd.ctl` (Ubuntu and Debian). |
+| `RAAS_URL` | Address of the "Atlas docs" service in the Rem RaaS dashboard, which answers the Atlas Explorer chat through `POST /api/ask`. Leave empty to turn the chat off; everything else keeps working. |
+| `RAAS_KEY` | A key of that service. **Secret: server only, never in `frontend/.env` or the Explorer page.** Leave empty to turn the chat off. |
 
 ### `frontend/.env` (template: `frontend/.env.example`)
 
@@ -424,6 +428,7 @@ a plain VPS without Kubernetes.
    - `FRONTEND_ORIGIN=https://atlas.example.com` (your real domain, no trailing slash)
    - `TRUST_PROXY=true`
    - `GEMINI_API_KEY=<your key>` (only needed for flashcards)
+   - `RAAS_URL=...` and `RAAS_KEY=<your key>` (only needed for the Atlas Explorer chat)
    - `CLAMAV_MODE=daemon` (or `command` on a server with less than 2 GB of RAM; check with `free -h`)
 3. **Install ClamAV** (about 15 minutes; `freshclam` downloads the virus list and keeps it updated):
 

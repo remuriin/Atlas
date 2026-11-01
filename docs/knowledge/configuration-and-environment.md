@@ -6,7 +6,7 @@ Atlas is configured with environment variables kept in small `.env` files: `back
 
 - Backend: `backend/src/config/env.js` loads only `backend/.env` (with the dotenv package) and checks it once at start. `backend/.env.local` is NOT loaded, so values put there have no effect. A variable already set in the process environment wins over the file, because dotenv does not overwrite it. Template: `backend/.env.example`.
 - Frontend: Vite reads `frontend/.env` for `npm run dev` and `npm run build`, and `npm run build` also reads `frontend/.env.production`, whose values win. Vite also reads `.env.local` files in `frontend/`. Only names that start with `VITE_` reach the website's code. Template: `frontend/.env.example`.
-- Atlas Explorer and docs ingest: `docs/.env` holds `RAAS_URL` and `RAAS_KEY`.
+- Atlas Explorer and docs ingest: `docs/.env` holds `RAAS_URL` and `RAAS_KEY` for the ingest script, plus the optional `ATLAS_API_URL` for the Explorer build.
 
 Git ignores `.env`, `.env.local` and `.env.*.local` files in every folder. The `.env.example` templates are committed with placeholders only, and `frontend/.env.production` is committed on purpose because everything in it is public. After changing a backend value, restart the API; after changing a frontend value, restart `npm run dev` or build again, because Vite reads the files only when it starts.
 
@@ -53,6 +53,17 @@ None of these is secret. FRONTEND_ORIGIN must match the browser's address exactl
 | `CLAMAV_SOCKET` | `daemon` mode only: the ClamAV service's socket | `/var/run/clamav/clamd.ctl`, the Ubuntu and Debian default | Only if different | No |
 
 Without GEMINI_API_KEY everything else keeps working, and making flashcards answers 503 "Flashcards are not set up on this server yet." The key is a secret: never put it in `frontend/.env` and never commit it. `daemon` asks the running ClamAV service, which is fast but keeps about 1 to 1.5 GB of RAM in use; `command` runs `clamscan` once per upload, which uses little RAM but takes 10 to 30 seconds per upload. Any other CLAMAV_MODE value stops the API at start. In production, `off` starts with the warning "Warning: CLAMAV_MODE is off, so uploads are not virus-scanned." When a scan cannot run, the upload is refused rather than let through unscanned.
+
+## Which docs chat settings does the Atlas backend read?
+
+The Atlas API passes questions from the Atlas Explorer chat (Rem) to the docs service on Rem RaaS through `POST /api/ask`, so the backend reads two optional settings:
+
+| Variable | What it controls | Default | Production | Secret |
+| --- | --- | --- | --- | --- |
+| `RAAS_URL` | Address of the Atlas docs service in the Rem RaaS dashboard | empty: the chat is off | Needed for the Explorer chat | No |
+| `RAAS_KEY` | A key of that service, sent by the server as a Bearer key | empty: the chat is off | Needed for the Explorer chat | Yes |
+
+When either value is empty, everything else keeps working and `POST /api/ask` answers 503 "The docs chat is not set up on this server yet." RAAS_KEY is a secret like GEMINI_API_KEY: it stays in the server's `backend/.env`, never reaches a browser, and is never committed. A trailing slash on RAAS_URL is removed.
 
 ## Which settings does the Atlas frontend read?
 
@@ -106,10 +117,11 @@ The Atlas Explorer tools in `docs/` read `docs/.env`:
 
 | Variable | What it holds | Secret |
 | --- | --- | --- |
-| `RAAS_URL` | Address of the Rem RaaS service, which answers the Explorer chat from the ingested docs | No |
-| `RAAS_KEY` | The key for that service | Yes |
+| `RAAS_URL` | Address of the Rem RaaS docs service, used by `node docs/ingest-docs.js` | No |
+| `RAAS_KEY` | The key for that service, used by `node docs/ingest-docs.js` | Yes |
+| `ATLAS_API_URL` | Optional: the Atlas API address the Explorer chat asks; when empty, the build uses VITE_API_URL from `frontend/.env.production` | No |
 
-`node docs/build-explorer.js` builds `docs/dist/atlas-explorer.html` and writes the key into that page, so the built page is as secret as the key: `docs/dist/` is ignored by git, and the page should only be shared with people who may use the key. `node docs/ingest-docs.js` sends the Markdown files in `docs/knowledge/` to the service. `docs/.env` is ignored by git, because the `.env` rule covers every folder; never commit it or paste the key anywhere public. After the key changes, update `docs/.env` and build the page again, because an older page still holds the old key. The pages in `docs/knowledge/` are public in the repository, so they must never contain secrets or private server details.
+`node docs/build-explorer.js` builds `docs/dist/atlas-explorer.html`. The page holds no key: its chat asks the Atlas API (`POST /api/ask`), which keeps its own RAAS_KEY in `backend/.env`, so the page can be shared freely. `docs/dist/` is ignored by git only because it is build output. `node docs/ingest-docs.js` sends the Markdown files in `docs/knowledge/` to the service. `docs/.env` is ignored by git, because the `.env` rule covers every folder; never commit it or paste the key anywhere public. The pages in `docs/knowledge/` are public in the repository, so they must never contain secrets or private server details.
 
 ## Which settings does the Atlas backup script read?
 
@@ -117,4 +129,4 @@ The Atlas Explorer tools in `docs/` read `docs/.env`:
 
 ## Which Atlas settings are secrets and where are they kept?
 
-The Atlas secrets are DATABASE_URL and MIGRATION_DATABASE_URL (they hold database passwords), GEMINI_API_KEY and RAAS_KEY, plus the psql variable `api_password`, which is typed once when `api-user.sql` runs and never stored in a file. They live only in the server's `backend/.env` and in each developer's own `backend/.env` and `docs/.env`; never in git, chat messages, screenshots or these docs. The `.env.example` templates hold placeholders only. `backend/.env.local` is not loaded by the backend, so it is not a place for settings. Not secret: every `VITE_` value, FIREBASE_PROJECT_ID, the Firebase web config, FRONTEND_ORIGIN and the API address, which are public by design. Private notes about the server belong in `docs/private/`, which git ignores, and never in `docs/knowledge/`, which is public. If a secret leaks, replace it at its source (a new Gemini key, a new database password, a new RaaS key), update the `.env` file, then restart the API or rebuild the page.
+The Atlas secrets are DATABASE_URL and MIGRATION_DATABASE_URL (they hold database passwords), GEMINI_API_KEY and RAAS_KEY, plus the psql variable `api_password`, which is typed once when `api-user.sql` runs and never stored in a file. They live only in the server's `backend/.env` (RAAS_KEY too, for the Explorer chat) and in each developer's own `backend/.env` and `docs/.env` (RAAS_KEY for the ingest script); never in git, chat messages, screenshots or these docs. The `.env.example` templates hold placeholders only. `backend/.env.local` is not loaded by the backend, so it is not a place for settings. Not secret: every `VITE_` value, FIREBASE_PROJECT_ID, the Firebase web config, FRONTEND_ORIGIN and the API address, which are public by design. Private notes about the server belong in `docs/private/`, which git ignores, and never in `docs/knowledge/`, which is public. If a secret leaks, replace it at its source (a new Gemini key, a new database password, a new RaaS key), update every `.env` file that holds it (for the RaaS key, both `docs/.env` and the server's `backend/.env`), then restart the API.

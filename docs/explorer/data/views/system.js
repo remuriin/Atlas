@@ -52,7 +52,7 @@ AX.addView({
       kids: {
         cols: 1,
         items: [
-          { id: 'a-routes', name: 'Routes (4 routers)', sub: '30 endpoints', piece: 'layer:routes', opens: 'endpoints', term: 'endpoint' },
+          { id: 'a-routes', name: 'Routes (5 routers)', sub: '31 endpoints', piece: 'layer:routes', opens: 'endpoints', term: 'endpoint' },
           { id: 'a-middleware', name: 'Middleware (7)', sub: 'login, limits, file checks', piece: 'layer:middleware', opens: 'pipeline', term: 'middleware' },
           { id: 'a-controllers', name: 'Controllers (4)', sub: 'one per router', piece: 'layer:controllers', opens: 'backend', term: 'controller' },
           { id: 'a-models', name: 'Models (7)', sub: 'all the SQL', piece: 'layer:models', opens: 'data', term: 'model' },

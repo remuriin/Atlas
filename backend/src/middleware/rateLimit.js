@@ -61,8 +61,16 @@ const flashcardLimiter = rateLimit({
   },
 });
 
+// Questions to Rem, the Atlas Explorer's chat. Anyone may ask without a login, and each
+// answer uses the shared Gemini allowance, so a visitor gets 30 questions per 15 minutes.
+const askLimiter = buildLimiter(
+  30,
+  'You have asked a lot of questions. Please wait a few minutes and try again.'
+);
+
 module.exports = {
   generalLimiter: generalLimiter,
+  askLimiter: askLimiter,
   writeLimiter: writeLimiter,
   studyLimiter: studyLimiter,
   flashcardLimiter: flashcardLimiter,

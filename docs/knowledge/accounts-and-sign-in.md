@@ -35,7 +35,7 @@ After you sign in, Firebase Authentication gives the browser an ID token: a sign
 
 The API checks the token in `backend/src/middleware/auth.js` with `verifyIdToken` from `firebase-admin` (`backend/src/config/firebaseAdmin.js`). The check uses Google's public keys and only the Firebase project id, so tokens from any other Firebase project are refused, and no secret service-account key file is stored on the server. Your password never reaches the Atlas API or its database: Firebase keeps it.
 
-The API also only accepts browser requests from the Atlas website's own address. This rule is called CORS and is set by `FRONTEND_ORIGIN` in `backend/.env`.
+The API also only accepts browser requests from the Atlas website's own address, except the Atlas Explorer chat (`POST /api/ask`), which needs no login. This rule is called CORS and is set by `FRONTEND_ORIGIN` in `backend/.env`.
 
 ## When does Atlas create my profile?
 

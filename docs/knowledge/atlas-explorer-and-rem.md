@@ -116,7 +116,7 @@ For each question, Rem finds the few pieces whose meaning is closest to the ques
 
 ## What happens to my questions in the Rem chat?
 
-When you send a question, the Atlas Explorer sends it over the internet to the Rem service. Your recent messages can go along with it, so that a follow-up such as "and for Google accounts?" makes sense; Rem uses at most the last 6 messages and the first 500 characters of each. Rem passes the question and the matching passages to Google Gemini to write the answer, and Google's terms cover what Gemini does with them.
+When you send a question, the Atlas Explorer sends it over the internet to the Atlas API (`POST /api/ask`), which passes it to the Rem service. The Rem key stays on the Atlas server, so the Explorer file holds no secret and is safe to share. Your recent messages can go along with it, so that a follow-up such as "and for Google accounts?" makes sense; Rem uses at most the last 6 messages and the first 500 characters of each. Rem passes the question and the matching passages to Google Gemini to write the answer, and Google's terms cover what Gemini does with them.
 
 The Rem service does not keep the conversation; it only counts how many questions were asked each day. The Explorer page keeps the conversation only in the browser tab's session storage, so it is gone when you close the tab. Do not type passwords or personal details into the chat.
 
@@ -127,7 +127,7 @@ The complete list of limits of the Rem chat in the Atlas Explorer:
 - Rem needs an internet connection; the rest of the Explorer does not.
 - Rem only knows what these documents say. When they do not cover a question, Rem says it cannot answer from them, and may say what it can help with, instead of guessing.
 - When the Rem service or Google Gemini is busy or rate limited, the chat shows a busy message. Wait a moment and ask again.
-- The Rem service accepts about 5 requests per second from one network address.
+- The Atlas API accepts 30 questions per 15 minutes from one network address, and the Rem service about 5 requests per second.
 - A question can be at most 2,000 characters.
 - An answer usually takes a few seconds, longer when the model is busy.
 - Answers are written by AI and can contain mistakes. The documents and the code are the final word.

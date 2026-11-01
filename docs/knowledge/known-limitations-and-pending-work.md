@@ -46,16 +46,16 @@ Smaller limits in everyday use of Atlas:
 
 ## How do the Atlas rate limits behave on restarts and outages?
 
-`backend/src/middleware/rateLimit.js` defines four limits, kept in two places:
+`backend/src/middleware/rateLimit.js` defines five limits, kept in two places:
 
-- In memory: the general limit (600 requests per 15 minutes, on every request) and the study limit (600 saves per 15 minutes, for notes autosave and marking flashcards). These reset whenever the API restarts, and they are counted per API process. They only smooth out bursts.
+- In memory: the general limit (600 requests per 15 minutes, on every request), the study limit (600 saves per 15 minutes, for notes autosave and marking flashcards), and the ask limit (30 Atlas Explorer chat questions per 15 minutes). These reset whenever the API restarts, and they are counted per API process. They only smooth out bursts.
 - In PostgreSQL (the `rate_limits` table, through `backend/src/utils/rateLimitStore.js`): the write limit (120 changes per 15 minutes, for example uploads, edits, deletes, upvotes, saves, reports and recorded views) and the daily flashcard limit (10 sets per account). These survive restarts. Rows whose window ended are deleted every hour.
 
-Both database-backed limits use `passOnStoreError: true`: if PostgreSQL cannot be reached, the limiter lets the request through instead of failing it. During a database outage most of those requests fail anyway, but the limits themselves are off. A restart of the API, for example during a deploy, gives everyone a fresh general and study allowance.
+Both database-backed limits use `passOnStoreError: true`: if PostgreSQL cannot be reached, the limiter lets the request through instead of failing it. During a database outage most of those requests fail anyway, but the limits themselves are off. A restart of the API, for example during a deploy, gives everyone a fresh general, study and ask allowance.
 
 ## Why do students on one network share the Atlas rate limits?
 
-The general, study and write limits in `backend/src/middleware/rateLimit.js` count per visitor address (`req.ip`), not per account. On the study reviewer routes the write limit even runs before the login check. Only the daily flashcard limit counts per account.
+The general, study, write and ask limits in `backend/src/middleware/rateLimit.js` count per visitor address (`req.ip`), not per account. On the study reviewer routes the write limit even runs before the login check. Only the daily flashcard limit counts per account.
 
 Students in the same school, on the same home Wi-Fi or on the same mobile network often reach the internet through one shared public address. All of them then share one allowance: 600 requests and 120 changes per 15 minutes. A full classroom browsing and opening study reviewers at the same time could reach the write limit and see "You are making changes too quickly. Please wait a few minutes and try again." A limit keyed by account for logged-in users would avoid this; it has not been built.
 
