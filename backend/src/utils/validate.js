@@ -286,14 +286,37 @@ const parsePositiveNumber = (value, fallback, name) => {
   return Number(value);
 };
 
-// In a LIKE pattern, % and _ are wildcards. Putting a backslash in front makes
-// Postgres treat them as ordinary characters, so a search for "100%" works as expected.
-const buildSearchPattern = (searchText) => {
-  if (searchText === '') {
+// The most words one search looks for; any after these are ignored.
+const SEARCH_WORDS_MAX = 8;
+
+// Turns the search box text into one Postgres pattern per word. Each pattern
+// matches its word at the start of a word, so "chem" finds "chemistry" and
+// "stem" finds "STEM" but not "systems". \m means "start of a word" in Postgres.
+// A backslash goes in front of every character that has a special meaning in a
+// pattern, so a search for "c++" or "(2)" looks for those exact characters.
+const buildSearchWords = (searchText) => {
+  const words = searchText.split(/\s+/).filter((word) => word !== '');
+  return words.slice(0, SEARCH_WORDS_MAX).map((word) => {
+    const escaped = word.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+    // A word that starts with a symbol, like "(2)", cannot start a word in the
+    // text, so it is looked for anywhere instead.
+    if (/^[\p{L}\p{N}]/u.test(word)) {
+      return `\\m${escaped}`;
+    }
+    return escaped;
+  });
+};
+
+// One Postgres pattern for "the title starts with the whole search", so a search
+// for "c" lists the titles that begin with C first. ^ means "the very start", and
+// any run of spaces in the search matches any run of spaces in the title.
+const buildSearchStart = (searchText) => {
+  const words = searchText.split(/\s+/).filter((word) => word !== '');
+  if (words.length === 0) {
     return '';
   }
-  const escaped = searchText.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
-  return `%${escaped}%`;
+  const escaped = words.map((word) => word.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&'));
+  return `^${escaped.join('\\s+')}`;
 };
 
 module.exports = {
@@ -313,5 +336,6 @@ module.exports = {
   validateFlashcardStatus: validateFlashcardStatus,
   parseFilter: parseFilter,
   parsePositiveNumber: parsePositiveNumber,
-  buildSearchPattern: buildSearchPattern,
+  buildSearchWords: buildSearchWords,
+  buildSearchStart: buildSearchStart,
 };
