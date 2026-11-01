@@ -51,8 +51,5 @@ Thumbs.db
 # Bundle made for copying the backend to the server
 atlas-backend.tar.gz
 
-# Atlas Explorer: the built page holds the Rem chat key, and the private notes hold
-# server details that must not be public (see docs/README.md)
-docs/dist/
-docs/private/
-docs/.ingest-state.json
+# Docs and the Atlas Explorer are kept locally, not in the repo
+docs/
