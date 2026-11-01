@@ -43,13 +43,14 @@
   text-decoration: none;
 }
 
-/* "Sign up" in the header bar: phones only. On the narrowest screens there is
-   no room beside the logo and the Menu button, so there it stays in the menu. */
+/* "Sign up" in the header bar: phones and tablets, where the menu is closed. On
+   the narrowest screens there is no room beside the logo and the Menu button,
+   so there it stays in the menu. */
 .header-signup {
   display: none;
 }
 
-@media (min-width: 22.5rem) and (max-width: 47.99rem) {
+@media (min-width: 22.5rem) and (max-width: 63.99rem) {
   .header-signup {
     display: inline-flex;
   }
@@ -128,7 +129,9 @@
   color: var(--color-text-muted);
 }
 
-@media (min-width: 48rem) {
+/* The row needs room for up to five links, the name, the theme switch, and Log
+   out, so tablets keep the Menu button. */
+@media (min-width: 64rem) {
   .menu-button {
     display: none;
   }
@@ -153,6 +156,8 @@
   }
 
   .nav-link {
+    /* A crowded row never breaks a link's word apart. */
+    white-space: nowrap;
     border-left: 0;
     border-bottom: 3px solid transparent;
     border-top: 3px solid transparent;
@@ -173,5 +178,19 @@
     flex-basis: auto;
     /* Room for the picture and a typical name on one line. */
     max-width: 16rem;
+  }
+}
+
+/* On small laptops the row shows only the picture; screen readers still hear
+   "Logged in as" and the name. */
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  .nav-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 }

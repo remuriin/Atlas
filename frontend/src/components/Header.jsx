@@ -156,7 +156,7 @@ function Header() {
             {auth.firebaseUser && displayName !== '' && (
               <span className="nav-user">
                 <Avatar photoUrl={auth.firebaseUser.photoURL} name={displayName} size="small" />
-                <span>Logged in as {displayName}</span>
+                <span className="nav-name">Logged in as {displayName}</span>
               </span>
             )}
             <ThemeToggle />

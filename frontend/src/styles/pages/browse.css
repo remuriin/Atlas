@@ -22,11 +22,11 @@
   margin-bottom: var(--space-2);
 }
 
-/* Strand, grade, and quarter side by side; the long subject names get a full row
-   on phones. */
+/* Strand and grade side by side on phones, then quarter; the long subject names
+   get a full row. Three in a row would cut "Any strand" short. */
 .filters {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2) var(--space-3);
   margin-bottom: var(--space-2);
 }
