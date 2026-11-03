@@ -27,3 +27,10 @@
   gap: var(--space-2) var(--space-3);
   margin-top: var(--space-3);
 }
+
+/* Report panels hold their own buttons, so only the title text is a link here.
+   On feed cards the title's invisible layer (cards.css) covers the card; these
+   panels are not positioned, so it would cover the whole page and every button. */
+.report-list .review-title a::after {
+  content: none;
+}

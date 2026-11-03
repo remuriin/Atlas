@@ -103,14 +103,24 @@ const unique = (names) => {
   return names.filter((name, index) => names.indexOf(name) === index);
 };
 
+// A to Z, with "Other" always last so it is easy to find.
+// filter() makes a copy first, so sort() never reorders the lists above.
+const sortSubjects = (names) => {
+  const sorted = names.filter((name) => name !== 'Other').sort((a, b) => a.localeCompare(b));
+  if (names.indexOf('Other') !== -1) {
+    sorted.push('Other');
+  }
+  return sorted;
+};
+
 // The subjects a reviewer for this strand can be filed under, in the order the form shows them.
 export const subjectsForStrand = (strand) => {
   const specialized = SPECIALIZED_SUBJECTS[strand] || [];
-  return unique(CORE_SUBJECTS.concat(APPLIED_SUBJECTS, specialized, CLOSING_SUBJECTS));
+  return sortSubjects(unique(CORE_SUBJECTS.concat(APPLIED_SUBJECTS, specialized, CLOSING_SUBJECTS)));
 };
 
 // Every subject of every strand, for the feed filter.
-export const ALL_SUBJECTS = unique(STRANDS.flatMap((strand) => subjectsForStrand(strand)));
+export const ALL_SUBJECTS = sortSubjects(unique(STRANDS.flatMap((strand) => subjectsForStrand(strand))));
 
 // A short name for each strand, used in CSS class names such as "stem".
 // The colors themselves are --subject-* tokens in styles/tokens.css (see components.css).
