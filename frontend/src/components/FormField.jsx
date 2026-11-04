@@ -87,8 +87,8 @@ function FormField(props) {
       />
     );
   } else if (type === 'password') {
-    // The show/hide control is a real button, and its name ("Show password" or
-    // "Hide password") always says what pressing it will do.
+    // The show/hide control is a real button, and its accessible name starts
+    // with the visible action text for voice control users.
     let inputType = 'password';
     let toggleIcon = 'eye';
     let toggleText = 'Show';
@@ -114,11 +114,11 @@ function FormField(props) {
         <button
           type="button"
           className="button"
-          aria-label={`${toggleText} ${props.label.toLowerCase()}`}
           onClick={() => setIsPasswordShown(!isPasswordShown)}
         >
           <Icon name={toggleIcon} />
           {toggleText}
+          <span className="visually-hidden"> {props.label.toLowerCase()}</span>
         </button>
       </div>
     );

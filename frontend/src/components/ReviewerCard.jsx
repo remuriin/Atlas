@@ -97,20 +97,20 @@ function ReviewerCard(props) {
             <Link
               className="button"
               to={`/reviewers/${reviewer.id}/edit`}
-              aria-label={`Edit ${reviewer.title}`}
             >
               <Icon name="pencil" />
               Edit
+              <span className="visually-hidden"> {reviewer.title}</span>
             </Link>
             <button
               type="button"
               id={`delete-button-${reviewer.id}`}
               className="button-outline"
-              aria-label={`Delete ${reviewer.title}`}
               onClick={() => props.onDelete(reviewer)}
             >
               <Icon name="trash" />
               Delete
+              <span className="visually-hidden"> {reviewer.title}</span>
             </button>
           </div>
         )}

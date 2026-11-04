@@ -77,12 +77,12 @@ function SaveButton(props) {
         type="button"
         className="save"
         aria-pressed={isSaved}
-        aria-label={`${visibleText} ${props.title} study reviewer`}
         aria-disabled={isWorking}
         onClick={handleClick}
       >
         <Icon name="bookmark" filled={isSaved} />
         <span>{visibleText}</span>
+        <span className="visually-hidden"> {props.title} study reviewer</span>
       </button>
       <span className="visually-hidden" role="status">
         {announcement}

@@ -66,11 +66,7 @@ function UpvoteButton(props) {
     visibleText = 'Upvoted';
   }
 
-  // The name starts with the word shown on the button (so voice control users can
-  // say what they see) and adds the title and count, so on a page full of
-  // buttons each one says which reviewer it belongs to.
   const total = countLabel(count, 'upvote', 'upvotes');
-  const accessibleName = `${visibleText} ${props.title} study reviewer, ${total}`;
 
   return (
     <>
@@ -78,12 +74,12 @@ function UpvoteButton(props) {
         type="button"
         className="upvote"
         aria-pressed={hasUpvoted}
-        aria-label={accessibleName}
         aria-disabled={isSaving}
         onClick={handleClick}
       >
         <Icon name="arrow-up" filled={hasUpvoted} />
         <span>{visibleText}</span>
+        <span className="visually-hidden"> {props.title} study reviewer,</span>
         <span className="upvote-count">{count}</span>
       </button>
       {/* Screen readers read this out when it changes, without moving focus. */}

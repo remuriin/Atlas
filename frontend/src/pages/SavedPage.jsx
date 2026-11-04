@@ -205,11 +205,11 @@ function SavedPage() {
                   <button
                     type="button"
                     className="button-outline"
-                    aria-label={`Remove ${item.title} from Saved`}
                     onClick={() => setItemToRemove(item)}
                   >
                     <Icon name="trash" />
                     Remove
+                    <span className="visually-hidden"> {item.title} from Saved</span>
                   </button>
                 </div>
               </article>
